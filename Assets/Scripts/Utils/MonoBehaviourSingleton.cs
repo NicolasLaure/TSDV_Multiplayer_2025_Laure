@@ -8,7 +8,7 @@ public class MonoBehaviourSingleton<T> : MonoBehaviour where T : MonoBehaviourSi
 
     public static T Instance
     {
-        get 
+        get
         {
             if (instance == null)
                 instance = FindObjectOfType<MonoBehaviourSingleton<T>>();
@@ -19,13 +19,15 @@ public class MonoBehaviourSingleton<T> : MonoBehaviour where T : MonoBehaviourSi
 
     protected virtual void Initialize()
     {
-
     }
 
     private void Awake()
     {
         if (instance != null)
+        {
             Destroy(this.gameObject);
+            return;
+        }
 
         instance = this;
 
