@@ -23,20 +23,33 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         int port = System.Convert.ToInt32(portInputField.text);
 
         NetworkManager.Instance.StartClient(ipAddress, port);
-        
-        SwitchToChatScreen();
+
+        if (ChatScreen.Instance != null)
+            SwitchToChatScreen();
+        else
+            SwitchToCubes();
     }
 
     void OnStartServerBtnClick()
     {
         int port = System.Convert.ToInt32(portInputField.text);
         NetworkManager.Instance.StartServer(port);
-        SwitchToChatScreen();
+
+        if (ChatScreen.Instance != null)
+            SwitchToChatScreen();
+        else
+            SwitchToCubes();
     }
 
     void SwitchToChatScreen()
     {
         ChatScreen.Instance.gameObject.SetActive(true);
+        this.gameObject.SetActive(false);
+    }
+
+    void SwitchToCubes()
+    {
+        MovingCubes.Instance.gameObject.SetActive(true);
         this.gameObject.SetActive(false);
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
+using UnityEngine.Events;
 
 public struct Client
 {
@@ -19,20 +20,11 @@ public struct Client
 
 public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveData
 {
-    public IPAddress ipAddress
-    {
-        get; private set;
-    }
+    public IPAddress ipAddress { get; private set; }
 
-    public int port
-    {
-        get; private set;
-    }
+    public int port { get; private set; }
 
-    public bool isServer
-    {
-        get; private set;
-    }
+    public bool isServer { get; private set; }
 
     public int TimeOut = 30;
 
@@ -44,6 +36,8 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
     private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
 
     int clientId = 0; // This id should be generated during first handshake
+
+    [SerializeField] private UnityEvent<int, int> onNewClient;
 
     public void StartServer(int port)
     {
@@ -74,7 +68,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
             ipToId[ip] = clientId;
 
             clients.Add(clientId, new Client(ip, id, Time.realtimeSinceStartup));
-
+            onNewClient.Invoke(clients.Count, clientId);
             clientId++;
         }
     }
