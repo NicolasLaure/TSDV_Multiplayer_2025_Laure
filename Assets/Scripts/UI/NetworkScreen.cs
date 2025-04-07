@@ -38,7 +38,10 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         if (ChatScreen.Instance != null)
             SwitchToChatScreen();
         else
+        {
             SwitchToCubes();
+            MovingCubes.Instance.HandleServerStart();
+        }
     }
 
     void SwitchToChatScreen()

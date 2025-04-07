@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -37,13 +39,14 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
     int clientId = 0; // This id should be generated during first handshake
 
-    [SerializeField] private UnityEvent<int, int> onNewClient;
+    public Action<int> onNewClient;
 
     public void StartServer(int port)
     {
         isServer = true;
         this.port = port;
         connection = new UdpConnection(port, this);
+        clientId++;
     }
 
     public void StartClient(IPAddress ip, int port)
@@ -54,21 +57,19 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         this.ipAddress = ip;
 
         connection = new UdpConnection(ip, port, this);
-
-        AddClient(new IPEndPoint(ip, port));
+        SendToServer(BitConverter.GetBytes('h'));
     }
 
     void AddClient(IPEndPoint ip)
     {
         if (!ipToId.ContainsKey(ip))
         {
-            Debug.Log("Adding client: " + ip.Address);
-
             int id = clientId;
             ipToId[ip] = clientId;
-
-            clients.Add(clientId, new Client(ip, id, Time.realtimeSinceStartup));
-            onNewClient.Invoke(clients.Count, clientId);
+            Debug.Log("Adding client: " + ip.Address + " ID: " + id);
+            clients.Add(clientId, new Client(ip, clientId, Time.realtimeSinceStartup));
+            if (onNewClient != null && isServer)
+                onNewClient.Invoke(clientId);
             clientId++;
         }
     }
@@ -82,17 +83,35 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         }
     }
 
+    public int GetIpId(IPEndPoint ip)
+    {
+        if (ipToId.ContainsKey(ip))
+            return ipToId[ip];
+
+        return -1;
+    }
+
     public void OnReceiveData(byte[] data, IPEndPoint ip)
     {
-        AddClient(ip);
+        if (!ipToId.ContainsKey(ip))
+            AddClient(ip);
 
-        if (OnReceiveEvent != null)
+        if (OnReceiveEvent != null && data.Length > 2)
             OnReceiveEvent.Invoke(data, ip);
     }
 
     public void SendToServer(byte[] data)
     {
         connection.Send(data);
+    }
+
+    public void SendToClient(byte[] data, int clientId)
+    {
+        if (!isServer)
+            return;
+
+        Client client = clients[clientId];
+        connection.Send(data, client.ipEndPoint);
     }
 
     public void Broadcast(byte[] data)

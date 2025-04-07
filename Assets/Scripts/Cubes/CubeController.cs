@@ -2,7 +2,11 @@ using UnityEngine;
 
 public class CubeController : MonoBehaviour
 {
-    [SerializeField] private float speed;
+    private float speed;
+    public float Speed {
+        get { return speed; }
+        set { speed = value; }
+    }
 
     void Update()
     {
