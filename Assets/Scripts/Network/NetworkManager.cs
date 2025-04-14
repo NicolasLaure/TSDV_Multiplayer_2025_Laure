@@ -11,12 +11,14 @@ public struct Client
     public float timeStamp;
     public int id;
     public IPEndPoint ipEndPoint;
+    public float ping;
 
     public Client(IPEndPoint ipEndPoint, int id, float timeStamp)
     {
         this.timeStamp = timeStamp;
         this.id = id;
         this.ipEndPoint = ipEndPoint;
+        ping = 0;
     }
 }
 
@@ -29,7 +31,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
     public bool isServer { get; private set; }
 
     public int TimeOut = 30;
-
+    public int ping = 0;
     public Action<byte[], IPEndPoint> OnReceiveEvent;
 
     private UdpConnection connection;
