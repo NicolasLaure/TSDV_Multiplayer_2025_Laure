@@ -2,13 +2,25 @@ using System;
 using System.IO;
 using System.Net;
 
+public enum PacketType : short
+{
+    HandShake,
+    Acknowledge, //To Do
+    DisAcknowledge, //To Do
+    Disconnect, //To Do
+    Error,
+    Ping, //To Do
+    Pong,
+    Message,
+}
+
 [Flags]
 public enum Attributes
 {
-    None = 0,
-    Important = 1,
-    Checksum = 2,
-    //Next Should be a power of 2
+    None = 1 << 0,
+    Important = 1 << 2,
+    Checksum = 1 << 3,
+    Critical = 1 << 4,
 }
 
 public class MyNetworkPacket

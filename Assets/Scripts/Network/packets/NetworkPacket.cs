@@ -1,15 +1,5 @@
 using System.Net;
 
-public enum PacketType : short
-{
-    HandShake,
-    HandShake_OK,
-    Error,
-    Ping,
-    Pong,
-    Message,
-}
-
 public class NetworkPacket
 {
     public PacketType type;
