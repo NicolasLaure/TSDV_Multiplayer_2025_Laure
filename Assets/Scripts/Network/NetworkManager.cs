@@ -59,7 +59,9 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         this.ipAddress = ip;
 
         connection = new UdpConnection(ip, port, this);
-        SendToServer(BitConverter.GetBytes('h'));
+        HandshakeData handshakeData;
+        handshakeData.ip = 0;
+        SendToServer(new Handshake(handshakeData).Serialize());
     }
 
     void AddClient(IPEndPoint ip)
@@ -98,7 +100,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         if (!ipToId.ContainsKey(ip))
             AddClient(ip);
 
-        if (OnReceiveEvent != null && data.Length > 2)
+        if (OnReceiveEvent != null)
             OnReceiveEvent.Invoke(data, ip);
     }
 

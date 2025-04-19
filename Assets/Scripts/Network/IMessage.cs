@@ -5,16 +5,10 @@ using System;
 using System.Text;
 using System.Net;
 
-public enum MessageType
-{
-    HandShake = -1,
-    Console = 0,
-    Position = 1
-}
-
 public interface IMessage<T>
 {
     public MessageType GetMessageType();
+
     public byte[] Serialize();
     public T Deserialize(byte[] message);
 }
@@ -22,6 +16,7 @@ public interface IMessage<T>
 public class NetHandShake : IMessage<(long, int)>
 {
     (long, int) data;
+
     public (long, int) Deserialize(byte[] message)
     {
         (long, int) outData;
@@ -34,7 +29,7 @@ public class NetHandShake : IMessage<(long, int)>
 
     public MessageType GetMessageType()
     {
-       return MessageType.HandShake;
+        return MessageType.HandShake;
     }
 
     public byte[] Serialize()

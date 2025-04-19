@@ -13,16 +13,6 @@ public enum PacketType : short
     Pong,
     Message,
 }
-
-[Flags]
-public enum Attributes
-{
-    None = 1 << 0,
-    Important = 1 << 2,
-    Checksum = 1 << 3,
-    Critical = 1 << 4,
-}
-
 public class MyNetworkPacket
 {
     public PacketType type;

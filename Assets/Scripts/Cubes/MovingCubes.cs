@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -22,33 +24,34 @@ public class MovingCubes : MonoBehaviourSingleton<MovingCubes>
 
     void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
     {
-        MyNetworkPacket receivedPacket = MyNetworkPacket.GetPacket(data);
-        if (receivedPacket == null)
-            Debug.Log("Error");
-        switch (receivedPacket.type)
+        MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
+        switch (messageType)
         {
-            case PacketType.HandShake:
-                HandleHandshakeData(receivedPacket.payload);
+            case MessageType.HandShake:
+                Handshake handshake = new Handshake(data);
                 break;
-            case PacketType.Acknowledge:
+            case MessageType.HandShakeResponse:
+                HandleHandshakeResponseData(new HandshakeResponse(data));
                 break;
-            case PacketType.DisAcknowledge:
+            case MessageType.Acknowledge:
                 break;
-            case PacketType.Disconnect:
+            case MessageType.DisAcknowledge:
                 break;
-            case PacketType.Error:
+            case MessageType.Disconnect:
                 break;
-            case PacketType.Ping:
+            case MessageType.Error:
                 break;
-            case PacketType.Pong:
+            case MessageType.Ping:
                 break;
-            case PacketType.Message:
+            case MessageType.Pong:
+                break;
+            case MessageType.Position:
                 if (NetworkManager.Instance.isServer)
                 {
                     NetworkManager.Instance.Broadcast(data);
                 }
 
-                ReceiveCubePos(receivedPacket.payload);
+                ReceiveCubePos(data);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -69,65 +72,49 @@ public class MovingCubes : MonoBehaviourSingleton<MovingCubes>
 
     private void BroadCastCubePosition(Vector3 pos, int index)
     {
-        byte[] data = new byte[16];
-        Buffer.BlockCopy(BitConverter.GetBytes(index), 0, data, 0, 4);
-        Buffer.BlockCopy(GetVector3Bytes(pos), 0, data, 4, 12);
-
-        MyNetworkPacket packet = new MyNetworkPacket(PacketType.Message, Attributes.None, data, Time.time, instanceID);
-        NetworkManager.Instance.Broadcast(packet.GetBytes());
+        NetworkManager.Instance.Broadcast(new Position(pos, index).Serialize());
     }
 
     private void SendCubePosition(Vector3 pos)
     {
-        byte[] data = new byte[16];
-        Buffer.BlockCopy(BitConverter.GetBytes(instanceID), 0, data, 0, 4);
-        Buffer.BlockCopy(GetVector3Bytes(pos), 0, data, 4, 12);
-
-        MyNetworkPacket packet = new MyNetworkPacket(PacketType.Message, Attributes.None, data, Time.time, instanceID);
-        NetworkManager.Instance.SendToServer(packet.GetBytes());
+        NetworkManager.Instance.SendToServer(new Position(pos, instanceID).Serialize());
     }
 
     private void ReceiveCubePos(byte[] data)
     {
-        Debug.Log($"array length = {data.Length}");
-        int index = BitConverter.ToInt32(data, 0);
-        byte[] componentsData = new byte[12];
-        Buffer.BlockCopy(data, 4, componentsData, 0, 12);
+        Position posMessage = new Position(data);
+        Vector3 pos = posMessage.pos;
+        int index = posMessage.instanceID;
         while (index >= cubes.Count)
         {
             cubes.Add(Instantiate(cubePrefab));
         }
 
-        cubes[index].transform.position = GetVector3FromBytes(componentsData);
+        cubes[index].transform.position = pos;
     }
 
     private void HandleNewClient(int id)
     {
-        GameObject newCube = Instantiate(cubePrefab, new Vector3(horizontalOffset * cubes.Count, 0, 0),
-            Quaternion.identity);
+        GameObject newCube = Instantiate(cubePrefab, new Vector3(horizontalOffset * cubes.Count, 0, 0), Quaternion.identity);
         cubes.Add(newCube);
-        byte[] data = new byte[4 + 4 + cubes.Count * 12];
-        Buffer.BlockCopy(BitConverter.GetBytes(id), 0, data, 0, 4);
-        Buffer.BlockCopy(BitConverter.GetBytes(cubes.Count), 0, data, 4, 4);
+
+        List<Vector3> positions = new List<Vector3>();
         for (int i = 0; i < cubes.Count; i++)
         {
-            Buffer.BlockCopy(GetVector3Bytes(cubes[i].transform.position), 0, data, 8 + i * 12, 12);
+            positions.Add(cubes[i].transform.position);
         }
 
-        MyNetworkPacket packet = new MyNetworkPacket(PacketType.HandShake, Attributes.Important, data, Time.time, id);
-        NetworkManager.Instance.SendToClient(packet.GetBytes(), id);
+        HandshakeResponse hsResponse = new HandshakeResponse(id, cubes.Count, positions);
+        NetworkManager.Instance.SendToClient(hsResponse.Serialize(), id);
     }
 
-    private void HandleHandshakeData(byte[] data)
+    private void HandleHandshakeResponseData(HandshakeResponse response)
     {
-        instanceID = BitConverter.ToInt32(data, 0);
-        int count = BitConverter.ToInt32(data, 4);
-
-        for (int i = 0; i < count; i++)
+        Debug.Log("SpawningCubes");
+        instanceID = response._handshakeData.id;
+        for (int i = 0; i < response._handshakeData.count; i++)
         {
-            byte[] componentsBytes = new byte[12];
-            Buffer.BlockCopy(data, 8 + 12 * i, componentsBytes, 0, 12);
-            GameObject newCube = Instantiate(cubePrefab, GetVector3FromBytes(componentsBytes), Quaternion.identity);
+            GameObject newCube = Instantiate(cubePrefab, response._handshakeData.positions[i], Quaternion.identity);
             cubes.Add(newCube);
         }
 
@@ -141,38 +128,10 @@ public class MovingCubes : MonoBehaviourSingleton<MovingCubes>
     {
         instanceID = 0;
         GameObject newCube = Instantiate(cubePrefab, new Vector3(horizontalOffset * cubes.Count, 0, 0),
-            Quaternion.identity);
+        Quaternion.identity);
         cubes.Add(newCube);
 
         cubes[instanceID].AddComponent<CubeController>();
         cubes[instanceID].GetComponent<CubeController>().Speed = playerSpeed;
     }
-
-    #region Converters
-
-    private byte[] GetVector3Bytes(Vector3 input)
-    {
-        byte[] vec3Bytes = new byte[12];
-        Buffer.BlockCopy(BitConverter.GetBytes(input.x), 0, vec3Bytes, 0, 4);
-        Buffer.BlockCopy(BitConverter.GetBytes(input.y), 0, vec3Bytes, 4, 4);
-        Buffer.BlockCopy(BitConverter.GetBytes(input.z), 0, vec3Bytes, 8, 4);
-
-        return vec3Bytes;
-    }
-
-    private Vector3 GetVector3FromBytes(byte[] bytes)
-    {
-        List<byte[]> components = new List<byte[]>();
-        for (int i = 0; i < 3; i++)
-        {
-            byte[] componentBytes = new byte[4];
-            Buffer.BlockCopy(bytes, i * 4, componentBytes, 0, 4);
-            components.Add(componentBytes);
-        }
-
-        return new Vector3(BitConverter.ToSingle(components[0]), BitConverter.ToSingle(components[1]),
-            BitConverter.ToSingle(components[2]));
-    }
-
-    #endregion
 }
