@@ -32,8 +32,7 @@ public class HandshakeResponse : Message<HandshakeResponseData>
 
     public override byte[] Serialize()
     {
-        int size = Marshal.SizeOf(_handshakeData);
-        Debug.Log(size);
+        int size = sizeof(int) * 2 + _handshakeData.positions.Count * 12;
         byte[] data = new byte[size];
 
         Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.id), 0, data, 0, sizeof(int));

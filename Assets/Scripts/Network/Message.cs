@@ -8,7 +8,6 @@ public enum MessageType : short
     DisAcknowledge, //To Do
     Disconnect, //To Do
     Ping, //To Do
-    Pong,
     Position,
     Console,
     Error,
@@ -35,7 +34,7 @@ public abstract class Message<T>
     {
         int headerSize = sizeof(short) * 2;
         int tailSize = 0;
-        if (messageType != MessageType.Ping || messageType != MessageType.Pong)
+        if (messageType != MessageType.Ping)
         {
             headerSize += sizeof(short) * 2;
             if (attribs == Attributes.Checksum)
@@ -54,7 +53,7 @@ public abstract class Message<T>
         offset += sizeof(short);
         Buffer.BlockCopy(BitConverter.GetBytes((short)attribs), 0, header, offset, sizeof(short));
         offset += sizeof(short);
-        if (messageType != MessageType.Ping || messageType != MessageType.Pong)
+        if (messageType != MessageType.Ping)
         {
             Buffer.BlockCopy(BitConverter.GetBytes(messageStart), 0, header, offset, sizeof(short));
             offset += sizeof(short);
@@ -85,7 +84,7 @@ public abstract class Message<T>
         Attributes messageAttributes = (Attributes)BitConverter.ToInt16(message, offset);
         offset += sizeof(short);
 
-        if (type == MessageType.Ping || type == MessageType.Pong)
+        if (type == MessageType.Ping)
         {
             payloadSize = message.Length - sizeof(short) * 2;
             payload = new byte[payloadSize];

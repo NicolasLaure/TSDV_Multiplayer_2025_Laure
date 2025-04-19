@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 public struct Client
 {
@@ -31,17 +33,19 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
     public bool isServer { get; private set; }
 
     public int TimeOut = 30;
-    public int ping = 0;
+    public short ping = 0;
     public Action<byte[], IPEndPoint> OnReceiveEvent;
 
     private UdpConnection connection;
 
     private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
     private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
+    private readonly Dictionary<int, float> idPingTime = new Dictionary<int, float>();
 
     int clientId = 0; // This id should be generated during first handshake
 
     public Action<int> onNewClient;
+    public Action<short> onPingUpdated;
 
     public void StartServer(int port)
     {
@@ -72,6 +76,9 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
             ipToId[ip] = clientId;
             Debug.Log("Adding client: " + ip.Address + " ID: " + id);
             clients.Add(clientId, new Client(ip, clientId, Time.realtimeSinceStartup));
+            idPingTime[clientId] = Time.time;
+            SendToClient(new Ping(0).Serialize(), clientId);
+
             if (onNewClient != null && isServer)
                 onNewClient.Invoke(clientId);
             clientId++;
@@ -97,11 +104,56 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
     public void OnReceiveData(byte[] data, IPEndPoint ip)
     {
-        if (!ipToId.ContainsKey(ip))
-            AddClient(ip);
+        int receivedClientId = -1;
+        if (ipToId.ContainsKey(ip))
+            receivedClientId = ipToId[ip];
 
-        if (OnReceiveEvent != null)
-            OnReceiveEvent.Invoke(data, ip);
+        MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
+        switch (messageType)
+        {
+            case MessageType.HandShake:
+                if (!ipToId.ContainsKey(ip))
+                    AddClient(ip);
+                break;
+            case MessageType.Acknowledge:
+                break;
+            case MessageType.DisAcknowledge:
+                break;
+            case MessageType.Disconnect:
+                break;
+            case MessageType.Error:
+                break;
+            case MessageType.Ping:
+                if (isServer)
+                {
+                    short ms = (short)Mathf.FloorToInt((Time.time - idPingTime[receivedClientId]) * 1000);
+                    idPingTime[receivedClientId] = Time.time;
+                    SendToClient(new Ping(ms).Serialize(), receivedClientId);
+                }
+                else
+                {
+                    ping = new Ping(data).ms;
+                    SendToServer(new Ping(0).Serialize());
+                    onPingUpdated.Invoke(ping);
+                }
+
+                break;
+
+            //Moving Cubes message
+            case MessageType.HandShakeResponse:
+            case MessageType.Position:
+                if (OnReceiveEvent != null)
+                    OnReceiveEvent.Invoke(data, ip);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private IEnumerator PingTest(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SendToServer(new Ping(0).Serialize());
     }
 
     public void SendToServer(byte[] data)

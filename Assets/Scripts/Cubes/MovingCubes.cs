@@ -27,23 +27,8 @@ public class MovingCubes : MonoBehaviourSingleton<MovingCubes>
         MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
         switch (messageType)
         {
-            case MessageType.HandShake:
-                Handshake handshake = new Handshake(data);
-                break;
             case MessageType.HandShakeResponse:
                 HandleHandshakeResponseData(new HandshakeResponse(data));
-                break;
-            case MessageType.Acknowledge:
-                break;
-            case MessageType.DisAcknowledge:
-                break;
-            case MessageType.Disconnect:
-                break;
-            case MessageType.Error:
-                break;
-            case MessageType.Ping:
-                break;
-            case MessageType.Pong:
                 break;
             case MessageType.Position:
                 if (NetworkManager.Instance.isServer)

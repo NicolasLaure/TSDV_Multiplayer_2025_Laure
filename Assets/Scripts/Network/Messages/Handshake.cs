@@ -27,7 +27,6 @@ public class Handshake : Message<HandshakeData>
     public override byte[] Serialize()
     {
         int size = Marshal.SizeOf(_handshakeData);
-        Debug.Log(size);
         byte[] data = new byte[size];
 
         Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.ip), 0, data, 0, sizeof(int));
