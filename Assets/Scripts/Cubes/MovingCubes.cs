@@ -126,4 +126,14 @@ public class MovingCubes : MonoBehaviourSingleton<MovingCubes>
         cubes[instanceID].AddComponent<CubeController>();
         cubes[instanceID].GetComponent<CubeController>().Speed = playerSpeed;
     }
+
+    [ContextMenu("OrderTest")]
+    public void OrderTest()
+    {
+        if (ServerManager.Instance != null)
+            NetworkManager<ServerManager>.Instance.Broadcast(new Position(new Vector3(0, 0, 0), instanceID, 0).Serialize());
+
+        if (ClientManager.Instance != null)
+            ClientManager.Instance.SendToServer(new Position(new Vector3(0, 0, 0), instanceID, 0).Serialize());
+    }
 }

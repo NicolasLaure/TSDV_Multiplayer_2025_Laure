@@ -73,6 +73,8 @@ namespace Network
             int receivedClientId = -1;
             if (ipToId.ContainsKey(ip))
                 receivedClientId = ipToId[ip];
+            else
+                receivedClientId = nextClientId;
 
             MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
             Attributes messageAttribs = (Attributes)BitConverter.ToInt16(data, 2);
@@ -81,7 +83,13 @@ namespace Network
             {
                 messageId = BitConverter.ToInt32(data, sizeof(short) * 2);
                 InitializeMessageId(receivedClientId, messageType);
+                if (messageAttribs == Attributes.Order && messageId <= clientIdToMessageId[receivedClientId][messageType])
+                {
+                    Debug.Log($"MessageId {messageId} was older than, message {clientIdToMessageId[receivedClientId][messageType]}");
+                    return;
+                }
             }
+
 
             switch (messageType)
             {

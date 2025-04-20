@@ -9,7 +9,7 @@ public class Position : Message<(Vector3, int)>
     public Position(Vector3 pos, int instanceID, int messageId)
     {
         messageType = MessageType.Position;
-        attribs = Attributes.None;
+        attribs = Attributes.Order;
         this.pos = pos;
         this.instanceID = instanceID;
         this.messageId = messageId;
