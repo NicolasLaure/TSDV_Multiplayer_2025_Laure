@@ -1,4 +1,5 @@
 using System;
+using Network;
 using TMPro;
 using UnityEngine;
 
@@ -7,15 +8,15 @@ public class PingText : MonoBehaviour
     [SerializeField] private TextMeshProUGUI text;
     private string header = "Ping: ";
 
-    private void Start()
+    private void OnEnable()
     {
-        if (NetworkManager.Instance.isServer)
+        if (ClientManager.Instance)
         {
             gameObject.SetActive(false);
             return;
         }
 
-        NetworkManager.Instance.onPingUpdated += UpdatePing;
+        ClientManager.Instance.onPingUpdated += UpdatePing;
     }
 
     private void UpdatePing(short ping)

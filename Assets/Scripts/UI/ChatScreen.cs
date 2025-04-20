@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Network;
 using UnityEngine.UI;
 
 public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
@@ -12,14 +13,14 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
 
         this.gameObject.SetActive(false);
 
-        NetworkManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
+        ClientManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
     }
 
     void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
     {
-        if (NetworkManager.Instance.isServer)
+        if (ServerManager.Instance)
         {
-            NetworkManager.Instance.Broadcast(data);
+            ServerManager.Instance.Broadcast(data);
         }
 
         messages.text += System.Text.ASCIIEncoding.UTF8.GetString(data) + System.Environment.NewLine;
@@ -29,14 +30,14 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
     {
         if (inputMessage.text != "")
         {
-            if (NetworkManager.Instance.isServer)
+            if (ServerManager.Instance)
             {
-                NetworkManager.Instance.Broadcast(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
+                ServerManager.Instance.Broadcast(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
                 messages.text += inputMessage.text + System.Environment.NewLine;
             }
             else
             {
-                NetworkManager.Instance.SendToServer(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
+                ClientManager.Instance.SendToServer(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
             }
 
             inputMessage.ActivateInputField();

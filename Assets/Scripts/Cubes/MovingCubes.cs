@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
+using Network;
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Events;
@@ -15,11 +16,19 @@ public class MovingCubes : MonoBehaviourSingleton<MovingCubes>
     private List<GameObject> cubes = new List<GameObject>();
     private int instanceID = -1;
 
+    private int positionMessageId = 0;
+
     protected override void Initialize()
     {
         onCubeUpdated.AddListener(OnCubeUpdate);
-        NetworkManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
-        NetworkManager.Instance.onNewClient += HandleNewClient;
+        if (ServerManager.Instance != null)
+        {
+            ServerManager.Instance.onNewClient += HandleNewClient;
+            ServerManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
+        }
+
+        if (ClientManager.Instance)
+            ClientManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
     }
 
     void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
@@ -31,11 +40,6 @@ public class MovingCubes : MonoBehaviourSingleton<MovingCubes>
                 HandleHandshakeResponseData(new HandshakeResponse(data));
                 break;
             case MessageType.Position:
-                if (NetworkManager.Instance.isServer)
-                {
-                    NetworkManager.Instance.Broadcast(data);
-                }
-
                 ReceiveCubePos(data);
                 break;
             default:
@@ -45,24 +49,27 @@ public class MovingCubes : MonoBehaviourSingleton<MovingCubes>
 
     void OnCubeUpdate(Vector3 pos)
     {
-        if (NetworkManager.Instance.isServer)
+        if (ServerManager.Instance != null)
         {
-            BroadCastCubePosition(pos, instanceID);
+            BroadCastCubePosition(pos);
         }
-        else
+
+        if (ClientManager.Instance != null)
         {
             SendCubePosition(pos);
         }
     }
 
-    private void BroadCastCubePosition(Vector3 pos, int index)
+    private void BroadCastCubePosition(Vector3 pos)
     {
-        NetworkManager.Instance.Broadcast(new Position(pos, index).Serialize());
+        NetworkManager<ServerManager>.Instance.Broadcast(new Position(pos, instanceID, positionMessageId).Serialize());
+        positionMessageId++;
     }
 
     private void SendCubePosition(Vector3 pos)
     {
-        NetworkManager.Instance.SendToServer(new Position(pos, instanceID).Serialize());
+        NetworkManager<ClientManager>.Instance.SendToServer(new Position(pos, instanceID, positionMessageId).Serialize());
+        positionMessageId++;
     }
 
     private void ReceiveCubePos(byte[] data)
@@ -90,7 +97,7 @@ public class MovingCubes : MonoBehaviourSingleton<MovingCubes>
         }
 
         HandshakeResponse hsResponse = new HandshakeResponse(id, cubes.Count, positions);
-        NetworkManager.Instance.SendToClient(hsResponse.Serialize(), id);
+        ServerManager.Instance.SendToClient(hsResponse.Serialize(), id);
     }
 
     private void HandleHandshakeResponseData(HandshakeResponse response)

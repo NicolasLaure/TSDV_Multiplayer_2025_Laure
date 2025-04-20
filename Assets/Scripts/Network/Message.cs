@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public enum MessageType : short
 {
@@ -20,6 +21,7 @@ public enum Attributes : short
     Important = 1 << 2,
     Checksum = 1 << 3,
     Critical = 1 << 4,
+    Order = 1 << 5
 }
 
 public abstract class Message<T>
@@ -30,13 +32,16 @@ public abstract class Message<T>
     public short messageStart;
     public short messageEnd;
 
+    public int messageId = 0;
+
     public byte[] GetFormattedData(byte[] input)
     {
         int headerSize = sizeof(short) * 2;
         int tailSize = 0;
         if (messageType != MessageType.Ping)
         {
-            headerSize += sizeof(short) * 2;
+            headerSize += sizeof(short) * 2 + sizeof(int);
+
             if (attribs == Attributes.Checksum)
                 tailSize = sizeof(int) * 2;
         }
@@ -55,6 +60,9 @@ public abstract class Message<T>
         offset += sizeof(short);
         if (messageType != MessageType.Ping)
         {
+            Buffer.BlockCopy(BitConverter.GetBytes(messageId), 0, header, offset, sizeof(int));
+            offset += sizeof(int);
+
             Buffer.BlockCopy(BitConverter.GetBytes(messageStart), 0, header, offset, sizeof(short));
             offset += sizeof(short);
             Buffer.BlockCopy(BitConverter.GetBytes(messageEnd), 0, header, offset, sizeof(short));
@@ -92,6 +100,7 @@ public abstract class Message<T>
             return payload;
         }
 
+        offset += sizeof(int);
         short messageStart = BitConverter.ToInt16(message, offset);
         offset += sizeof(short);
         short messageEnd = BitConverter.ToInt16(message, offset);

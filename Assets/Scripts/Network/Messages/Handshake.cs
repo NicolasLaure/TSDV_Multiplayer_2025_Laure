@@ -12,10 +12,11 @@ public class Handshake : Message<HandshakeData>
 {
     private HandshakeData _handshakeData;
 
-    public Handshake(HandshakeData handshakeData)
+    public Handshake(HandshakeData handshakeData, int messageId)
     {
         messageType = MessageType.HandShake;
         attribs = Attributes.Important;
+        this.messageId = messageId;
         _handshakeData = handshakeData;
     }
 

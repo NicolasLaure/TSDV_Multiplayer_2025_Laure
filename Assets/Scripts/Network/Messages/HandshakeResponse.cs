@@ -23,6 +23,7 @@ public class HandshakeResponse : Message<HandshakeResponseData>
         _handshakeData.id = id;
         _handshakeData.count = count;
         _handshakeData.positions = positions;
+        this.messageId = 0;
     }
 
     public HandshakeResponse(byte[] data)

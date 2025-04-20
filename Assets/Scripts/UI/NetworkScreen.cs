@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Net;
+using Network;
+using UnityEngine.Serialization;
 
 public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 {
@@ -10,6 +12,12 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public Button startServerBtn;
     public InputField portInputField;
     public InputField addressInputField;
+
+    [SerializeField] private GameObject pingTextObject;
+    [SerializeField] private GameObject movingCubes;
+
+    [SerializeField] private GameObject clientPrefab;
+    [SerializeField] private GameObject serverPrefab;
 
     protected override void Initialize()
     {
@@ -22,7 +30,11 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
         int port = System.Convert.ToInt32(portInputField.text);
 
-        NetworkManager.Instance.StartClient(ipAddress, port);
+        Instantiate(clientPrefab);
+        ClientManager.Instance.StartClient(ipAddress, port);
+        movingCubes.SetActive(true);
+
+        pingTextObject.SetActive(true);
 
         if (ChatScreen.Instance != null)
             SwitchToChatScreen();
@@ -33,7 +45,10 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     void OnStartServerBtnClick()
     {
         int port = System.Convert.ToInt32(portInputField.text);
-        NetworkManager.Instance.StartServer(port);
+
+        Instantiate(serverPrefab);
+        ServerManager.Instance.StartServer(port);
+        movingCubes.SetActive(true);
 
         if (ChatScreen.Instance != null)
             SwitchToChatScreen();

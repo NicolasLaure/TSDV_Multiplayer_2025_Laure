@@ -224,52 +224,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &180350408
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 180350410}
-  - component: {fileID: 180350409}
-  m_Layer: 0
-  m_Name: NetworkManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &180350409
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 180350408}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f30c9f44b7174d45b74c4ae777e3447, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TimeOut: 30
-  pingMs: 0
---- !u!4 &180350410
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 180350408}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 648.8062, y: 449.30316, z: -80}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &194703369
 GameObject:
   m_ObjectHideFlags: 0
@@ -445,6 +399,12 @@ MonoBehaviour:
   startServerBtn: {fileID: 306608487}
   portInputField: {fileID: 1558557928}
   addressInputField: {fileID: 2123302590}
+  pingTextObject: {fileID: 1364286041}
+  movingCubes: {fileID: 1416574781}
+  clientPrefab: {fileID: 6540943213920370471, guid: d23ac760fae1f3348939a3ca0bdcb1fa,
+    type: 3}
+  serverPrefab: {fileID: 4876374338819648420, guid: 4380a6c7f5a0d174697d822b7a22b7be,
+    type: 3}
 --- !u!1 &304126657
 GameObject:
   m_ObjectHideFlags: 0
@@ -1369,7 +1329,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1364286042
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1517,7 +1477,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1416574782
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2391,5 +2351,4 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 124582378}
   - {fileID: 2034178765}
-  - {fileID: 180350410}
   - {fileID: 1416574783}

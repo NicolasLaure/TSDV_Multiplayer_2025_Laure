@@ -6,12 +6,13 @@ public class Position : Message<(Vector3, int)>
     public Vector3 pos;
     public int instanceID;
 
-    public Position(Vector3 pos, int instanceID)
+    public Position(Vector3 pos, int instanceID, int messageId)
     {
         messageType = MessageType.Position;
         attribs = Attributes.None;
         this.pos = pos;
         this.instanceID = instanceID;
+        this.messageId = messageId;
     }
 
     public Position(byte[] data)
