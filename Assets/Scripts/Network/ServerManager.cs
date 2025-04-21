@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using Random = System.Random;
 
 namespace Network
 {
@@ -39,6 +40,9 @@ namespace Network
         {
             this.port = port;
             connection = new UdpConnection(port, this);
+            seed = UnityEngine.Random.Range(0, int.MaxValue);
+            Debug.Log($"Server Seed: {seed}");
+
             nextClientId++;
         }
 

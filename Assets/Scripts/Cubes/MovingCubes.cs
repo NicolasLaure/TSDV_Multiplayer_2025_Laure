@@ -96,14 +96,16 @@ public class MovingCubes : MonoBehaviourSingleton<MovingCubes>
             positions.Add(cubes[i].transform.position);
         }
 
-        HandshakeResponse hsResponse = new HandshakeResponse(id, cubes.Count, positions);
+        HandshakeResponse hsResponse = new HandshakeResponse(id, cubes.Count, ServerManager.Instance.Seed, positions);
         ServerManager.Instance.SendToClient(hsResponse.Serialize(), id);
     }
 
     private void HandleHandshakeResponseData(HandshakeResponse response)
     {
-        Debug.Log("SpawningCubes");
         instanceID = response._handshakeData.id;
+        ClientManager.Instance.Seed = response._handshakeData.seed;
+        Debug.Log($"Seed: {ClientManager.Instance.Seed}");
+
         for (int i = 0; i < response._handshakeData.count; i++)
         {
             GameObject newCube = Instantiate(cubePrefab, response._handshakeData.positions[i], Quaternion.identity);

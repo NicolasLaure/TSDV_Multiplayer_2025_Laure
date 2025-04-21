@@ -14,6 +14,14 @@ namespace Network
         protected float maxResponseWait = 0.5f;
         protected int TimeOutTime = 10;
 
+        protected int seed;
+
+        public int Seed
+        {
+            get { return seed; }
+            set { seed = value; }
+        }
+
         public abstract void OnReceiveData(byte[] data, IPEndPoint ip);
 
         protected void Update()
