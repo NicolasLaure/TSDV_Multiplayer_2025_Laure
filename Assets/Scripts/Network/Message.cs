@@ -5,10 +5,10 @@ public enum MessageType : short
 {
     HandShake = -1,
     HandShakeResponse,
-    Acknowledge, //To Do
+    Acknowledge,
     DisAcknowledge, //To Do
     Disconnect, //To Do
-    Ping, //To Do
+    Ping,
     Position,
     Console,
     Error,
