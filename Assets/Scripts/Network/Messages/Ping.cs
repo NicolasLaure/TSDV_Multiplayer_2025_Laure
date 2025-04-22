@@ -1,29 +1,32 @@
 using System;
-using UnityEngine;
+using Network.Enums;
 
-public class Ping : Message<short>
+namespace Network.Messages
 {
-    public short ms;
-
-    public Ping(short ms)
+    public class Ping : Message<short>
     {
-        messageType = MessageType.Ping;
-        attribs = Attributes.None;
-        this.ms = ms;
-    }
+        public short ms;
 
-    public Ping(byte[] data)
-    {
-        ms = Deserialize(data);
-    }
+        public Ping(short ms)
+        {
+            messageType = MessageType.Ping;
+            attribs = Attributes.None;
+            this.ms = ms;
+        }
 
-    public override byte[] Serialize()
-    {
-        return GetFormattedData(BitConverter.GetBytes(ms));
-    }
+        public Ping(byte[] data)
+        {
+            ms = Deserialize(data);
+        }
 
-    public override short Deserialize(byte[] message)
-    {
-        return BitConverter.ToInt16(ExtractPayload(message));
+        public override byte[] Serialize()
+        {
+            return GetFormattedData(BitConverter.GetBytes(ms));
+        }
+
+        public override short Deserialize(byte[] message)
+        {
+            return BitConverter.ToInt16(ExtractPayload(message));
+        }
     }
 }

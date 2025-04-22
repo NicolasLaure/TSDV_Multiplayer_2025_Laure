@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
 using System.Net;
+using Network.Enums;
+using Network.Messages;
 using UnityEngine;
+using Ping = Network.Messages.Ping;
 
 namespace Network
 {

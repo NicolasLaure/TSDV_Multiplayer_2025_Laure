@@ -3,85 +3,88 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
-public class UdpConnection
+namespace Network
 {
-    private struct DataReceived
+    public class UdpConnection
     {
-        public byte[] data;
-        public IPEndPoint ipEndPoint;
-    }
-
-    private readonly UdpClient connection;
-    private IReceiveData receiver = null;
-    private Queue<DataReceived> dataReceivedQueue = new Queue<DataReceived>();
-
-    object handler = new object();
-    
-    public UdpConnection(int port, IReceiveData receiver = null)
-    {
-        connection = new UdpClient(port);
-
-        this.receiver = receiver;
-
-        connection.BeginReceive(OnReceive, null);
-    }
-
-    public UdpConnection(IPAddress ip, int port, IReceiveData receiver = null)
-    {
-        connection = new UdpClient();
-        connection.Connect(ip, port);
-
-        this.receiver = receiver;
-
-        connection.BeginReceive(OnReceive, null);
-    }
-
-    public void Close()
-    {
-        connection.Close();
-    }
-
-    public void FlushReceiveData()
-    {
-        lock (handler)
+        private struct DataReceived
         {
-            while (dataReceivedQueue.Count > 0)
-            {
-                DataReceived dataReceived = dataReceivedQueue.Dequeue();
-                if (receiver != null)
-                    receiver.OnReceiveData(dataReceived.data, dataReceived.ipEndPoint);
-            }
+            public byte[] data;
+            public IPEndPoint ipEndPoint;
         }
-    }
 
-    void OnReceive(IAsyncResult ar)
-    {
-        try
+        private readonly UdpClient connection;
+        private IReceiveData receiver = null;
+        private Queue<DataReceived> dataReceivedQueue = new Queue<DataReceived>();
+
+        object handler = new object();
+
+        public UdpConnection(int port, IReceiveData receiver = null)
         {
-            DataReceived dataReceived = new DataReceived();
-            dataReceived.data = connection.EndReceive(ar, ref dataReceived.ipEndPoint);
+            connection = new UdpClient(port);
 
+            this.receiver = receiver;
+
+            connection.BeginReceive(OnReceive, null);
+        }
+
+        public UdpConnection(IPAddress ip, int port, IReceiveData receiver = null)
+        {
+            connection = new UdpClient();
+            connection.Connect(ip, port);
+
+            this.receiver = receiver;
+
+            connection.BeginReceive(OnReceive, null);
+        }
+
+        public void Close()
+        {
+            connection.Close();
+        }
+
+        public void FlushReceiveData()
+        {
             lock (handler)
             {
-                dataReceivedQueue.Enqueue(dataReceived);
+                while (dataReceivedQueue.Count > 0)
+                {
+                    DataReceived dataReceived = dataReceivedQueue.Dequeue();
+                    if (receiver != null)
+                        receiver.OnReceiveData(dataReceived.data, dataReceived.ipEndPoint);
+                }
             }
         }
-        catch(SocketException e)
+
+        void OnReceive(IAsyncResult ar)
         {
-            // This happens when a client disconnects, as we fail to send to that port.
-            UnityEngine.Debug.LogError("[UdpConnection] " + e.Message);
+            try
+            {
+                DataReceived dataReceived = new DataReceived();
+                dataReceived.data = connection.EndReceive(ar, ref dataReceived.ipEndPoint);
+
+                lock (handler)
+                {
+                    dataReceivedQueue.Enqueue(dataReceived);
+                }
+            }
+            catch (SocketException e)
+            {
+                // This happens when a client disconnects, as we fail to send to that port.
+                UnityEngine.Debug.LogError("[UdpConnection] " + e.Message);
+            }
+
+            connection.BeginReceive(OnReceive, null);
         }
 
-        connection.BeginReceive(OnReceive, null);
-    }
+        public void Send(byte[] data)
+        {
+            connection.Send(data, data.Length);
+        }
 
-    public void Send(byte[] data)
-    {
-        connection.Send(data, data.Length);
-    }
-
-    public void Send(byte[] data, IPEndPoint ipEndpoint)
-    {
-        connection.Send(data, data.Length, ipEndpoint);
+        public void Send(byte[] data, IPEndPoint ipEndpoint)
+        {
+            connection.Send(data, data.Length, ipEndpoint);
+        }
     }
 }

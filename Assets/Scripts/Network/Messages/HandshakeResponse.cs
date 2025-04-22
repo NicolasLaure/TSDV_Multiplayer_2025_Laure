@@ -1,68 +1,61 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Runtime.InteropServices;
+using Network.Enums;
 using UnityEngine;
 
-
-public struct HandshakeResponseData
+namespace Network.Messages
 {
-    public int id;
-    public int count;
-    public int seed;
-    public List<Vector3> positions;
-}
-
-public class HandshakeResponse : Message<HandshakeResponseData>
-{
-    public HandshakeResponseData _handshakeData;
-
-    public HandshakeResponse(int id, int count, int seed, List<Vector3> positions)
+    public class HandshakeResponse : Message<HandshakeResponseData>
     {
-        messageType = MessageType.HandShakeResponse;
-        attribs = Attributes.Important;
-        _handshakeData.id = id;
-        _handshakeData.count = count;
-        _handshakeData.positions = positions;
-        _handshakeData.seed = seed;
-        this.messageId = 0;
-    }
+        public HandshakeResponseData _handshakeData;
 
-    public HandshakeResponse(byte[] data)
-    {
-        _handshakeData = Deserialize(data);
-    }
-
-    public override byte[] Serialize()
-    {
-        int size = sizeof(int) * 3 + _handshakeData.positions.Count * 12;
-        byte[] data = new byte[size];
-
-        Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.id), 0, data, 0, sizeof(int));
-        Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.count), 0, data, 4, sizeof(int));
-        Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.seed), 0, data, 8, sizeof(int));
-        for (int i = 0; i < _handshakeData.count; i++)
+        public HandshakeResponse(int id, int count, int seed, List<Vector3> positions)
         {
-            Buffer.BlockCopy(ByteFormat.GetVector3Bytes(_handshakeData.positions[i]), 0, data, 12 + 12 * i, 12);
+            messageType = MessageType.HandShakeResponse;
+            attribs = Attributes.Important;
+            _handshakeData.id = id;
+            _handshakeData.count = count;
+            _handshakeData.positions = positions;
+            _handshakeData.seed = seed;
+            this.messageId = 0;
         }
 
-        return GetFormattedData(data);
-    }
-
-    public override HandshakeResponseData Deserialize(byte[] message)
-    {
-        byte[] payload = ExtractPayload(message);
-        HandshakeResponseData data;
-        data.id = BitConverter.ToInt32(payload, 0);
-        data.count = BitConverter.ToInt32(payload, sizeof(int));
-        data.seed = BitConverter.ToInt32(payload, sizeof(int) * 2);
-        data.positions = new List<Vector3>();
-
-        for (int i = 0; i < data.count; i++)
+        public HandshakeResponse(byte[] data)
         {
-            data.positions.Add(ByteFormat.GetVector3FromBytes(payload, sizeof(int) * 3 + i * 12));
+            _handshakeData = Deserialize(data);
         }
 
-        return data;
+        public override byte[] Serialize()
+        {
+            int size = sizeof(int) * 3 + _handshakeData.positions.Count * 12;
+            byte[] data = new byte[size];
+
+            Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.id), 0, data, 0, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.count), 0, data, 4, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.seed), 0, data, 8, sizeof(int));
+            for (int i = 0; i < _handshakeData.count; i++)
+            {
+                Buffer.BlockCopy(ByteFormat.GetVector3Bytes(_handshakeData.positions[i]), 0, data, 12 + 12 * i, 12);
+            }
+
+            return GetFormattedData(data);
+        }
+
+        public override HandshakeResponseData Deserialize(byte[] message)
+        {
+            byte[] payload = ExtractPayload(message);
+            HandshakeResponseData data;
+            data.id = BitConverter.ToInt32(payload, 0);
+            data.count = BitConverter.ToInt32(payload, sizeof(int));
+            data.seed = BitConverter.ToInt32(payload, sizeof(int) * 2);
+            data.positions = new List<Vector3>();
+
+            for (int i = 0; i < data.count; i++)
+            {
+                data.positions.Add(ByteFormat.GetVector3FromBytes(payload, sizeof(int) * 3 + i * 12));
+            }
+
+            return data;
+        }
     }
 }

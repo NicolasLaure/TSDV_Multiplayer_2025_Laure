@@ -1,44 +1,41 @@
 using System;
-using System.Net;
 using System.Runtime.InteropServices;
-using UnityEngine;
+using Network.Enums;
 
-public struct HandshakeData
+namespace Network.Messages
 {
-    public int ip;
-}
-
-public class Handshake : Message<HandshakeData>
-{
-    private HandshakeData _handshakeData;
-
-    public Handshake(HandshakeData handshakeData, int messageId)
+    public class Handshake : Message<HandshakeData>
     {
-        messageType = MessageType.HandShake;
-        attribs = Attributes.Important;
-        this.messageId = messageId;
-        _handshakeData = handshakeData;
-    }
+        private HandshakeData _handshakeData;
 
-    public Handshake(byte[] data)
-    {
-        _handshakeData = Deserialize(data);
-    }
+        public Handshake(HandshakeData handshakeData, int messageId)
+        {
+            messageType = MessageType.HandShake;
+            attribs = Attributes.Important;
+            this.messageId = messageId;
+            _handshakeData = handshakeData;
+        }
 
-    public override byte[] Serialize()
-    {
-        int size = Marshal.SizeOf(_handshakeData);
-        byte[] data = new byte[size];
+        public Handshake(byte[] data)
+        {
+            _handshakeData = Deserialize(data);
+        }
 
-        Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.ip), 0, data, 0, sizeof(int));
-        return GetFormattedData(data);
-    }
+        public override byte[] Serialize()
+        {
+            int size = Marshal.SizeOf(_handshakeData);
+            byte[] data = new byte[size];
 
-    public override HandshakeData Deserialize(byte[] message)
-    {
-        byte[] payload = ExtractPayload(message);
-        HandshakeData data;
-        data.ip = BitConverter.ToInt32(payload, 0);
-        return data;
+            Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.ip), 0, data, 0, sizeof(int));
+            return GetFormattedData(data);
+        }
+
+        public override HandshakeData Deserialize(byte[] message)
+        {
+            byte[] payload = ExtractPayload(message);
+            HandshakeData data;
+            data.ip = BitConverter.ToInt32(payload, 0);
+            return data;
+        }
     }
 }

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using UnityEditor.Experimental.GraphView;
+using Network.Enums;
+using Network.Messages;
 using UnityEngine;
-using Random = System.Random;
+using Ping = Network.Messages.Ping;
+using Random = UnityEngine.Random;
 
 namespace Network
 {
@@ -40,7 +42,7 @@ namespace Network
         {
             this.port = port;
             connection = new UdpConnection(port, this);
-            seed = UnityEngine.Random.Range(0, int.MaxValue);
+            seed = Random.Range(0, int.MaxValue);
             Debug.Log($"Server Seed: {seed}");
 
             nextClientId++;

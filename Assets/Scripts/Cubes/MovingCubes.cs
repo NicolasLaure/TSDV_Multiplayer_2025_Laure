@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using Network;
+using Network.Enums;
+using Network.Messages;
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Events;

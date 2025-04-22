@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.Text;
 using System.Net;
+using Network.Enums;
 
 public interface IMessage<T>
 {
