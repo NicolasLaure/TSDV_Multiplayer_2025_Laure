@@ -1,24 +1,37 @@
+using System;
 using UnityEngine;
 
-public class CubeController : MonoBehaviour
+namespace Cubes
 {
-    private float speed;
-    public float Speed {
-        get { return speed; }
-        set { speed = value; }
-    }
-
-    void Update()
+    public class CubeController : MonoBehaviour
     {
-        Vector3 dir;
-        dir.x = Input.GetAxis("Horizontal");
-        dir.y = 0;
-        dir.z = Input.GetAxis("Vertical");
+        private float speed;
+        private Vector3 dir;
 
-        if (dir != Vector3.zero)
+        public float Speed
         {
-            transform.position += dir * speed * Time.deltaTime;
-            MovingCubesClient.Instance.onCubeUpdated?.Invoke(transform.position);
+            get { return speed; }
+            set { speed = value; }
+        }
+
+        private void Start()
+        {
+            Input.InputReader.Instance.onMove += HandleDir;
+            Input.InputReader.Instance.onMove += HandleDir;
+        }
+
+        void Update()
+        {
+            if (dir != Vector3.zero)
+            {
+                transform.position += dir * speed * Time.deltaTime;
+                MovingCubesClient.Instance.onCubeUpdated?.Invoke(transform.position);
+            }
+        }
+
+        void HandleDir(Vector2 newDir)
+        {
+            dir = new Vector3(newDir.x, 0, newDir.y);
         }
     }
 }

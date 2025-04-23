@@ -5,11 +5,11 @@ namespace Network.Enums
         HandShake = -1,
         HandShakeResponse,
         Acknowledge,
-        DisAcknowledge, //To Do
-        Disconnect, //To Do
+        DisAcknowledge, //ToDo
+        Disconnect, //ToDo
         Ping,
         Position,
-        Chat, //To Do
+        Chat, //ToDo
         Console,
         Error,
     }
