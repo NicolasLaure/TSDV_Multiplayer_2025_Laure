@@ -14,7 +14,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public InputField addressInputField;
 
     [SerializeField] private GameObject pingTextObject;
-    [SerializeField] private GameObject movingCubes;
 
     [SerializeField] private GameObject clientPrefab;
     [SerializeField] private GameObject serverPrefab;
@@ -32,7 +31,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 
         Instantiate(clientPrefab);
         ClientManager.Instance.StartClient(ipAddress, port);
-        movingCubes.SetActive(true);
 
         pingTextObject.SetActive(true);
 
@@ -48,15 +46,11 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 
         Instantiate(serverPrefab);
         ServerManager.Instance.StartServer(port);
-        movingCubes.SetActive(true);
 
         if (ChatScreen.Instance != null)
             SwitchToChatScreen();
         else
-        {
             SwitchToCubes();
-            MovingCubes.Instance.HandleServerStart();
-        }
     }
 
     void SwitchToChatScreen()
@@ -67,7 +61,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 
     void SwitchToCubes()
     {
-        MovingCubes.Instance.gameObject.SetActive(true);
         this.gameObject.SetActive(false);
     }
 }

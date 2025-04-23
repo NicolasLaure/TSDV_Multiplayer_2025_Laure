@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3522261599387971857}
   - component: {fileID: 7812880439592045247}
+  - component: {fileID: 4023703460669702528}
   m_Layer: 0
   m_Name: Server
   m_TagString: Untagged
@@ -44,4 +45,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d64c3359aae33ad4b8f8f6a338727141, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TimeOut: 30
+--- !u!114 &4023703460669702528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4876374338819648420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e4e3aa180b69c447bd22c0fc8140924, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  horizontalOffset: 2

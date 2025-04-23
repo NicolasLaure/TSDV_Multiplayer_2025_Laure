@@ -18,7 +18,7 @@ public class CubeController : MonoBehaviour
         if (dir != Vector3.zero)
         {
             transform.position += dir * speed * Time.deltaTime;
-            MovingCubes.Instance.onCubeUpdated?.Invoke(transform.position);
+            MovingCubesClient.Instance.onCubeUpdated?.Invoke(transform.position);
         }
     }
 }

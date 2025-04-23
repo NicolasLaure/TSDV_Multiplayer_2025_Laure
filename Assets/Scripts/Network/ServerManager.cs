@@ -44,8 +44,6 @@ namespace Network
             connection = new UdpConnection(port, this);
             seed = Random.Range(0, int.MaxValue);
             Debug.Log($"Server Seed: {seed}");
-
-            nextClientId++;
         }
 
         void AddClient(IPEndPoint ip)
@@ -59,8 +57,7 @@ namespace Network
                 idPingTime[nextClientId] = Time.time;
                 SendToClient(new Ping(0).Serialize(), nextClientId);
 
-                if (onNewClient != null)
-                    onNewClient.Invoke(nextClientId);
+                onNewClient?.Invoke(nextClientId);
                 nextClientId++;
             }
         }
