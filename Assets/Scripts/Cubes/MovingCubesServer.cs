@@ -6,47 +6,51 @@ using Network.Enums;
 using Network.Messages;
 using UnityEngine;
 
-public class MovingCubesServer : MonoBehaviourSingleton<MovingCubesServer>
+namespace Cubes
 {
-    [SerializeField] private float horizontalOffset;
-
-    private List<Vector3> _positions = new List<Vector3>();
-
-    protected override void Initialize()
+    public class MovingCubesServer : MonoBehaviourSingleton<MovingCubesServer>
     {
-        if (ServerManager.Instance == null)
-            return;
+        [SerializeField] private float horizontalOffset;
 
-        ServerManager.Instance.onNewClient += HandleNewClient;
-        ServerManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
-    }
+        private List<Vector3> _positions = new List<Vector3>();
 
-    void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
-    {
-        MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
-        switch (messageType)
+        protected override void Initialize()
         {
-            case MessageType.Position:
-                ReceiveCubePos(data);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            if (ServerManager.Instance == null)
+                return;
+
+            ServerManager.Instance.onNewClient += HandleNewClient;
+            ServerManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
         }
-    }
 
-    private void ReceiveCubePos(byte[] data)
-    {
-        Position posMessage = new Position(data);
-        Vector3 pos = posMessage.pos;
-        int index = posMessage.instanceID;
-        _positions[index] = pos;
-    }
+        void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
+        {
+            MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
+            switch (messageType)
+            {
+                case MessageType.Position:
+                    ReceiveCubePos(data);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
-    private void HandleNewClient(int id)
-    {
-        _positions.Add(new Vector3(horizontalOffset * this._positions.Count, 0, 0));
+        private void ReceiveCubePos(byte[] data)
+        {
+            Position posMessage = new Position(data);
+            Vector3 pos = posMessage.pos;
+            int index = posMessage.instanceID;
+            _positions[index] = pos;
+        }
 
-        HandshakeResponse hsResponse = new HandshakeResponse(id, _positions.Count, ServerManager.Instance.Seed, _positions);
-        ServerManager.Instance.SendToClient(hsResponse.Serialize(), id);
+        private void HandleNewClient(int id)
+        {
+            if (id > _positions.Count - 1)
+                _positions.Add(new Vector3(horizontalOffset * this._positions.Count, 0, 0));
+
+            HandshakeResponse hsResponse = new HandshakeResponse(id, _positions.Count, ServerManager.Instance.Seed, _positions);
+            ServerManager.Instance.SendToClient(hsResponse.Serialize(), id);
+        }
     }
 }

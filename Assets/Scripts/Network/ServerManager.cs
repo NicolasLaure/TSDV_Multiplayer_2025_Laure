@@ -35,6 +35,7 @@ namespace Network
         private readonly HandshakeResponse heldHandshakeSa;
 
         public Action<int> onNewClient;
+        public Action<int> onClientRemoved;
 
         private int nextClientId = 0; // This id should be generated during first handshake
 
@@ -48,6 +49,7 @@ namespace Network
 
         void AddClient(IPEndPoint ip)
         {
+            //ipToId does not contain a previous connected Ip? Has something to do with creating a new Connection? 
             if (!ipToId.ContainsKey(ip))
             {
                 int id = nextClientId;
@@ -60,6 +62,15 @@ namespace Network
                 onNewClient?.Invoke(nextClientId);
                 nextClientId++;
             }
+            else
+            {
+                int id = ipToId[ip];
+                Debug.Log("Reconnecting client: " + ip.Address + " ID: " + id);
+                clients.Add(id, new Client(ip, id, Time.realtimeSinceStartup));
+                idPingTime[id] = Time.time;
+                SendToClient(new Ping(0).Serialize(), id);
+                onNewClient?.Invoke(id);
+            }
         }
 
         void RemoveClient(IPEndPoint ip)
@@ -67,7 +78,9 @@ namespace Network
             if (ipToId.ContainsKey(ip))
             {
                 Debug.Log("Removing client: " + ip.Address);
+                prevClients.Add(ipToId[ip], clients[ipToId[ip]]);
                 clients.Remove(ipToId[ip]);
+                onClientRemoved?.Invoke(ipToId[ip]);
             }
         }
 
@@ -116,6 +129,8 @@ namespace Network
                 case MessageType.DisAcknowledge:
                     break;
                 case MessageType.Disconnect:
+                    RemoveClient(ip);
+                    Broadcast(data);
                     break;
                 case MessageType.Error:
                     break;

@@ -27,7 +27,16 @@
                     "name": "Fire",
                     "type": "Button",
                     "id": "654b998d-daef-472f-843f-261432b33e65",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Quit",
+                    "type": "Button",
+                    "id": "fa9854a7-da27-438f-8029-7d70433c8276",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -251,6 +260,17 @@
                     "processors": "",
                     "groups": "XR",
                     "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6d77f5a8-1332-43e3-b269-58889468005c",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Quit",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

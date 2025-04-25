@@ -9,6 +9,7 @@ namespace Input
         private PlayerInput _input;
 
         public Action<Vector2> onMove;
+        public Action onQuit;
 
         protected override void Initialize()
         {
@@ -17,11 +18,18 @@ namespace Input
 
             _input.Player.Move.performed += OnMove;
             _input.Player.Move.canceled += OnMove;
+
+            _input.Player.Quit.performed += OnQuit;
         }
 
         private void OnMove(InputAction.CallbackContext context)
         {
             onMove?.Invoke(context.ReadValue<Vector2>());
+        }
+
+        private void OnQuit(InputAction.CallbackContext context)
+        {
+            onQuit?.Invoke();
         }
     }
 }

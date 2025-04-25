@@ -1,8 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Net;
+using Input;
 using Network;
 using UnityEngine.Serialization;
 
@@ -33,6 +35,8 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         ClientManager.Instance.StartClient(ipAddress, port);
 
         pingTextObject.SetActive(true);
+        InputReader.Instance.onQuit += Disconnect;
+
 
         if (ChatScreen.Instance != null)
             SwitchToChatScreen();
@@ -62,5 +66,11 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     void SwitchToCubes()
     {
         this.gameObject.SetActive(false);
+    }
+
+    public void Disconnect()
+    {
+        this.gameObject.SetActive(true);
+        InputReader.Instance.onQuit -= Disconnect;
     }
 }

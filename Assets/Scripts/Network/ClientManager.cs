@@ -18,6 +18,8 @@ namespace Network
         private Coroutine handshake;
         private float clientStartTime;
 
+        public Action<int> onClientDisconnect;
+
         public void StartClient(IPAddress ip, int port)
         {
             this.port = port;
@@ -26,6 +28,12 @@ namespace Network
             connection = new UdpConnection(ip, port, this);
             clientStartTime = Time.time;
             handshake = StartCoroutine(SendHandshake());
+        }
+
+        public void EndClient(int instanceID)
+        {
+            SendToServer(new Disconnect(instanceID).Serialize());
+            connection = null;
         }
 
         public void SendToServer(byte[] data)
@@ -41,11 +49,12 @@ namespace Network
                 case MessageType.Acknowledge:
                     if (handshake != null)
                         StopCoroutine(handshake);
-                    
+
                     break;
                 case MessageType.DisAcknowledge:
                     break;
                 case MessageType.Disconnect:
+                    onClientDisconnect?.Invoke(new Disconnect(data).id);
                     break;
                 case MessageType.Error:
                     break;

@@ -1,96 +1,123 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using Cubes;
+using Input;
 using Network;
 using Network.Enums;
 using Network.Messages;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class MovingCubesClient : MonoBehaviourSingleton<MovingCubesClient>
+namespace Cubes
 {
-    public UnityEvent<Vector3> onCubeUpdated;
-    [SerializeField] private GameObject cubePrefab;
-    [SerializeField] private float playerSpeed;
-    private List<GameObject> cubes = new List<GameObject>();
-    private int instanceID = -1;
-
-    private int positionMessageId = 0;
-
-    protected override void Initialize()
+    public class MovingCubesClient : MonoBehaviourSingleton<MovingCubesClient>
     {
-        onCubeUpdated.AddListener(OnCubeUpdate);
+        public UnityEvent<Vector3> onCubeUpdated;
+        [SerializeField] private GameObject cubePrefab;
+        [SerializeField] private float playerSpeed;
+        private List<GameObject> cubes = new List<GameObject>();
+        private int instanceID = -1;
 
-        if (ClientManager.Instance)
-            ClientManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
-    }
+        private int positionMessageId = 0;
 
-    void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
-    {
-        MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
-        switch (messageType)
+        protected override void Initialize()
         {
-            case MessageType.HandShakeResponse:
-                HandleHandshakeResponseData(new HandshakeResponse(data));
-                break;
-            case MessageType.Position:
-                ReceiveCubePos(data);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-    }
+            onCubeUpdated.AddListener(OnCubeUpdate);
 
-    void OnCubeUpdate(Vector3 pos)
-    {
-        if (ClientManager.Instance != null)
-        {
-            SendCubePosition(pos);
-        }
-    }
+            if (ClientManager.Instance)
+            {
+                ClientManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
+                ClientManager.Instance.onClientDisconnect += RemoveCube;
+            }
 
-    private void SendCubePosition(Vector3 pos)
-    {
-        NetworkManager<ClientManager>.Instance.SendToServer(new Position(pos, instanceID, positionMessageId).Serialize());
-        positionMessageId++;
-    }
-
-    private void ReceiveCubePos(byte[] data)
-    {
-        Position posMessage = new Position(data);
-        Vector3 pos = posMessage.pos;
-        int index = posMessage.instanceID;
-        while (index >= cubes.Count)
-        {
-            cubes.Add(Instantiate(cubePrefab));
+            InputReader.Instance.onQuit += HandleQuit;
         }
 
-        cubes[index].transform.position = pos;
-    }
-
-    private void HandleHandshakeResponseData(HandshakeResponse response)
-    {
-        instanceID = response._handshakeData.id;
-        ClientManager.Instance.Seed = response._handshakeData.seed;
-        Debug.Log($"Seed: {ClientManager.Instance.Seed}");
-
-        for (int i = 0; i < response._handshakeData.count; i++)
+        void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
         {
-            GameObject newCube = Instantiate(cubePrefab, response._handshakeData.positions[i], Quaternion.identity);
-            cubes.Add(newCube);
+            MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
+            switch (messageType)
+            {
+                case MessageType.HandShakeResponse:
+                    HandleHandshakeResponseData(new HandshakeResponse(data));
+                    break;
+                case MessageType.Position:
+                    ReceiveCubePos(data);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        cubes[instanceID].AddComponent<CubeController>();
-        cubes[instanceID].GetComponent<CubeController>().Speed = playerSpeed;
+        void OnCubeUpdate(Vector3 pos)
+        {
+            if (ClientManager.Instance != null)
+            {
+                SendCubePosition(pos);
+            }
+        }
 
-        SendCubePosition(cubes[instanceID].transform.position);
-    }
+        private void SendCubePosition(Vector3 pos)
+        {
+            NetworkManager<ClientManager>.Instance.SendToServer(new Position(pos, instanceID, positionMessageId).Serialize());
+            positionMessageId++;
+        }
 
-    [ContextMenu("OrderTest")]
-    public void OrderTest()
-    {
-        if (ClientManager.Instance != null)
-            ClientManager.Instance.SendToServer(new Position(new Vector3(0, 0, 0), instanceID, 0).Serialize());
+        private void ReceiveCubePos(byte[] data)
+        {
+            Position posMessage = new Position(data);
+            Vector3 pos = posMessage.pos;
+            int index = posMessage.instanceID;
+            while (index >= cubes.Count)
+            {
+                cubes.Add(Instantiate(cubePrefab));
+            }
+
+            if (!cubes[index].activeInHierarchy)
+                cubes[index].SetActive(true);
+
+            cubes[index].transform.position = pos;
+        }
+
+        private void RemoveCube(int id)
+        {
+            cubes[id].SetActive(false);
+        }
+
+        private void HandleHandshakeResponseData(HandshakeResponse response)
+        {
+            instanceID = response._handshakeData.id;
+            ClientManager.Instance.Seed = response._handshakeData.seed;
+            Debug.Log($"Seed: {ClientManager.Instance.Seed}");
+
+            for (int i = 0; i < response._handshakeData.count; i++)
+            {
+                GameObject newCube = Instantiate(cubePrefab, response._handshakeData.positions[i], Quaternion.identity);
+                cubes.Add(newCube);
+            }
+
+            cubes[instanceID].AddComponent<CubeController>();
+            cubes[instanceID].GetComponent<CubeController>().Speed = playerSpeed;
+
+            SendCubePosition(cubes[instanceID].transform.position);
+        }
+
+        private void HandleQuit()
+        {
+            ClientManager.Instance.EndClient(instanceID);
+            foreach (GameObject cube in cubes)
+            {
+                Destroy(cube);
+            }
+
+            cubes.Clear();
+        }
+
+        [ContextMenu("OrderTest")]
+        public void OrderTest()
+        {
+            if (ClientManager.Instance != null)
+                ClientManager.Instance.SendToServer(new Position(new Vector3(0, 0, 0), instanceID, 0).Serialize());
+        }
     }
 }
