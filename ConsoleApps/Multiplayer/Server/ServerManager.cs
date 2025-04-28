@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Net;
 using Network.Enums;
 using Network.Messages;
-using UnityEngine;
-using Ping = Network.Messages.Ping;
-using Random = UnityEngine.Random;
 
 namespace Network
 {
@@ -38,13 +33,18 @@ namespace Network
         public Action<int> onClientRemoved;
 
         private int nextClientId = 0; // This id should be generated during first handshake
-
+        
+        Random rngGenerator;
+        
         public void StartServer(int port)
         {
+            rngGenerator = new Random(DateTime.Now.Second);
             this.port = port;
             connection = new UdpConnection(port, this);
-            seed = Random.Range(0, int.MaxValue);
-            Debug.Log($"Server Seed: {seed}");
+           
+            seed = rngGenerator.Next();
+            
+            Console.Write($"Server Seed: {seed}");
         }
 
         void AddClient(IPEndPoint ip)
@@ -54,8 +54,8 @@ namespace Network
             {
                 int id = nextClientId;
                 ipToId[ip] = nextClientId;
-                Debug.Log("Adding client: " + ip.Address + " ID: " + id);
-                clients.Add(nextClientId, new Client(ip, nextClientId, Time.realtimeSinceStartup));
+                Console.Write("Adding client: " + ip.Address + " ID: " + id);
+                clients.Add(nextClientId, new Client(ip, nextClientId,  Time.realtimeSinceStartup));
                 idPingTime[nextClientId] = Time.time;
                 SendToClient(new Ping(0).Serialize(), nextClientId);
 
@@ -65,7 +65,7 @@ namespace Network
             else
             {
                 int id = ipToId[ip];
-                Debug.Log("Reconnecting client: " + ip.Address + " ID: " + id);
+                Console.Write("Reconnecting client: " + ip.Address + " ID: " + id);
                 clients.Add(id, new Client(ip, id, Time.realtimeSinceStartup));
                 idPingTime[id] = Time.time;
                 SendToClient(new Ping(0).Serialize(), id);
@@ -77,7 +77,7 @@ namespace Network
         {
             if (ipToId.ContainsKey(ip))
             {
-                Debug.Log("Removing client: " + ip.Address);
+                Console.Write("Removing client: " + ip.Address);
                 clients.Remove(ipToId[ip]);
                 onClientRemoved?.Invoke(ipToId[ip]);
             }
@@ -100,7 +100,7 @@ namespace Network
                 InitializeMessageId(receivedClientId, messageType);
                 if (messageAttribs == Attributes.Order && messageId <= clientIdToMessageId[receivedClientId][messageType])
                 {
-                    Debug.Log($"MessageId {messageId} was older than, message {clientIdToMessageId[receivedClientId][messageType]}");
+                    Console.Write($"MessageId {messageId} was older than, message {clientIdToMessageId[receivedClientId][messageType]}");
                     return;
                 }
             }
@@ -119,7 +119,7 @@ namespace Network
                     }
                     else
                     {
-                        Debug.Log("This Message Already taken");
+                        Console.Write("This Message Already taken");
                     }
 
                     break;
@@ -183,7 +183,7 @@ namespace Network
         {
             if (!clientIdToMessageId.ContainsKey(clientId))
             {
-                Debug.Log($"ClientID: {clientId}");
+                Console.Write($"ClientID: {clientId}");
                 clientIdToMessageId.Add(clientId, new Dictionary<MessageType, int>());
                 clientIdToMessageId[clientId][type] = -1;
             }
