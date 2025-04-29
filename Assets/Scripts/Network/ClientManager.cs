@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Net;
+using Network.CheckSum;
 using Network.Enums;
 using Network.Messages;
 using UnityEngine;
 using Ping = Network.Messages.Ping;
+using Random = System.Random;
 
 namespace Network
 {
@@ -14,11 +16,12 @@ namespace Network
 
         private Handshake heldHandshake;
         private short ping = 0;
-
+        private int id;
         private Coroutine handshake;
         private float clientStartTime;
 
         public Action<int> onClientDisconnect;
+        public int Id => id;
 
         public void StartClient(IPAddress ip, int port)
         {
@@ -67,6 +70,9 @@ namespace Network
 
                 //Moving Cubes message
                 case MessageType.HandShakeResponse:
+                    HandleHandshakeResponse(new HandshakeResponse(data));
+                    OnReceiveEvent?.Invoke(data, ip);
+                    break;
                 case MessageType.Position:
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
@@ -103,6 +109,15 @@ namespace Network
 
                 yield return null;
             }
+        }
+
+        private void HandleHandshakeResponse(HandshakeResponse data)
+        {
+            id = data._handshakeData.id;
+            seed = data._handshakeData.seed;
+            Debug.Log($"Seed: {ClientManager.Instance.Seed}");
+            rngGenerator = new Random(seed);
+            OperationsList.Populate(rngGenerator);
         }
     }
 }

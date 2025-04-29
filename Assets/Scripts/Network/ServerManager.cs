@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using Network.CheckSum;
 using Network.Enums;
 using Network.Messages;
 using UnityEngine;
 using Ping = Network.Messages.Ping;
-using Random = UnityEngine.Random;
+using Random = System.Random;
 
 namespace Network
 {
@@ -43,8 +44,12 @@ namespace Network
         {
             this.port = port;
             connection = new UdpConnection(port, this);
-            seed = Random.Range(0, int.MaxValue);
+            rngGenerator = new Random(Time.frameCount);
+            seed = rngGenerator.Next(0, int.MaxValue);
+            rngGenerator = new Random(seed);
             Debug.Log($"Server Seed: {seed}");
+
+            OperationsList.Populate(rngGenerator);
         }
 
         void AddClient(IPEndPoint ip)
@@ -61,15 +66,6 @@ namespace Network
 
                 onNewClient?.Invoke(nextClientId);
                 nextClientId++;
-            }
-            else
-            {
-                int id = ipToId[ip];
-                Debug.Log("Reconnecting client: " + ip.Address + " ID: " + id);
-                clients.Add(id, new Client(ip, id, Time.realtimeSinceStartup));
-                idPingTime[id] = Time.time;
-                SendToClient(new Ping(0).Serialize(), id);
-                onNewClient?.Invoke(id);
             }
         }
 
@@ -118,9 +114,7 @@ namespace Network
                         }
                     }
                     else
-                    {
                         Debug.Log("This Message Already taken");
-                    }
 
                     break;
                 case MessageType.Acknowledge:

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Network.Enums;
 
 namespace Network
@@ -96,6 +97,7 @@ namespace Network
 
         public void ChecksumBytes(byte[] data, out byte[] first, out byte[] second)
         {
+            
             CheckSum(data, out short firstNum, out short secondNum);
             first = BitConverter.GetBytes(firstNum);
             second = BitConverter.GetBytes(secondNum);

@@ -14,9 +14,9 @@ namespace Network.Messages
             messageType = MessageType.HandShakeResponse;
             attribs = Attributes.Important;
             _handshakeData.id = id;
+            _handshakeData.seed = seed;
             _handshakeData.count = count;
             _handshakeData.positions = positions;
-            _handshakeData.seed = seed;
             this.messageId = 0;
         }
 
@@ -31,8 +31,9 @@ namespace Network.Messages
             byte[] data = new byte[size];
 
             Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.id), 0, data, 0, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.count), 0, data, 4, sizeof(int));
-            Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.seed), 0, data, 8, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.seed), 0, data, 4, sizeof(int));
+            Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.count), 0, data, 8, sizeof(int));
+
             for (int i = 0; i < _handshakeData.count; i++)
             {
                 Buffer.BlockCopy(ByteFormat.GetVector3Bytes(_handshakeData.positions[i]), 0, data, 12 + 12 * i, 12);
@@ -46,8 +47,8 @@ namespace Network.Messages
             byte[] payload = ExtractPayload(message);
             HandshakeResponseData data;
             data.id = BitConverter.ToInt32(payload, 0);
-            data.count = BitConverter.ToInt32(payload, sizeof(int));
-            data.seed = BitConverter.ToInt32(payload, sizeof(int) * 2);
+            data.seed = BitConverter.ToInt32(payload, sizeof(int));
+            data.count = BitConverter.ToInt32(payload, sizeof(int) * 2);
             data.positions = new List<Vector3>();
 
             for (int i = 0; i < data.count; i++)

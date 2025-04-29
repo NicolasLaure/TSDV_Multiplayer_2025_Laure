@@ -86,10 +86,7 @@ namespace Cubes
 
         private void HandleHandshakeResponseData(HandshakeResponse response)
         {
-            instanceID = response._handshakeData.id;
-            ClientManager.Instance.Seed = response._handshakeData.seed;
-            Debug.Log($"Seed: {ClientManager.Instance.Seed}");
-
+            instanceID = ClientManager.Instance.Id;
             for (int i = 0; i < response._handshakeData.count; i++)
             {
                 GameObject newCube = Instantiate(cubePrefab, response._handshakeData.positions[i], Quaternion.identity);
