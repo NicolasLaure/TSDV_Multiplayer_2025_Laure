@@ -5,11 +5,11 @@ using UnityEngine;
 
 namespace Network.Messages
 {
-    public class HandshakeResponse : Message<HandshakeResponseData>
+    public class PublicHandshakeResponse : Message<HandshakeResponseData>
     {
         public HandshakeResponseData _handshakeData;
 
-        public HandshakeResponse(int id, int count, int seed, List<Vector3> positions)
+        public PublicHandshakeResponse(int id, int count, int seed, List<Vector3> positions)
         {
             messageType = MessageType.HandShakeResponse;
             attribs = Attributes.Important;
@@ -20,7 +20,7 @@ namespace Network.Messages
             this.messageId = 0;
         }
 
-        public HandshakeResponse(byte[] data)
+        public PublicHandshakeResponse(byte[] data)
         {
             _handshakeData = Deserialize(data);
         }

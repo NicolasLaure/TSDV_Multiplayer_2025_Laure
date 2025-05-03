@@ -4,9 +4,10 @@ namespace Network.Enums
     {
         HandShake = -1,
         HandShakeResponse,
+        PrivateHandshake,
         Acknowledge,
         DisAcknowledge, //ToDo
-        Disconnect, //ToDo
+        Disconnect,
         Ping,
         Position,
         Chat, //ToDo

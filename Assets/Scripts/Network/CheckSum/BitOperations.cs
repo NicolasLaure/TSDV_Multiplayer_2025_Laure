@@ -6,7 +6,7 @@ namespace Network.CheckSum
         LeftShift,
         And,
         Or,
-        Not,
+        Xor,
         Count
     }
 }

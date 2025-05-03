@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Network.CheckSum;
 using Network.Enums;
+using UnityEngine;
 
 namespace Network
 {
@@ -22,12 +24,11 @@ namespace Network
             {
                 headerSize += sizeof(short) * 2 + sizeof(int);
 
-                if (attribs == Attributes.Checksum)
+                if (attribs.HasFlag(Attributes.Checksum))
                     tailSize = sizeof(int) * 2;
             }
 
             byte[] header = new byte[headerSize];
-            byte[] tail = tailSize == 0 ? null : new byte[tailSize];
             byte[] data = new byte[headerSize + tailSize + input.Length];
 
             messageStart = (short)headerSize;
@@ -48,15 +49,20 @@ namespace Network
                 Buffer.BlockCopy(BitConverter.GetBytes(messageEnd), 0, header, offset, sizeof(short));
             }
 
-            Buffer.BlockCopy(header, 0, data, 0, header.Length);
+            Buffer.BlockCopy(header, 0, data, 0, headerSize);
             Buffer.BlockCopy(input, 0, data, messageStart, input.Length);
 
-            if (tail == null) return data;
+            if (tailSize == 0) return data;
 
-            ChecksumBytes(data, out byte[] first, out byte[] second);
-            Buffer.BlockCopy(first, 0, tail, 0, sizeof(int));
-            Buffer.BlockCopy(second, 0, tail, 0 + first.Length, sizeof(int));
-            Buffer.BlockCopy(tail, 0, data, messageEnd, tail.Length);
+
+            Span<byte> dataSpan = data;
+            Span<byte> checkSum1Span = dataSpan.Slice(0, messageEnd);
+            Span<byte> checkSum2Span = dataSpan.Slice(0, messageEnd + sizeof(int));
+            
+            CheckSumCalculations.ChecksumBytes(checkSum1Span.ToArray(), out byte[] first, OperationsList.OperationsCheckSum1);
+            Buffer.BlockCopy(first, 0, data, messageEnd, sizeof(int));
+            CheckSumCalculations.ChecksumBytes(checkSum2Span.ToArray(), out byte[] second, OperationsList.OperationsCheckSum2);
+            Buffer.BlockCopy(second, 0, data, messageEnd + first.Length, sizeof(int));
 
             return data;
         }
@@ -94,19 +100,5 @@ namespace Network
 
         public abstract byte[] Serialize();
         public abstract T Deserialize(byte[] message);
-
-        public void ChecksumBytes(byte[] data, out byte[] first, out byte[] second)
-        {
-            
-            CheckSum(data, out short firstNum, out short secondNum);
-            first = BitConverter.GetBytes(firstNum);
-            second = BitConverter.GetBytes(secondNum);
-        }
-
-        public void CheckSum(byte[] data, out short first, out short second)
-        {
-            first = (short)((data.Length - sizeof(short) * 2) * 32 / 15);
-            second = (short)(Math.Pow(data.Length - sizeof(short), 5) / 6);
-        }
     }
 }

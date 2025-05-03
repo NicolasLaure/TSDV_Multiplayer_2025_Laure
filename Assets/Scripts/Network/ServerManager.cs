@@ -33,7 +33,7 @@ namespace Network
         private readonly Dictionary<int, float> idPingTime = new Dictionary<int, float>();
 
         private readonly Dictionary<int, Dictionary<MessageType, int>> clientIdToMessageId = new Dictionary<int, Dictionary<MessageType, int>>();
-        private readonly HandshakeResponse heldHandshakeSa;
+        private readonly PublicHandshakeResponse _heldPublicHandshakeSa;
 
         public Action<int> onNewClient;
         public Action<int> onClientRemoved;
@@ -94,13 +94,23 @@ namespace Network
             {
                 messageId = BitConverter.ToInt32(data, sizeof(short) * 2);
                 InitializeMessageId(receivedClientId, messageType);
-                if (messageAttribs == Attributes.Order && messageId <= clientIdToMessageId[receivedClientId][messageType])
+                if (messageAttribs.HasFlag(Attributes.Order) && messageId <= clientIdToMessageId[receivedClientId][messageType])
                 {
                     Debug.Log($"MessageId {messageId} was older than, message {clientIdToMessageId[receivedClientId][messageType]}");
                     return;
                 }
             }
 
+            if (messageAttribs.HasFlag(Attributes.Checksum))
+            {
+                if (!CheckSumCalculations.IsCheckSumOk(data))
+                {
+                    Debug.Log("CheckSum Not Okay");
+                    return;
+                }
+
+                Debug.Log("CheckSum Okay");
+            }
 
             switch (messageType)
             {
@@ -115,6 +125,9 @@ namespace Network
                     }
                     else
                         Debug.Log("This Message Already taken");
+
+                    break;
+                case MessageType.PrivateHandshake:
 
                     break;
                 case MessageType.Acknowledge:

@@ -14,7 +14,7 @@ namespace Network
     {
         public Action<short> onPingUpdated;
 
-        private Handshake heldHandshake;
+        private PublicHandshake _heldPublicHandshake;
         private short ping = 0;
         private int id;
         private Coroutine handshake;
@@ -62,7 +62,6 @@ namespace Network
                 case MessageType.Error:
                     break;
                 case MessageType.Ping:
-
                     ping = new Ping(data).ms;
                     SendToServer(new Ping(0).Serialize());
                     onPingUpdated?.Invoke(ping);
@@ -70,7 +69,8 @@ namespace Network
 
                 //Moving Cubes message
                 case MessageType.HandShakeResponse:
-                    HandleHandshakeResponse(new HandshakeResponse(data));
+                    HandleHandshakeResponse(new PublicHandshakeResponse(data));
+                    SendToServer(new PrivateHandshake(id, 0).Serialize());
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
                 case MessageType.Position:
@@ -91,8 +91,8 @@ namespace Network
         {
             HandshakeData handshakeData;
             handshakeData.ip = 0;
-            heldHandshake = new Handshake(handshakeData, 0);
-            SendToServer(heldHandshake.Serialize());
+            _heldPublicHandshake = new PublicHandshake(handshakeData, 0);
+            SendToServer(_heldPublicHandshake.Serialize());
 
             float timer = 0;
             float startTime = Time.time;
@@ -101,7 +101,7 @@ namespace Network
                 timer = Time.time - startTime;
                 if (timer >= maxResponseWait)
                 {
-                    SendToServer(heldHandshake.Serialize());
+                    SendToServer(_heldPublicHandshake.Serialize());
                     Debug.Log("Resend Handshake");
                     timer = 0;
                     startTime = Time.time;
@@ -111,7 +111,7 @@ namespace Network
             }
         }
 
-        private void HandleHandshakeResponse(HandshakeResponse data)
+        private void HandleHandshakeResponse(PublicHandshakeResponse data)
         {
             id = data._handshakeData.id;
             seed = data._handshakeData.seed;

@@ -39,7 +39,7 @@ namespace Cubes
             switch (messageType)
             {
                 case MessageType.HandShakeResponse:
-                    HandleHandshakeResponseData(new HandshakeResponse(data));
+                    HandleHandshakeResponseData(new PublicHandshakeResponse(data));
                     break;
                 case MessageType.Position:
                     ReceiveCubePos(data);
@@ -84,7 +84,7 @@ namespace Cubes
             cubes[id].SetActive(false);
         }
 
-        private void HandleHandshakeResponseData(HandshakeResponse response)
+        private void HandleHandshakeResponseData(PublicHandshakeResponse response)
         {
             instanceID = ClientManager.Instance.Id;
             for (int i = 0; i < response._handshakeData.count; i++)

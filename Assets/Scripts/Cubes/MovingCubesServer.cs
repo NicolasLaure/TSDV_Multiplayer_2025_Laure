@@ -49,7 +49,7 @@ namespace Cubes
             if (id > _positions.Count - 1)
                 _positions.Add(new Vector3(horizontalOffset * this._positions.Count, 0, 0));
 
-            HandshakeResponse hsResponse = new HandshakeResponse(id, _positions.Count, ServerManager.Instance.Seed, _positions);
+            PublicHandshakeResponse hsResponse = new PublicHandshakeResponse(id, _positions.Count, ServerManager.Instance.Seed, _positions);
             ServerManager.Instance.SendToClient(hsResponse.Serialize(), id);
         }
     }

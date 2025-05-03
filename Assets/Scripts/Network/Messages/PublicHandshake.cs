@@ -4,11 +4,11 @@ using Network.Enums;
 
 namespace Network.Messages
 {
-    public class Handshake : Message<HandshakeData>
+    public class PublicHandshake : Message<HandshakeData>
     {
         private HandshakeData _handshakeData;
 
-        public Handshake(HandshakeData handshakeData, int messageId)
+        public PublicHandshake(HandshakeData handshakeData, int messageId)
         {
             messageType = MessageType.HandShake;
             attribs = Attributes.Important;
@@ -16,7 +16,7 @@ namespace Network.Messages
             _handshakeData = handshakeData;
         }
 
-        public Handshake(byte[] data)
+        public PublicHandshake(byte[] data)
         {
             _handshakeData = Deserialize(data);
         }
