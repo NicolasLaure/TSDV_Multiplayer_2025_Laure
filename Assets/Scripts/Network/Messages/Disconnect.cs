@@ -11,6 +11,7 @@ namespace Network.Messages
         {
             messageType = MessageType.Disconnect;
             attribs = Attributes.None;
+            this.id = id;
         }
 
         public Disconnect(byte[] data)

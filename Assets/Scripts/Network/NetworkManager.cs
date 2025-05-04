@@ -21,7 +21,7 @@ namespace Network
 
         public abstract void OnReceiveData(byte[] data, IPEndPoint ip);
 
-        protected void Update()
+        protected virtual void Update()
         {
             // Flush the data in main thread
             if (connection != null)

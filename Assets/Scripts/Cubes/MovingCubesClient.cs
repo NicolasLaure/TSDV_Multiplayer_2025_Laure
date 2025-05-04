@@ -89,7 +89,8 @@ namespace Cubes
             instanceID = ClientManager.Instance.Id;
             for (int i = 0; i < response._handshakeData.count; i++)
             {
-                GameObject newCube = Instantiate(cubePrefab, response._handshakeData.positions[i], Quaternion.identity);
+                GameObject newCube = Instantiate(cubePrefab, response._handshakeData.cubes[i].position, Quaternion.identity);
+                newCube.SetActive(response._handshakeData.cubes[i].isActive);
                 cubes.Add(newCube);
             }
 
@@ -101,7 +102,7 @@ namespace Cubes
 
         private void HandleQuit()
         {
-            ClientManager.Instance.EndClient(instanceID);
+            ClientManager.Instance.EndClient();
             foreach (GameObject cube in cubes)
             {
                 Destroy(cube);

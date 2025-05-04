@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using UnityEngine;
+using Cubes;
 
 namespace Network.Messages
 {
@@ -8,6 +8,6 @@ namespace Network.Messages
         public int id;
         public int seed;
         public int count;
-        public List<Vector3> positions;
+        public List<Cube> cubes;
     }
 }

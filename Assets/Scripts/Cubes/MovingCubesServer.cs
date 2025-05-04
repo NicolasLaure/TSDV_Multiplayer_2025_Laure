@@ -12,7 +12,7 @@ namespace Cubes
     {
         [SerializeField] private float horizontalOffset;
 
-        private List<Vector3> _positions = new List<Vector3>();
+        private List<Cube> _cubes = new List<Cube>();
 
         protected override void Initialize()
         {
@@ -21,6 +21,7 @@ namespace Cubes
 
             ServerManager.Instance.onNewClient += HandleNewClient;
             ServerManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
+            ServerManager.Instance.onClientRemoved += RemoveClient;
         }
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
@@ -41,16 +42,21 @@ namespace Cubes
             Position posMessage = new Position(data);
             Vector3 pos = posMessage.pos;
             int index = posMessage.instanceID;
-            _positions[index] = pos;
+            _cubes[index].position = pos;
         }
 
         private void HandleNewClient(int id)
         {
-            if (id > _positions.Count - 1)
-                _positions.Add(new Vector3(horizontalOffset * this._positions.Count, 0, 0));
+            if (id > _cubes.Count - 1)
+                _cubes.Add(new Cube(new Vector3(horizontalOffset * _cubes.Count, 0, 0)));
 
-            PublicHandshakeResponse hsResponse = new PublicHandshakeResponse(id, _positions.Count, ServerManager.Instance.Seed, _positions);
+            PublicHandshakeResponse hsResponse = new PublicHandshakeResponse(id, _cubes.Count, ServerManager.Instance.Seed, _cubes);
             ServerManager.Instance.SendToClient(hsResponse.Serialize(), id);
+        }
+
+        private void RemoveClient(int id)
+        {
+            _cubes[id].isActive = false;
         }
     }
 }

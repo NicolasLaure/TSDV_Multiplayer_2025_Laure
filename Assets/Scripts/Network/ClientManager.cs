@@ -21,6 +21,7 @@ namespace Network
         private float clientStartTime;
 
         public Action<int> onClientDisconnect;
+        public Action onDisconnection;
         public int Id => id;
 
         public void StartClient(IPAddress ip, int port)
@@ -33,9 +34,16 @@ namespace Network
             handshake = StartCoroutine(SendHandshake());
         }
 
-        public void EndClient(int instanceID)
+        protected override void Update()
         {
-            SendToServer(new Disconnect(instanceID).Serialize());
+            base.Update();
+            if (ping > TimeOutTime * 1000)
+                EndClient();
+        }
+
+        public void EndClient()
+        {
+            SendToServer(new Disconnect(id).Serialize());
             connection = null;
         }
 
