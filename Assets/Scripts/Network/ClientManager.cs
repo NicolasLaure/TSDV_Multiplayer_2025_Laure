@@ -86,7 +86,7 @@ namespace Network
                     break;
                 case MessageType.Ping:
                     lastPingTime = Time.time;
-                    //SendToServer(new Ping(0).Serialize());
+                    SendToServer(new Ping(0).Serialize());
                     break;
 
                 //Moving Cubes message
