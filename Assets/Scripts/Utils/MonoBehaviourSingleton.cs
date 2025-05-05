@@ -15,6 +15,7 @@ public class MonoBehaviourSingleton<T> : MonoBehaviour where T : MonoBehaviourSi
 
             return (T)instance;
         }
+        set { instance = value; }
     }
 
     protected virtual void Initialize()

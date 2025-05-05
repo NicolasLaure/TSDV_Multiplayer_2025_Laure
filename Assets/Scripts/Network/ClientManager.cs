@@ -15,7 +15,8 @@ namespace Network
         public Action<short> onPingUpdated;
 
         private PublicHandshake _heldPublicHandshake;
-        private short ping = 0;
+        private float ping = 0;
+        private float lastPingTime;
         private int id;
         private Coroutine handshake;
         private float clientStartTime;
@@ -28,7 +29,9 @@ namespace Network
         {
             this.port = port;
             this.ipAddress = ip;
-
+            lastPingTime = Time.time;
+            ping = 0;
+            
             connection = new UdpConnection(ip, port, this);
             clientStartTime = Time.time;
             handshake = StartCoroutine(SendHandshake());
@@ -37,18 +40,30 @@ namespace Network
         protected override void Update()
         {
             base.Update();
-            if (ping > TimeOutTime * 1000)
+            ping = Time.time - lastPingTime;
+            onPingUpdated?.Invoke((short)(ping * 1000));
+
+            if (connection != null && ping > TimeOutTime)
                 EndClient();
         }
 
         public void EndClient()
         {
+            if (connection == null)
+                return;
+
             SendToServer(new Disconnect(id).Serialize());
             connection = null;
+            onDisconnection?.Invoke();
+            Instance = null;
+            Destroy(gameObject);
         }
 
         public void SendToServer(byte[] data)
         {
+            if (connection == null)
+                return;
+
             connection.Send(data);
         }
 
@@ -70,9 +85,8 @@ namespace Network
                 case MessageType.Error:
                     break;
                 case MessageType.Ping:
-                    ping = new Ping(data).ms;
-                    SendToServer(new Ping(0).Serialize());
-                    onPingUpdated?.Invoke(ping);
+                    lastPingTime = Time.time;
+                    //SendToServer(new Ping(0).Serialize());
                     break;
 
                 //Moving Cubes message

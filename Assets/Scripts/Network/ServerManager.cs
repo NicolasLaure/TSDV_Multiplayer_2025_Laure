@@ -28,9 +28,10 @@ namespace Network
 
     public class ServerManager : NetworkManager<ServerManager>
     {
+        private readonly List<int> clientIds = new List<int>();
         private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
         private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
-        private readonly Dictionary<int, float> idPingTime = new Dictionary<int, float>();
+        private readonly Dictionary<int, float> idLastPingTime = new Dictionary<int, float>();
 
         private readonly Dictionary<int, Dictionary<MessageType, int>> clientIdToMessageId = new Dictionary<int, Dictionary<MessageType, int>>();
         private readonly PublicHandshakeResponse _heldPublicHandshakeSa;
@@ -52,6 +53,12 @@ namespace Network
             OperationsList.Populate(rngGenerator);
         }
 
+        protected override void Update()
+        {
+            base.Update();
+            PingCheck();
+        }
+
         void AddClient(IPEndPoint ip)
         {
             //ipToId does not contain a previous connected Ip? Has something to do with creating a new Connection? 
@@ -61,9 +68,9 @@ namespace Network
                 ipToId[ip] = nextClientId;
                 Debug.Log("Adding client: " + ip.Address + " ID: " + id);
                 clients.Add(nextClientId, new Client(ip, nextClientId, Time.realtimeSinceStartup));
-                idPingTime[nextClientId] = Time.time;
+                idLastPingTime[nextClientId] = Time.time;
+                clientIds.Add(id);
                 SendToClient(new Ping(0).Serialize(), nextClientId);
-
                 onNewClient?.Invoke(nextClientId);
                 nextClientId++;
             }
@@ -75,7 +82,23 @@ namespace Network
             {
                 Debug.Log("Removing client: " + ip.Address);
                 clients.Remove(ipToId[ip]);
+                idLastPingTime.Remove(ipToId[ip]);
+                clientIds.Remove(ipToId[ip]);
                 onClientRemoved?.Invoke(ipToId[ip]);
+                ipToId.Remove(ip);
+            }
+        }
+
+        void RemoveClient(int id)
+        {
+            if (ipToId.ContainsValue(id))
+            {
+                Debug.Log("Removing client: " + id);
+                ipToId.Remove(clients[id].ipEndPoint);
+                clients.Remove(id);
+                idLastPingTime.Remove(id);
+                clientIds.Remove(id);
+                onClientRemoved?.Invoke(id);
             }
         }
 
@@ -141,8 +164,8 @@ namespace Network
                 case MessageType.Error:
                     break;
                 case MessageType.Ping:
-                    short ms = (short)Mathf.FloorToInt((Time.time - idPingTime[receivedClientId]) * 1000);
-                    idPingTime[receivedClientId] = Time.time;
+                    short ms = (short)Mathf.FloorToInt((Time.time - idLastPingTime[receivedClientId]) * 1000);
+                    idLastPingTime[receivedClientId] = Time.time;
                     SendToClient(new Ping(ms).Serialize(), receivedClientId);
                     return;
                     break;
@@ -204,6 +227,18 @@ namespace Network
         {
             if (clientIdToMessageId.ContainsKey(clientId) && clientIdToMessageId[clientId].ContainsKey(type))
                 clientIdToMessageId[clientId][type] = messageId > clientIdToMessageId[clientId][type] ? messageId : clientIdToMessageId[clientId][type];
+        }
+
+        private void PingCheck()
+        {
+            for (int i = 0; i < clientIds.Count; i++)
+            {
+                if (Time.time - idLastPingTime[clientIds[i]] > TimeOutTime)
+                {
+                    Broadcast(new Disconnect(clientIds[i]).Serialize());
+                    RemoveClient(clientIds[i]);
+                }
+            }
         }
     }
 }

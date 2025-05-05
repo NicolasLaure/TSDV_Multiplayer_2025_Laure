@@ -42,7 +42,6 @@ namespace Network
         {
             connection.Close();
         }
-
         public void FlushReceiveData()
         {
             lock (handler)

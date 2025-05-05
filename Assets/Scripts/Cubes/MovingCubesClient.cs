@@ -24,11 +24,9 @@ namespace Cubes
         {
             onCubeUpdated.AddListener(OnCubeUpdate);
 
-            if (ClientManager.Instance)
-            {
-                ClientManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
-                ClientManager.Instance.onClientDisconnect += RemoveCube;
-            }
+            ClientManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
+            ClientManager.Instance.onClientDisconnect += RemoveCube;
+            ClientManager.Instance.onDisconnection += HandleAbruptDisconnection;
 
             InputReader.Instance.onQuit += HandleQuit;
         }
@@ -103,6 +101,16 @@ namespace Cubes
         private void HandleQuit()
         {
             ClientManager.Instance.EndClient();
+            foreach (GameObject cube in cubes)
+            {
+                Destroy(cube);
+            }
+
+            cubes.Clear();
+        }
+
+        private void HandleAbruptDisconnection()
+        {
             foreach (GameObject cube in cubes)
             {
                 Destroy(cube);
