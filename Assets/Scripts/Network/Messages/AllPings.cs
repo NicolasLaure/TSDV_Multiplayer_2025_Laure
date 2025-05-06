@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class AllPings : Message<ClientsPing>
 {
-    ClientsPing clientsPing;
+    public ClientsPing clientsPing;
 
     private int DataSize => sizeof(int) + clientsPing.count * sizeof(short);
 
     public AllPings(short[] ms, int count)
     {
-        messageType = MessageType.Ping;
+        messageType = MessageType.AllPings;
         attribs = Attributes.None;
         clientsPing.ms = ms;
         clientsPing.count = count;

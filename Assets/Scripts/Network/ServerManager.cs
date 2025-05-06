@@ -231,14 +231,20 @@ namespace Network
 
         private void PingCheck()
         {
+            short[] clientsMs = new short[clientIds.Count];
+
             for (int i = 0; i < clientIds.Count; i++)
             {
-                if (Time.time - idLastPingTime[clientIds[i]] > TimeOutTime)
+                short ms = (short)((Time.time - idLastPingTime[clientIds[i]]) * 1000);
+                clientsMs[i] = ms;
+                if (ms > TimeOutTime * 1000)
                 {
                     Broadcast(new Disconnect(clientIds[i]).Serialize());
                     RemoveClient(clientIds[i]);
                 }
             }
+
+            Broadcast(new AllPings(clientsMs, clientIds.Count).Serialize());
         }
     }
 }

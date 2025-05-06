@@ -9,6 +9,7 @@ namespace Network.Enums
         DisAcknowledge, //ToDo
         Disconnect,
         Ping,
+        AllPings,
         Position,
         Chat, //ToDo
         Console,

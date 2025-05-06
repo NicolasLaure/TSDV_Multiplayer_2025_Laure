@@ -31,7 +31,7 @@ namespace Network
             this.ipAddress = ip;
             lastPingTime = Time.time;
             ping = 0;
-            
+
             connection = new UdpConnection(ip, port, this);
             clientStartTime = Time.time;
             handshake = StartCoroutine(SendHandshake());
@@ -88,7 +88,15 @@ namespace Network
                     lastPingTime = Time.time;
                     SendToServer(new Ping(0).Serialize());
                     break;
+                case MessageType.AllPings:
+                    ClientsPing allClientsPing = new AllPings(data).clientsPing;
 
+                    for (int i = 0; i < allClientsPing.count; i++)
+                    {
+                        Debug.Log($"[{i}]: {allClientsPing.ms[i]}ms");
+                    }
+
+                    break;
                 //Moving Cubes message
                 case MessageType.HandShakeResponse:
                     HandleHandshakeResponse(new PublicHandshakeResponse(data));
