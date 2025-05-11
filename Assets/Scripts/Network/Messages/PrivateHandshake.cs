@@ -9,6 +9,7 @@ namespace Network.Messages
 
         public PrivateHandshake(int id, int messageId)
         {
+            isEncrypted = true;
             messageType = MessageType.PrivateHandshake;
             attribs = Attributes.Important | Attributes.Checksum;
             this.messageId = messageId;

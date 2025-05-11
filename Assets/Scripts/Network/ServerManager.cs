@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using Network.CheckSum;
+using Network.Encryption;
 using Network.Enums;
 using Network.Messages;
 using UnityEngine;
+using UnityEngine.Timeline;
 using Ping = Network.Messages.Ping;
 using Random = System.Random;
 
@@ -41,6 +43,8 @@ namespace Network
 
         private int nextClientId = 0; // This id should be generated during first handshake
 
+        private readonly Dictionary<int, Random> idToIVKeyGenerator = new Dictionary<int, Random>();
+
         public void StartServer(int port)
         {
             this.port = port;
@@ -70,6 +74,9 @@ namespace Network
                 clients.Add(nextClientId, new Client(ip, nextClientId, Time.realtimeSinceStartup));
                 idLastPingTime[nextClientId] = Time.time;
                 clientIds.Add(id);
+
+                idToIVKeyGenerator[id] = new Random(seed);
+
                 SendToClient(new Ping(0).Serialize(), nextClientId);
                 onNewClient?.Invoke(nextClientId);
                 nextClientId++;
@@ -110,12 +117,19 @@ namespace Network
             else
                 receivedClientId = nextClientId;
 
-            MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
-            Attributes messageAttribs = (Attributes)BitConverter.ToInt16(data, 2);
+            if (BitConverter.ToBoolean(data, 0))
+            {
+                Debug.Log($"dataLength = {data.Length}");
+                data = Encrypter.Decrypt(idToIVKeyGenerator[ipToId[ip]].Next(), data);
+                Debug.Log($"dataLength = {data.Length}");
+            }
+
+            MessageType messageType = (MessageType)BitConverter.ToInt16(data,  MessageOffsets.MessageTypeIndex);
+            Attributes messageAttribs = (Attributes)BitConverter.ToInt16(data, MessageOffsets.AttribsIndex);
             int messageId = -1;
             if (messageType != MessageType.Ping)
             {
-                messageId = BitConverter.ToInt32(data, sizeof(short) * 2);
+                messageId = BitConverter.ToInt32(data, MessageOffsets.IdIndex);
                 InitializeMessageId(receivedClientId, messageType);
                 if (messageAttribs.HasFlag(Attributes.Order) && messageId <= clientIdToMessageId[receivedClientId][messageType])
                 {
@@ -151,7 +165,8 @@ namespace Network
 
                     break;
                 case MessageType.PrivateHandshake:
-
+                    PrivateHandshake receivedHandshake = new PrivateHandshake(data);
+                    Debug.Log($"Decrypted Private Handshake id {receivedHandshake.id}");
                     break;
                 case MessageType.Acknowledge:
                     break;

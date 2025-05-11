@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Net;
 using Network.CheckSum;
+using Network.Encryption;
 using Network.Enums;
 using Network.Messages;
 using UnityEngine;
@@ -20,6 +22,7 @@ namespace Network
         private int id;
         private Coroutine handshake;
         private float clientStartTime;
+        private Random ivKeyGenerator;
 
         public Action<int> onClientDisconnect;
         public Action onDisconnection;
@@ -69,7 +72,25 @@ namespace Network
 
         public override void OnReceiveData(byte[] data, IPEndPoint ip)
         {
-            MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
+            if (BitConverter.ToBoolean(data, 0))
+            {
+                data = Encrypter.Decrypt(ivKeyGenerator.Next(), data);
+            }
+
+            MessageType messageType = (MessageType)BitConverter.ToInt16(data, sizeof(bool));
+            Attributes messageAttribs = (Attributes)BitConverter.ToInt16(data, sizeof(bool) + sizeof(short));
+
+            if (messageAttribs.HasFlag(Attributes.Checksum))
+            {
+                if (!CheckSumCalculations.IsCheckSumOk(data))
+                {
+                    Debug.Log("CheckSum Not Okay");
+                    return;
+                }
+
+                Debug.Log("CheckSum Okay");
+            }
+            
             switch (messageType)
             {
                 case MessageType.Acknowledge:
@@ -100,7 +121,7 @@ namespace Network
                 //Moving Cubes message
                 case MessageType.HandShakeResponse:
                     HandleHandshakeResponse(new PublicHandshakeResponse(data));
-                    SendToServer(new PrivateHandshake(id, 0).Serialize());
+                    SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateHandshake(id, 0).Serialize()));
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
                 case MessageType.Position:
@@ -147,6 +168,7 @@ namespace Network
             seed = data._handshakeData.seed;
             Debug.Log($"Seed: {ClientManager.Instance.Seed}");
             rngGenerator = new Random(seed);
+            ivKeyGenerator = new Random(seed);
             OperationsList.Populate(rngGenerator);
         }
     }

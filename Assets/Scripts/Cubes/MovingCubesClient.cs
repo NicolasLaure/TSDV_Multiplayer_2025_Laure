@@ -33,7 +33,7 @@ namespace Cubes
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
         {
-            MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
+            MessageType messageType = (MessageType)BitConverter.ToInt16(data, MessageOffsets.MessageTypeIndex);
             switch (messageType)
             {
                 case MessageType.HandShakeResponse:
@@ -43,6 +43,7 @@ namespace Cubes
                     ReceiveCubePos(data);
                     break;
                 default:
+                    Debug.Log($"MessageType = {(int)messageType}");
                     throw new ArgumentOutOfRangeException();
             }
         }

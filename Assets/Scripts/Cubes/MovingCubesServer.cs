@@ -26,7 +26,7 @@ namespace Cubes
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
         {
-            MessageType messageType = (MessageType)BitConverter.ToInt16(data, 0);
+            MessageType messageType = (MessageType)BitConverter.ToInt16(data, MessageOffsets.MessageTypeIndex);
             switch (messageType)
             {
                 case MessageType.Position:
