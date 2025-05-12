@@ -87,19 +87,19 @@ namespace Network
             connection.Send(data);
         }
 
-        public override void OnReceiveData(byte[] data, IPEndPoint ip)
+        public override void OnReceiveData(byte[] inputdata, IPEndPoint ip)
         {
-            if (BitConverter.ToBoolean(data, 0))
+            if (BitConverter.ToBoolean(inputdata, 0))
             {
-                data = Encrypter.Decrypt(ivKeyGenerator.Next(), data);
+                inputdata = Encrypter.Decrypt(ivKeyGenerator.Next(), inputdata);
             }
 
-            MessageType messageType = (MessageType)BitConverter.ToInt16(data, sizeof(bool));
-            Attributes messageAttribs = (Attributes)BitConverter.ToInt16(data, sizeof(bool) + sizeof(short));
+            MessageType messageType = (MessageType)BitConverter.ToInt16(inputdata, sizeof(bool));
+            Attributes messageAttribs = (Attributes)BitConverter.ToInt16(inputdata, sizeof(bool) + sizeof(short));
 
             if (messageAttribs.HasFlag(Attributes.Checksum))
             {
-                if (!CheckSumCalculations.IsCheckSumOk(data))
+                if (!CheckSumCalculations.IsCheckSumOk(inputdata))
                 {
                     Debug.Log("CheckSum Not Okay");
                     return;
@@ -111,14 +111,14 @@ namespace Network
             switch (messageType)
             {
                 case MessageType.Acknowledge:
-                    Acknowledge acknowledgedMessage = new Acknowledge(data);
+                    Acknowledge acknowledgedMessage = new Acknowledge(inputdata);
                     TryRemoveHeldMessage(acknowledgedMessage.acknowledgedType, acknowledgedMessage.acknowledgedId);
 
                     break;
                 case MessageType.DisAcknowledge:
                     break;
                 case MessageType.Disconnect:
-                    onClientDisconnect?.Invoke(new Disconnect(data).id);
+                    onClientDisconnect?.Invoke(new Disconnect(inputdata).id);
                     break;
                 case MessageType.Error:
                     break;
@@ -127,7 +127,7 @@ namespace Network
                     SendToServer(new Ping(0).Serialize());
                     break;
                 case MessageType.AllPings:
-                    ClientsPing allClientsPing = new AllPings(data).clientsPing;
+                    ClientsPing allClientsPing = new AllPings(inputdata).clientsPing;
 
                     for (int i = 0; i < allClientsPing.count; i++)
                     {
@@ -137,12 +137,12 @@ namespace Network
                     break;
                 //Moving Cubes message
                 case MessageType.HandShakeResponse:
-                    HandleHandshakeResponse(new PublicHandshakeResponse(data));
+                    HandleHandshakeResponse(new PublicHandshakeResponse(inputdata));
                     SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateHandshake(id, 0).Serialize()));
-                    OnReceiveEvent?.Invoke(data, ip);
+                    OnReceiveEvent?.Invoke(inputdata, ip);
                     break;
                 case MessageType.Position:
-                    OnReceiveEvent?.Invoke(data, ip);
+                    OnReceiveEvent?.Invoke(inputdata, ip);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

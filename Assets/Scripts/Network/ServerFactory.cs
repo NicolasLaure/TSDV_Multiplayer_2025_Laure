@@ -12,7 +12,7 @@ namespace Network
 
         public override void BroadcastInstantiation<T>(T objectToInstantiate, InstanceData instanceData)
         {
-            ServerManager.Instance.Broadcast(new InstantiateRequest(instanceData).Serialize());
+            NonAuthoritativeServer.Instance.Broadcast(new InstantiateRequest(instanceData).Serialize());
         }
 
         public override T DeInstantiate<T>(T objectToInstantiate)

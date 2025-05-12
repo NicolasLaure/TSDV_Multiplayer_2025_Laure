@@ -18,9 +18,9 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
 
     void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
     {
-        if (ServerManager.Instance)
+        if (NonAuthoritativeServer.Instance)
         {
-            ServerManager.Instance.Broadcast(data);
+            NonAuthoritativeServer.Instance.Broadcast(data);
         }
 
         messages.text += System.Text.ASCIIEncoding.UTF8.GetString(data) + System.Environment.NewLine;
@@ -30,9 +30,9 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
     {
         if (inputMessage.text != "")
         {
-            if (ServerManager.Instance)
+            if (NonAuthoritativeServer.Instance)
             {
-                ServerManager.Instance.Broadcast(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
+                NonAuthoritativeServer.Instance.Broadcast(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
                 messages.text += inputMessage.text + System.Environment.NewLine;
             }
             else
@@ -44,7 +44,5 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
             inputMessage.Select();
             inputMessage.text = "";
         }
-
     }
-
 }

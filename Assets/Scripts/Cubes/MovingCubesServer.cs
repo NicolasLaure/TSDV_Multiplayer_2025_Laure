@@ -16,12 +16,12 @@ namespace Cubes
 
         protected override void Initialize()
         {
-            if (ServerManager.Instance == null)
+            if (NonAuthoritativeServer.Instance == null)
                 return;
 
-            ServerManager.Instance.onNewClient += HandleNewClient;
-            ServerManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
-            ServerManager.Instance.onClientRemoved += RemoveClient;
+            NonAuthoritativeServer.Instance.onNewClient += HandleNewClient;
+            NonAuthoritativeServer.Instance.OnReceiveEvent += OnReceiveDataEvent;
+            NonAuthoritativeServer.Instance.onClientRemoved += RemoveClient;
         }
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
@@ -50,8 +50,8 @@ namespace Cubes
             if (id > _cubes.Count - 1)
                 _cubes.Add(new Cube(new Vector3(horizontalOffset * _cubes.Count, 0, 0)));
 
-            PublicHandshakeResponse hsResponse = new PublicHandshakeResponse(id, _cubes.Count, ServerManager.Instance.Seed, _cubes);
-            ServerManager.Instance.SendToClient(hsResponse.Serialize(), id);
+            PublicHandshakeResponse hsResponse = new PublicHandshakeResponse(id, _cubes.Count, NonAuthoritativeServer.Instance.Seed, _cubes);
+            NonAuthoritativeServer.Instance.SendToClient(hsResponse.Serialize(), id);
         }
 
         private void RemoveClient(int id)

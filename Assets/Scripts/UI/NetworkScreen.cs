@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Net;
+using Network;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Net;
-using Input;
-using Network;
-using UnityEngine.Serialization;
 
 public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 {
     public Button connectBtn;
-    public Button startServerBtn;
     public InputField rateInputField;
     public InputField addressInputField;
 
@@ -23,7 +18,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     protected override void Initialize()
     {
         connectBtn.onClick.AddListener(OnConnectBtnClick);
-        startServerBtn.onClick.AddListener(OnStartServerBtnClick);
     }
 
     void OnConnectBtnClick()
@@ -36,19 +30,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 
         pingTextObject.SetActive(true);
         ClientManager.Instance.onDisconnection += Disconnect;
-
-        if (ChatScreen.Instance != null)
-            SwitchToChatScreen();
-        else
-            SwitchToCubes();
-    }
-
-    void OnStartServerBtnClick()
-    {
-        int rate = Convert.ToInt32(rateInputField.text);
-
-        Instantiate(serverPrefab);
-        ServerManager.Instance.StartServer();
 
         if (ChatScreen.Instance != null)
             SwitchToChatScreen();
