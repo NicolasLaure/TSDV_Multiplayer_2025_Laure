@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using Network.SaveStructures;
 
 namespace Network
 {
@@ -16,6 +17,7 @@ namespace Network
 
         protected int seed;
         protected Random rngGenerator;
+        protected readonly List<CriticalMessage> criticalMessages = new List<CriticalMessage>();
 
         public int Seed => seed;
 
@@ -26,6 +28,11 @@ namespace Network
             // Flush the data in main thread
             if (connection != null)
                 connection.FlushReceiveData();
+        }
+        
+        protected void SaveCriticalMessage(int clientId, int messageId, byte[] message)
+        {
+            criticalMessages.Add(new CriticalMessage(clientId, messageId, message));
         }
     }
 }

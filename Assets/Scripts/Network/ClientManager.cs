@@ -147,6 +147,7 @@ namespace Network
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
         }
 
         private IEnumerator PingTest(float delay)

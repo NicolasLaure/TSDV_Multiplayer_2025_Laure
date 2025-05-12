@@ -11,7 +11,7 @@ namespace Network.Messages
         public PublicHandshake(HandshakeData handshakeData, int messageId)
         {
             messageType = MessageType.HandShake;
-            attribs = Attributes.Important;
+            attribs = Attributes.Important | Attributes.Critical;
             this.messageId = messageId;
             _handshakeData = handshakeData;
         }

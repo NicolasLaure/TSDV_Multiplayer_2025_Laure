@@ -6,6 +6,7 @@ using Network.Encryption;
 using Network.Enums;
 using Network.Messages;
 using Network.Messages.TestMessages;
+using Network.SaveStructures;
 using UnityEngine;
 using UnityEngine.Timeline;
 using Ping = Network.Messages.Ping;
@@ -212,6 +213,9 @@ namespace Network
             if (messageAttribs.HasFlag(Attributes.Important))
                 SendToClient(new Acknowledge(messageType, messageId).Serialize(), receivedClientId);
 
+            if (messageAttribs.HasFlag(Attributes.Critical) && messageId > clientIdToMessageId[receivedClientId][messageType])
+                SaveCriticalMessage(ipToId[ip], messageId, data);
+
             SaveMessageId(receivedClientId, messageType, messageId);
             if (messageAttribs.HasFlag(Attributes.Order) && messageAttribs.HasFlag(Attributes.Important) && AreHeldMessages(ipToId[ip], messageType))
             {
@@ -287,6 +291,7 @@ namespace Network
 
             heldImportantAndOrder[clientId][type].Add(new HeldMessage(messageId, message));
         }
+
 
         private bool AreHeldMessages(int clientId, MessageType messageType)
         {
