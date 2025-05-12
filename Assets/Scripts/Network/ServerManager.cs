@@ -48,9 +48,9 @@ namespace Network
 
         private readonly Dictionary<int, Random> idToIVKeyGenerator = new Dictionary<int, Random>();
 
-        public void StartServer(int port)
+        public void StartServer()
         {
-            this.port = port;
+            port = defaultPort;
             connection = new UdpConnection(port, this);
             rngGenerator = new Random(Time.frameCount);
             seed = rngGenerator.Next(0, int.MaxValue);

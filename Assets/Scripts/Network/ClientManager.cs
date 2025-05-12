@@ -30,9 +30,9 @@ namespace Network
 
         private List<HeldMessage> _heldMessages = new List<HeldMessage>();
 
-        public void StartClient(IPAddress ip, int port)
+        public void StartClient(IPAddress ip)
         {
-            this.port = port;
+            port = defaultPort;
             this.ipAddress = ip;
             lastPingTime = Time.time;
             ping = 0;

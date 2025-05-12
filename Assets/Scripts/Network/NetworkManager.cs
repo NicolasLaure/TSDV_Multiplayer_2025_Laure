@@ -18,6 +18,7 @@ namespace Network
         protected int seed;
         protected Random rngGenerator;
         protected readonly List<CriticalMessage> criticalMessages = new List<CriticalMessage>();
+        protected int defaultPort = 60325;
 
         public int Seed => seed;
 

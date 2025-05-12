@@ -12,7 +12,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 {
     public Button connectBtn;
     public Button startServerBtn;
-    public InputField portInputField;
+    public InputField rateInputField;
     public InputField addressInputField;
 
     [SerializeField] private GameObject pingTextObject;
@@ -29,10 +29,10 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     void OnConnectBtnClick()
     {
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
-        int port = System.Convert.ToInt32(portInputField.text);
+        int rate = Convert.ToInt32(rateInputField.text);
 
         Instantiate(clientPrefab);
-        ClientManager.Instance.StartClient(ipAddress, port);
+        ClientManager.Instance.StartClient(ipAddress);
 
         pingTextObject.SetActive(true);
         ClientManager.Instance.onDisconnection += Disconnect;
@@ -45,10 +45,10 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 
     void OnStartServerBtnClick()
     {
-        int port = System.Convert.ToInt32(portInputField.text);
+        int rate = Convert.ToInt32(rateInputField.text);
 
         Instantiate(serverPrefab);
-        ServerManager.Instance.StartServer(port);
+        ServerManager.Instance.StartServer();
 
         if (ChatScreen.Instance != null)
             SwitchToChatScreen();
