@@ -6,7 +6,9 @@ using Network.CheckSum;
 using Network.Encryption;
 using Network.Enums;
 using Network.Messages;
+using Network.Messages.TestMessages;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
 using Ping = Network.Messages.Ping;
 using Random = System.Random;
 
@@ -16,17 +18,17 @@ namespace Network
     {
         public Action<short> onPingUpdated;
 
-        private PublicHandshake _heldPublicHandshake;
         private float ping = 0;
         private float lastPingTime;
         private int id;
-        private Coroutine handshake;
         private float clientStartTime;
         private Random ivKeyGenerator;
 
         public Action<int> onClientDisconnect;
         public Action onDisconnection;
         public int Id => id;
+
+        private List<HeldMessage> _heldMessages = new List<HeldMessage>();
 
         public void StartClient(IPAddress ip, int port)
         {
@@ -37,7 +39,12 @@ namespace Network
 
             connection = new UdpConnection(ip, port, this);
             clientStartTime = Time.time;
-            handshake = StartCoroutine(SendHandshake());
+
+            HandshakeData handshakeData;
+            handshakeData.ip = 0;
+            byte[] handshakeBytes = new PublicHandshake(handshakeData, 0).Serialize();
+            SendToServer(handshakeBytes);
+            _heldMessages.Add(new HeldMessage(0, handshakeBytes));
         }
 
         protected override void Update()
@@ -45,6 +52,16 @@ namespace Network
             base.Update();
             ping = Time.time - lastPingTime;
             onPingUpdated?.Invoke((short)(ping * 1000));
+
+            for (int i = 0; i < _heldMessages.Count; i++)
+            {
+                if (Time.time - _heldMessages[i].heldSince >= maxResponseWait)
+                {
+                    Debug.Log($"Resending held message, Held Messages count: {_heldMessages.Count}");
+                    SendToServer(_heldMessages[i].message);
+                    _heldMessages[i].heldSince = Time.time;
+                }
+            }
 
             if (connection != null && ping > TimeOutTime)
                 EndClient();
@@ -90,12 +107,12 @@ namespace Network
 
                 Debug.Log("CheckSum Okay");
             }
-            
+
             switch (messageType)
             {
                 case MessageType.Acknowledge:
-                    if (handshake != null)
-                        StopCoroutine(handshake);
+                    Acknowledge acknowledgedMessage = new Acknowledge(data);
+                    TryRemoveHeldMessage(acknowledgedMessage.acknowledgedType, acknowledgedMessage.acknowledgedId);
 
                     break;
                 case MessageType.DisAcknowledge:
@@ -138,30 +155,6 @@ namespace Network
             SendToServer(new Ping(0).Serialize());
         }
 
-        private IEnumerator SendHandshake()
-        {
-            HandshakeData handshakeData;
-            handshakeData.ip = 0;
-            _heldPublicHandshake = new PublicHandshake(handshakeData, 0);
-            SendToServer(_heldPublicHandshake.Serialize());
-
-            float timer = 0;
-            float startTime = Time.time;
-            while (Time.time - clientStartTime < TimeOutTime)
-            {
-                timer = Time.time - startTime;
-                if (timer >= maxResponseWait)
-                {
-                    SendToServer(_heldPublicHandshake.Serialize());
-                    Debug.Log("Resend Handshake");
-                    timer = 0;
-                    startTime = Time.time;
-                }
-
-                yield return null;
-            }
-        }
-
         private void HandleHandshakeResponse(PublicHandshakeResponse data)
         {
             id = data._handshakeData.id;
@@ -170,6 +163,40 @@ namespace Network
             rngGenerator = new Random(seed);
             ivKeyGenerator = new Random(seed);
             OperationsList.Populate(rngGenerator);
+
+            StartCoroutine(SendMessedMessages());
+        }
+
+        private IEnumerator SendMessedMessages()
+        {
+            List<HeldMessage> testMessages = new List<HeldMessage>();
+            for (int i = 0; i < 5; i++)
+            {
+                testMessages.Add(new HeldMessage(i, new ImportantOrderMessage(i).Serialize()));
+            }
+
+            _heldMessages.AddRange(testMessages);
+
+            SendToServer(_heldMessages[0].message);
+            SendToServer(_heldMessages[2].message);
+            SendToServer(_heldMessages[4].message);
+            yield return new WaitForSeconds(0.05f);
+            SendToServer(_heldMessages[1].message);
+            SendToServer(_heldMessages[3].message);
+        }
+
+        private bool TryRemoveHeldMessage(MessageType type, int messageId)
+        {
+            for (int i = 0; i < _heldMessages.Count; i++)
+            {
+                if (_heldMessages[i].id == messageId && (MessageType)BitConverter.ToInt16(_heldMessages[i].message, MessageOffsets.MessageTypeIndex) == type)
+                {
+                    _heldMessages.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

@@ -5,8 +5,8 @@ namespace Network.Messages
 {
     public class Acknowledge : Message<(MessageType, int)>
     {
-        private MessageType acknowledgedType;
-        private int acknowledgedId;
+        public MessageType acknowledgedType;
+        public int acknowledgedId;
 
         public Acknowledge(MessageType type, int messageId)
         {

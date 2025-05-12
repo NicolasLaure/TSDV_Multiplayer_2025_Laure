@@ -5,6 +5,7 @@ using Network.CheckSum;
 using Network.Encryption;
 using Network.Enums;
 using Network.Messages;
+using Network.Messages.TestMessages;
 using UnityEngine;
 using UnityEngine.Timeline;
 using Ping = Network.Messages.Ping;
@@ -36,6 +37,7 @@ namespace Network
         private readonly Dictionary<int, float> idLastPingTime = new Dictionary<int, float>();
 
         private readonly Dictionary<int, Dictionary<MessageType, int>> clientIdToMessageId = new Dictionary<int, Dictionary<MessageType, int>>();
+        private readonly Dictionary<int, Dictionary<MessageType, List<HeldMessage>>> heldImportantAndOrder = new Dictionary<int, Dictionary<MessageType, List<HeldMessage>>>();
         private readonly PublicHandshakeResponse _heldPublicHandshakeSa;
 
         public Action<int> onNewClient;
@@ -118,25 +120,10 @@ namespace Network
                 receivedClientId = nextClientId;
 
             if (BitConverter.ToBoolean(data, 0))
-            {
-                Debug.Log($"dataLength = {data.Length}");
                 data = Encrypter.Decrypt(idToIVKeyGenerator[ipToId[ip]].Next(), data);
-                Debug.Log($"dataLength = {data.Length}");
-            }
 
-            MessageType messageType = (MessageType)BitConverter.ToInt16(data,  MessageOffsets.MessageTypeIndex);
+            MessageType messageType = (MessageType)BitConverter.ToInt16(data, MessageOffsets.MessageTypeIndex);
             Attributes messageAttribs = (Attributes)BitConverter.ToInt16(data, MessageOffsets.AttribsIndex);
-            int messageId = -1;
-            if (messageType != MessageType.Ping)
-            {
-                messageId = BitConverter.ToInt32(data, MessageOffsets.IdIndex);
-                InitializeMessageId(receivedClientId, messageType);
-                if (messageAttribs.HasFlag(Attributes.Order) && messageId <= clientIdToMessageId[receivedClientId][messageType])
-                {
-                    Debug.Log($"MessageId {messageId} was older than, message {clientIdToMessageId[receivedClientId][messageType]}");
-                    return;
-                }
-            }
 
             if (messageAttribs.HasFlag(Attributes.Checksum))
             {
@@ -147,6 +134,32 @@ namespace Network
                 }
 
                 Debug.Log("CheckSum Okay");
+            }
+
+            int messageId = -1;
+            if (messageType != MessageType.Ping)
+            {
+                messageId = BitConverter.ToInt32(data, MessageOffsets.IdIndex);
+                TryInitializeMessageId(receivedClientId, messageType);
+
+                if (messageAttribs.HasFlag(Attributes.Order))
+                {
+                    if (messageAttribs.HasFlag(Attributes.Important))
+                    {
+                        if (messageId > clientIdToMessageId[receivedClientId][messageType] + 1)
+                        {
+                            Debug.Log("Intermediate Message Lost");
+                            SaveHeldMessage(ipToId[ip], messageType, messageId, data);
+                            return;
+                        }
+                    }
+
+                    if (messageId <= clientIdToMessageId[receivedClientId][messageType])
+                    {
+                        Debug.Log($"MessageId {messageId} was older than, message {clientIdToMessageId[receivedClientId][messageType]}");
+                        return;
+                    }
+                }
             }
 
             switch (messageType)
@@ -189,14 +202,26 @@ namespace Network
                     Broadcast(data);
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
+                case MessageType.ImportantOrderTest:
+                    Debug.Log($"ImportantOrder: {new ImportantOrderMessage(data).number}");
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            if (messageAttribs == Attributes.Important)
+            if (messageAttribs.HasFlag(Attributes.Important))
                 SendToClient(new Acknowledge(messageType, messageId).Serialize(), receivedClientId);
 
             SaveMessageId(receivedClientId, messageType, messageId);
+            if (messageAttribs.HasFlag(Attributes.Order) && messageAttribs.HasFlag(Attributes.Important) && AreHeldMessages(ipToId[ip], messageType))
+            {
+                HeldMessage oldestHeldMessage = heldImportantAndOrder[ipToId[ip]][messageType][0];
+                if (oldestHeldMessage.id == messageId + 1)
+                {
+                    Debug.Log("Executing held message");
+                    OnReceiveData(oldestHeldMessage.message, ip);
+                }
+            }
         }
 
         public void SendToClient(byte[] data, int clientId)
@@ -224,24 +249,48 @@ namespace Network
             return -1;
         }
 
-        private void InitializeMessageId(int clientId, MessageType type)
+        private void TryInitializeMessageId(int clientId, MessageType type)
         {
             if (!clientIdToMessageId.ContainsKey(clientId))
-            {
-                Debug.Log($"ClientID: {clientId}");
                 clientIdToMessageId.Add(clientId, new Dictionary<MessageType, int>());
+
+            if (!clientIdToMessageId[clientId].ContainsKey(type))
                 clientIdToMessageId[clientId][type] = -1;
-            }
-            else if (!clientIdToMessageId[clientId].ContainsKey(type))
-            {
-                clientIdToMessageId[clientId][type] = -1;
-            }
         }
 
         private void SaveMessageId(int clientId, MessageType type, int messageId)
         {
-            if (clientIdToMessageId.ContainsKey(clientId) && clientIdToMessageId[clientId].ContainsKey(type))
-                clientIdToMessageId[clientId][type] = messageId > clientIdToMessageId[clientId][type] ? messageId : clientIdToMessageId[clientId][type];
+            if (!clientIdToMessageId.ContainsKey(clientId))
+                clientIdToMessageId.Add(clientId, new Dictionary<MessageType, int>());
+            if (!clientIdToMessageId[clientId].ContainsKey(type))
+                clientIdToMessageId[clientId][type] = -1;
+
+            clientIdToMessageId[clientId][type] = messageId > clientIdToMessageId[clientId][type] ? messageId : clientIdToMessageId[clientId][type];
+        }
+
+        private void SaveHeldMessage(int clientId, MessageType type, int messageId, byte[] message)
+        {
+            if (!heldImportantAndOrder.ContainsKey(clientId))
+                heldImportantAndOrder[clientId] = new Dictionary<MessageType, List<HeldMessage>>();
+            if (!heldImportantAndOrder[clientId].ContainsKey(type))
+                heldImportantAndOrder[clientId][type] = new List<HeldMessage>();
+
+            int messageCount = heldImportantAndOrder[clientId][type].Count;
+            for (int i = 0; i < messageCount; i++)
+            {
+                if (messageId < heldImportantAndOrder[clientId][type][i].id)
+                {
+                    heldImportantAndOrder[clientId][type].Insert(i, new HeldMessage(messageId, message));
+                    return;
+                }
+            }
+
+            heldImportantAndOrder[clientId][type].Add(new HeldMessage(messageId, message));
+        }
+
+        private bool AreHeldMessages(int clientId, MessageType messageType)
+        {
+            return heldImportantAndOrder.ContainsKey(clientId) && heldImportantAndOrder[clientId].ContainsKey(messageType) && heldImportantAndOrder[clientId][messageType].Count > 0;
         }
 
         private void PingCheck()

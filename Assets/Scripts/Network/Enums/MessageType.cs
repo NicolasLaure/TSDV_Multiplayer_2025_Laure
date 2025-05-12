@@ -12,6 +12,7 @@ namespace Network.Enums
         AllPings,
         Position,
         Chat, //ToDo
+        ImportantOrderTest,
         Console,
         Error,
     }

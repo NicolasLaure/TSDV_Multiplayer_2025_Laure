@@ -56,7 +56,6 @@ namespace Network.CheckSum
         private static int OperateThrough(Span<int> dataAsInts, List<BitOperations> operationsList)
         {
             int index = 0;
-            Debug.Log($"dataInts length {dataAsInts.Length}");
             while (dataAsInts.Length > 1)
             {
                 if (index >= operationsList.Count)
