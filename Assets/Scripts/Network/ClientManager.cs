@@ -6,6 +6,8 @@ using Network.CheckSum;
 using Network.Encryption;
 using Network.Enums;
 using Network.Messages;
+using Network.Messages.MatchMaker;
+using Network.Messages.Server;
 using Network.Messages.TestMessages;
 using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
@@ -145,8 +147,8 @@ namespace Network
                 //     OnReceiveEvent?.Invoke(inputdata, ip);
                 //     break;
 
-                case MessageType.MatchMakerHandshakeResponse:
-                    HandleMatchMakerHandshakeResponse(new PublicMatchMakerHsResponse(data));
+                case MessageType.MatchMakerHsResponse:
+                    HandleMatchMakerHandshakeResponse(new MatchMakerHsResponse(data));
                     SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateMatchMakerHandshake(_elo, 0).Serialize()));
                     break;
                 case MessageType.Position:
@@ -163,7 +165,7 @@ namespace Network
             SendToServer(new Ping(0).Serialize());
         }
 
-        private void HandleMatchMakerHandshakeResponse(PublicMatchMakerHsResponse data)
+        private void HandleMatchMakerHandshakeResponse(MatchMakerHsResponse data)
         {
             id = data.MatchMakerHandshakeData.id;
             seed = data.MatchMakerHandshakeData.seed;
@@ -173,7 +175,7 @@ namespace Network
             OperationsList.Populate(rngGenerator);
         }
 
-        private void HandleHandshakeResponse(PublicServerHandshakeResponse data)
+        private void HandleHandshakeResponse(ServerHsResponse data)
         {
             id = data.ServerHandshakeData.id;
             seed = data.ServerHandshakeData.seed;

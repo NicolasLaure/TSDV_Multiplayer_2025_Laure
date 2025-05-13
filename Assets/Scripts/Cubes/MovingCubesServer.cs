@@ -4,6 +4,7 @@ using System.Net;
 using Network;
 using Network.Enums;
 using Network.Messages;
+using Network.Messages.Server;
 using UnityEngine;
 
 namespace Cubes
@@ -50,7 +51,7 @@ namespace Cubes
             if (id > _cubes.Count - 1)
                 _cubes.Add(new Cube(new Vector3(horizontalOffset * _cubes.Count, 0, 0)));
 
-            PublicServerHandshakeResponse hsResponse = new PublicServerHandshakeResponse(id, _cubes.Count, NonAuthoritativeServer.Instance.Seed, _cubes);
+            ServerHsResponse hsResponse = new ServerHsResponse(id, _cubes.Count, NonAuthoritativeServer.Instance.Seed, _cubes);
             NonAuthoritativeServer.Instance.SendToClient(hsResponse.Serialize(), id);
         }
 

@@ -4,6 +4,7 @@ using System.Net;
 using Network.CheckSum;
 using Network.Enums;
 using Network.Messages;
+using Network.Messages.Server;
 using UnityEngine;
 using Ping = Network.Messages.Ping;
 using Random = System.Random;
@@ -35,7 +36,7 @@ namespace Network
 
         protected readonly Dictionary<int, Dictionary<MessageType, int>> clientIdToMessageId = new Dictionary<int, Dictionary<MessageType, int>>();
         protected readonly Dictionary<int, Dictionary<MessageType, List<HeldMessage>>> heldImportantAndOrder = new Dictionary<int, Dictionary<MessageType, List<HeldMessage>>>();
-        protected readonly PublicServerHandshakeResponse HeldPublicServerHandshakeSa;
+        protected readonly ServerHsResponse HeldServerHsSa;
 
         public Action<int> onNewClient;
         public Action<int> onClientRemoved;

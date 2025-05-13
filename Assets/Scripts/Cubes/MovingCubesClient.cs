@@ -5,6 +5,7 @@ using Input;
 using Network;
 using Network.Enums;
 using Network.Messages;
+using Network.Messages.Server;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -36,7 +37,7 @@ namespace Cubes
             switch (messageType)
             {
                 case MessageType.HandShakeResponse:
-                    HandleHandshakeResponseData(new PublicServerHandshakeResponse(data));
+                    HandleHandshakeResponseData(new ServerHsResponse(data));
                     break;
                 case MessageType.Position:
                     ReceiveCubePos(data);
@@ -82,7 +83,7 @@ namespace Cubes
             cubes[id].SetActive(false);
         }
 
-        private void HandleHandshakeResponseData(PublicServerHandshakeResponse response)
+        private void HandleHandshakeResponseData(ServerHsResponse response)
         {
             instanceID = ClientManager.Instance.Id;
             for (int i = 0; i < response.ServerHandshakeData.count; i++)

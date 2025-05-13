@@ -5,6 +5,7 @@ using System.Net.Mail;
 using Network.CheckSum;
 using Network.Enums;
 using Network.Messages;
+using Network.Messages.MatchMaker;
 using Network.Messages.TestMessages;
 using UnityEngine;
 using Ping = Network.Messages.Ping;
@@ -81,7 +82,7 @@ namespace Network
                         {
                             AddClient(ip);
                             receivedClientId = ipToId[ip];
-                            SendToClient(new PublicMatchMakerHsResponse(receivedClientId, seed).Serialize(), receivedClientId);
+                            SendToClient(new MatchMakerHsResponse(receivedClientId, seed).Serialize(), receivedClientId);
                         }
                     }
                     else

@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Cubes;
 using Network.Enums;
 
-namespace Network.Messages
+namespace Network.Messages.Server
 {
-    public class PublicServerHandshakeResponse : Message<ServerHandshakeResponseData>
+    public class ServerHsResponse : Message<ServerHandshakeResponseData>
     {
         public ServerHandshakeResponseData ServerHandshakeData;
 
-        public PublicServerHandshakeResponse(int id, int count, int seed, List<Cube> cubes)
+        public ServerHsResponse(int id, int count, int seed, List<Cube> cubes)
         {
             messageType = MessageType.HandShakeResponse;
             attribs = Attributes.Important;
@@ -20,7 +20,7 @@ namespace Network.Messages
             this.messageId = 0;
         }
 
-        public PublicServerHandshakeResponse(byte[] data)
+        public ServerHsResponse(byte[] data)
         {
             ServerHandshakeData = Deserialize(data);
         }
