@@ -19,7 +19,6 @@ namespace Cubes
         private int instanceID = -1;
 
         private int positionMessageId = 0;
-
         protected override void Initialize()
         {
             onCubeUpdated.AddListener(OnCubeUpdate);
@@ -37,7 +36,7 @@ namespace Cubes
             switch (messageType)
             {
                 case MessageType.HandShakeResponse:
-                    HandleHandshakeResponseData(new PublicHandshakeResponse(data));
+                    HandleHandshakeResponseData(new PublicServerHandshakeResponse(data));
                     break;
                 case MessageType.Position:
                     ReceiveCubePos(data);
@@ -83,13 +82,13 @@ namespace Cubes
             cubes[id].SetActive(false);
         }
 
-        private void HandleHandshakeResponseData(PublicHandshakeResponse response)
+        private void HandleHandshakeResponseData(PublicServerHandshakeResponse response)
         {
             instanceID = ClientManager.Instance.Id;
-            for (int i = 0; i < response._handshakeData.count; i++)
+            for (int i = 0; i < response.ServerHandshakeData.count; i++)
             {
-                GameObject newCube = Instantiate(cubePrefab, response._handshakeData.cubes[i].position, Quaternion.identity);
-                newCube.SetActive(response._handshakeData.cubes[i].isActive);
+                GameObject newCube = Instantiate(cubePrefab, response.ServerHandshakeData.cubes[i].position, Quaternion.identity);
+                newCube.SetActive(response.ServerHandshakeData.cubes[i].isActive);
                 cubes.Add(newCube);
             }
 

@@ -35,7 +35,7 @@ namespace Network
 
         protected readonly Dictionary<int, Dictionary<MessageType, int>> clientIdToMessageId = new Dictionary<int, Dictionary<MessageType, int>>();
         protected readonly Dictionary<int, Dictionary<MessageType, List<HeldMessage>>> heldImportantAndOrder = new Dictionary<int, Dictionary<MessageType, List<HeldMessage>>>();
-        protected readonly PublicHandshakeResponse _heldPublicHandshakeSa;
+        protected readonly PublicServerHandshakeResponse HeldPublicServerHandshakeSa;
 
         public Action<int> onNewClient;
         public Action<int> onClientRemoved;
@@ -125,12 +125,12 @@ namespace Network
             }
         }
 
-        public int GetIpId(IPEndPoint ip)
+        protected int GetReceivedClientId(IPEndPoint ip)
         {
-            if (!ipToId.ContainsKey(ip))
-                ipToId[ip] = nextClientId;
+            if (ipToId.ContainsKey(ip))
+                return ipToId[ip];
 
-            return ipToId[ip];
+            return nextClientId;
         }
 
         protected void SaveMessageId(int clientId, MessageType type, int messageId)

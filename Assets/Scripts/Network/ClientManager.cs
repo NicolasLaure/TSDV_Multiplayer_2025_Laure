@@ -30,12 +30,15 @@ namespace Network
 
         private List<HeldMessage> _heldMessages = new List<HeldMessage>();
 
-        public void StartClient(IPAddress ip)
+        private int _elo = 0;
+
+        public void StartClient(IPAddress ip, int elo)
         {
             port = defaultPort;
             this.ipAddress = ip;
             lastPingTime = Time.time;
             ping = 0;
+            _elo = elo;
 
             connection = new UdpConnection(ip, port, this);
             clientStartTime = Time.time;
@@ -87,19 +90,19 @@ namespace Network
             connection.Send(data);
         }
 
-        public override void OnReceiveData(byte[] inputdata, IPEndPoint ip)
+        public override void OnReceiveData(byte[] data, IPEndPoint ip)
         {
-            if (BitConverter.ToBoolean(inputdata, 0))
+            if (BitConverter.ToBoolean(data, 0))
             {
-                inputdata = Encrypter.Decrypt(ivKeyGenerator.Next(), inputdata);
+                data = Encrypter.Decrypt(ivKeyGenerator.Next(), data);
             }
 
-            MessageType messageType = (MessageType)BitConverter.ToInt16(inputdata, sizeof(bool));
-            Attributes messageAttribs = (Attributes)BitConverter.ToInt16(inputdata, sizeof(bool) + sizeof(short));
+            MessageType messageType = (MessageType)BitConverter.ToInt16(data, sizeof(bool));
+            Attributes messageAttribs = (Attributes)BitConverter.ToInt16(data, sizeof(bool) + sizeof(short));
 
             if (messageAttribs.HasFlag(Attributes.Checksum))
             {
-                if (!CheckSumCalculations.IsCheckSumOk(inputdata))
+                if (!CheckSumCalculations.IsCheckSumOk(data))
                 {
                     Debug.Log("CheckSum Not Okay");
                     return;
@@ -111,14 +114,14 @@ namespace Network
             switch (messageType)
             {
                 case MessageType.Acknowledge:
-                    Acknowledge acknowledgedMessage = new Acknowledge(inputdata);
+                    Acknowledge acknowledgedMessage = new Acknowledge(data);
                     TryRemoveHeldMessage(acknowledgedMessage.acknowledgedType, acknowledgedMessage.acknowledgedId);
 
                     break;
                 case MessageType.DisAcknowledge:
                     break;
                 case MessageType.Disconnect:
-                    onClientDisconnect?.Invoke(new Disconnect(inputdata).id);
+                    onClientDisconnect?.Invoke(new Disconnect(data).id);
                     break;
                 case MessageType.Error:
                     break;
@@ -127,7 +130,7 @@ namespace Network
                     SendToServer(new Ping(0).Serialize());
                     break;
                 case MessageType.AllPings:
-                    ClientsPing allClientsPing = new AllPings(inputdata).clientsPing;
+                    ClientsPing allClientsPing = new AllPings(data).clientsPing;
 
                     for (int i = 0; i < allClientsPing.count; i++)
                     {
@@ -136,18 +139,22 @@ namespace Network
 
                     break;
                 //Moving Cubes message
-                case MessageType.HandShakeResponse:
-                    HandleHandshakeResponse(new PublicHandshakeResponse(inputdata));
-                    SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateHandshake(id, 0).Serialize()));
-                    OnReceiveEvent?.Invoke(inputdata, ip);
+                // case MessageType.HandShakeResponse:
+                //     HandleHandshakeResponse(new PublicServerHandshakeResponse(inputdata));
+                //     SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateMatchMakerHandshake(_elo, 0).Serialize()));
+                //     OnReceiveEvent?.Invoke(inputdata, ip);
+                //     break;
+
+                case MessageType.MatchMakerHandshakeResponse:
+                    HandleMatchMakerHandshakeResponse(new PublicMatchMakerHsResponse(data));
+                    SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateMatchMakerHandshake(_elo, 0).Serialize()));
                     break;
                 case MessageType.Position:
-                    OnReceiveEvent?.Invoke(inputdata, ip);
+                    OnReceiveEvent?.Invoke(data, ip);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
         }
 
         private IEnumerator PingTest(float delay)
@@ -156,10 +163,20 @@ namespace Network
             SendToServer(new Ping(0).Serialize());
         }
 
-        private void HandleHandshakeResponse(PublicHandshakeResponse data)
+        private void HandleMatchMakerHandshakeResponse(PublicMatchMakerHsResponse data)
         {
-            id = data._handshakeData.id;
-            seed = data._handshakeData.seed;
+            id = data.MatchMakerHandshakeData.id;
+            seed = data.MatchMakerHandshakeData.seed;
+            Debug.Log($"Seed: {ClientManager.Instance.Seed}");
+            rngGenerator = new Random(seed);
+            ivKeyGenerator = new Random(seed);
+            OperationsList.Populate(rngGenerator);
+        }
+
+        private void HandleHandshakeResponse(PublicServerHandshakeResponse data)
+        {
+            id = data.ServerHandshakeData.id;
+            seed = data.ServerHandshakeData.seed;
             Debug.Log($"Seed: {ClientManager.Instance.Seed}");
             rngGenerator = new Random(seed);
             ivKeyGenerator = new Random(seed);

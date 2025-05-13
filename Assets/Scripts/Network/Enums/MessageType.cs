@@ -4,6 +4,8 @@ namespace Network.Enums
     {
         HandShake = -1,
         HandShakeResponse,
+        MatchMakerHandshakeResponse,
+        PrivateMatchMakerHandshake,
         PrivateHandshake,
         Acknowledge,
         DisAcknowledge, //ToDo

@@ -3,7 +3,7 @@ using Cubes;
 
 namespace Network.Messages
 {
-    public struct HandshakeResponseData
+    public struct ServerHandshakeResponseData
     {
         public int id;
         public int seed;

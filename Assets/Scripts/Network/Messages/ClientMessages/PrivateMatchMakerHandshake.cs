@@ -3,27 +3,27 @@ using Network.Enums;
 
 namespace Network.Messages
 {
-    public class PrivateHandshake : Message<int>
+    public class PrivateMatchMakerHandshake : Message<int>
     {
-        public int id;
+        public int elo;
 
-        public PrivateHandshake(int id, int messageId)
+        public PrivateMatchMakerHandshake(int elo, int messageId)
         {
             isEncrypted = true;
-            messageType = MessageType.PrivateHandshake;
+            messageType = MessageType.PrivateMatchMakerHandshake;
             attribs = Attributes.Important | Attributes.Checksum;
             this.messageId = messageId;
-            this.id = id;
+            this.elo = elo;
         }
 
-        public PrivateHandshake(byte[] data)
+        public PrivateMatchMakerHandshake(byte[] data)
         {
-            id = Deserialize(data);
+            elo = Deserialize(data);
         }
 
         public override byte[] Serialize()
         {
-            return GetFormattedData(BitConverter.GetBytes(id));
+            return GetFormattedData(BitConverter.GetBytes(elo));
         }
 
         public override int Deserialize(byte[] message)

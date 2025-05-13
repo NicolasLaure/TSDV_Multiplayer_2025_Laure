@@ -28,7 +28,7 @@ namespace Network
 
         public int Seed => seed;
 
-        public abstract void OnReceiveData(byte[] inputdata, IPEndPoint ip);
+        public abstract void OnReceiveData(byte[] data, IPEndPoint ip);
 
         protected virtual void Update()
         {
@@ -42,18 +42,14 @@ namespace Network
             criticalMessages.Add(new CriticalMessage(clientId, messageId, message));
         }
 
-        protected bool CheckHeader(int IvKey, out MessageType type, out Attributes attributes, byte[] rawData, out byte[] data)
+        protected bool CheckHeader(out MessageType type, out Attributes attributes, byte[] data)
         {
-            data = rawData;
-            if (BitConverter.ToBoolean(rawData, 0))
-                data = Encrypter.Decrypt(IvKey, rawData);
-
-            type = (MessageType)BitConverter.ToInt16(rawData, MessageOffsets.MessageTypeIndex);
-            attributes = (Attributes)BitConverter.ToInt16(rawData, MessageOffsets.AttribsIndex);
+            type = (MessageType)BitConverter.ToInt16(data, MessageOffsets.MessageTypeIndex);
+            attributes = (Attributes)BitConverter.ToInt16(data, MessageOffsets.AttribsIndex);
 
             if (attributes.HasFlag(Attributes.Checksum))
             {
-                if (!CheckSumCalculations.IsCheckSumOk(rawData))
+                if (!CheckSumCalculations.IsCheckSumOk(data))
                 {
                     Debug.Log("CheckSum Not Okay");
                     return false;
@@ -63,6 +59,13 @@ namespace Network
             }
 
             return true;
+        }
+
+        protected bool CheckHeader(int IvKey, out MessageType type, out Attributes attributes, byte[] rawData, out byte[] data)
+        {
+            data = Encrypter.Decrypt(IvKey, rawData);
+
+            return CheckHeader(out type, out attributes, data);
         }
     }
 }

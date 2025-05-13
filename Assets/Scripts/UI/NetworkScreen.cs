@@ -23,10 +23,10 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     void OnConnectBtnClick()
     {
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
-        int rate = Convert.ToInt32(rateInputField.text);
+        int elo = Convert.ToInt32(rateInputField.text);
 
         Instantiate(clientPrefab);
-        ClientManager.Instance.StartClient(ipAddress);
+        ClientManager.Instance.StartClient(ipAddress, elo);
 
         pingTextObject.SetActive(true);
         ClientManager.Instance.onDisconnection += Disconnect;

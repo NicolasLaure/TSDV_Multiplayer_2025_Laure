@@ -9,11 +9,19 @@ using Ping = Network.Messages.Ping;
 
 public class NonAuthoritativeServer : NetworkServer<NonAuthoritativeServer>
 {
-    public override void OnReceiveData(byte[] inputdata, IPEndPoint ip)
+    public override void OnReceiveData(byte[] data, IPEndPoint ip)
     {
-        int receivedClientId = GetIpId(ip);
+        int receivedClientId = GetReceivedClientId(ip);
 
-        if (!CheckHeader(idToIVKeyGenerator[ipToId[ip]].Next(), out MessageType messageType, out Attributes messageAttribs, inputdata, out byte[] data))
+        MessageType messageType;
+        Attributes messageAttribs;
+        if (BitConverter.ToBoolean(data, 0))
+        {
+            if (!CheckHeader(idToIVKeyGenerator[ipToId[ip]].Next(), out messageType, out messageAttribs, data, out byte[] decryptedData))
+                return;
+            data = decryptedData;
+        }
+        else if (!CheckHeader(out messageType, out messageAttribs, data))
             return;
 
         if (messageType == MessageType.Ping)
@@ -60,8 +68,8 @@ public class NonAuthoritativeServer : NetworkServer<NonAuthoritativeServer>
 
                 break;
             case MessageType.PrivateHandshake:
-                PrivateHandshake receivedHandshake = new PrivateHandshake(data);
-                Debug.Log($"Decrypted Private Handshake id {receivedHandshake.id}");
+                PrivateMatchMakerHandshake receivedMatchMakerHandshake = new PrivateMatchMakerHandshake(data);
+                Debug.Log($"Decrypted Private Handshake Elo {receivedMatchMakerHandshake.elo}");
                 break;
             case MessageType.Acknowledge:
                 break;

@@ -50,7 +50,7 @@ namespace Cubes
             if (id > _cubes.Count - 1)
                 _cubes.Add(new Cube(new Vector3(horizontalOffset * _cubes.Count, 0, 0)));
 
-            PublicHandshakeResponse hsResponse = new PublicHandshakeResponse(id, _cubes.Count, NonAuthoritativeServer.Instance.Seed, _cubes);
+            PublicServerHandshakeResponse hsResponse = new PublicServerHandshakeResponse(id, _cubes.Count, NonAuthoritativeServer.Instance.Seed, _cubes);
             NonAuthoritativeServer.Instance.SendToClient(hsResponse.Serialize(), id);
         }
 
