@@ -49,7 +49,7 @@ namespace Network
         {
             port = defaultPort;
             connection = new UdpConnection(port, this);
-            rngGenerator = new Random(Time.frameCount);
+            rngGenerator = new Random((int)Time.realtimeSinceStartup);
             seed = rngGenerator.Next(0, int.MaxValue);
             rngGenerator = new Random(seed);
             Debug.Log($"Server Seed: {seed}");

@@ -51,13 +51,9 @@ namespace Network
 
             if (tailSize == 0) return data;
 
-            Span<byte> dataSpan = data;
-            Span<byte> checkSum1Span = dataSpan.Slice(0, messageEnd);
-            Span<byte> checkSum2Span = dataSpan.Slice(0, messageEnd + sizeof(int));
-
-            CheckSumCalculations.ChecksumBytes(checkSum1Span.ToArray(), out byte[] first, OperationsList.OperationsCheckSum1);
+            CheckSumCalculations.ChecksumBytes(data[..messageEnd], out byte[] first, OperationsList.OperationsCheckSum1);
             Buffer.BlockCopy(first, 0, data, messageEnd, sizeof(int));
-            CheckSumCalculations.ChecksumBytes(checkSum2Span.ToArray(), out byte[] second, OperationsList.OperationsCheckSum2);
+            CheckSumCalculations.ChecksumBytes(data[..(messageEnd + sizeof(int))], out byte[] second, OperationsList.OperationsCheckSum2);
             Buffer.BlockCopy(second, 0, data, messageEnd + first.Length, sizeof(int));
 
             return data;
