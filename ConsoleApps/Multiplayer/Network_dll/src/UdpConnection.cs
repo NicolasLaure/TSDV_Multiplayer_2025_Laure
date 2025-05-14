@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using Network.Utilities;
 
 namespace Network
 {
@@ -42,7 +43,6 @@ namespace Network
         {
             connection.Close();
         }
-
         public void FlushReceiveData()
         {
             lock (handler)
@@ -71,7 +71,7 @@ namespace Network
             catch (SocketException e)
             {
                 // This happens when a client disconnects, as we fail to send to that port.
-                Console.Write("[UdpConnection] " + e.Message);
+                Logger.LogError("[UdpConnection] " + e.Message);
             }
 
             connection.BeginReceive(OnReceive, null);

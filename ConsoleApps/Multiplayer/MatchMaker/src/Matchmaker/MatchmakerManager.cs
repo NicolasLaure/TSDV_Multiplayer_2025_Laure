@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using Network.Enums;
 using Network.Matchmaker;
 using Network.Messages;
 using Network.Messages.MatchMaker;
-using UnityEngine;
-using Debug = UnityEngine.Debug;
+using Network.Utilities;
 using MessageType = Network.Enums.MessageType;
 using Ping = Network.Messages.Ping;
 
@@ -23,20 +23,20 @@ namespace Network
         private List<int> usedPorts = new List<int>();
         private List<ActiveServer> _activeServers = new List<ActiveServer>();
 
-        private string serverPath;
+        private string serverPath = "NonAuthoritativeServer.exe";
 
         private readonly Dictionary<HeldMessage, int> heldMessageToClientId = new Dictionary<HeldMessage, int>();
 
-        private void OnEnable()
-        {
-            StartServer();
-        }
+        private List<Process> runningServers = new List<Process>();
+        private readonly Dictionary<Process, int> processToPort = new Dictionary<Process, int>();
 
-        protected override void Update()
+        public override void Update()
         {
             base.Update();
+            CheckActiveServers();
             CheckQueue();
         }
+
 
         public override void OnReceiveData(byte[] data, IPEndPoint ip)
         {
@@ -60,7 +60,7 @@ namespace Network
 
             if (messageType == MessageType.Ping)
             {
-                short ms = (short)Mathf.FloorToInt((Time.time - idLastPingTime[receivedClientId]) * 1000);
+                short ms = (short)Math.Floor((Time.time - idLastPingTime[receivedClientId]) * 1000);
                 idLastPingTime[receivedClientId] = Time.time;
                 SendToClient(new Ping(ms).Serialize(), receivedClientId);
                 return;
@@ -73,7 +73,7 @@ namespace Network
                 {
                     if (messageId > ReadMessageId(receivedClientId, messageType) + 1)
                     {
-                        Debug.Log("Intermediate Message Lost");
+                        Logger.Log("Intermediate Message Lost");
                         SaveHeldMessage(ipToId[ip], messageType, messageId, data);
                         return;
                     }
@@ -81,7 +81,7 @@ namespace Network
 
                 if (messageId <= ReadMessageId(receivedClientId, messageType))
                 {
-                    Debug.Log($"MessageId {messageId} was older than, message {ReadMessageId(receivedClientId, messageType)}");
+                    Logger.Log($"MessageId {messageId} was older than, message {ReadMessageId(receivedClientId, messageType)}");
                     return;
                 }
             }
@@ -89,12 +89,12 @@ namespace Network
             switch (messageType)
             {
                 case MessageType.HandShake:
-                    Debug.Log(messageId);
+                    Logger.Log(messageId.ToString());
                     if (ReadMessageId(receivedClientId, messageType) != messageId)
                     {
                         if (!ipToId.ContainsKey(ip))
                         {
-                            Debug.Log("NEW CLIENT");
+                            Logger.Log("NEW CLIENT");
                             AddClient(ip);
                             receivedClientId = ipToId[ip];
                             SendToClient(new MatchMakerHsResponse(receivedClientId, seed).Serialize(), receivedClientId);
@@ -102,12 +102,12 @@ namespace Network
                         }
                     }
                     else
-                        Debug.Log("This Message Already taken");
+                        Logger.Log("This Message Already taken");
 
                     break;
                 case MessageType.PrivateMatchMakerHandshake:
                     PrivateMatchMakerHandshake receivedMatchMakerHandshake = new PrivateMatchMakerHandshake(data);
-                    Debug.Log($"client{receivedClientId} Elo Is {receivedMatchMakerHandshake.elo}");
+                    Logger.Log($"client{receivedClientId} Elo Is {receivedMatchMakerHandshake.elo}");
                     clientIdToElo[receivedClientId] = receivedMatchMakerHandshake.elo;
                     initializedClientIds.Add(receivedClientId);
                     break;
@@ -141,7 +141,7 @@ namespace Network
                 HeldMessage oldestHeldMessage = heldImportantAndOrder[ipToId[ip]][messageType][0];
                 if (oldestHeldMessage.id == messageId + 1)
                 {
-                    Debug.Log("Executing held message");
+                    Logger.Log("Executing held message");
                     OnReceiveData(oldestHeldMessage.message, ip);
                 }
             }
@@ -172,10 +172,19 @@ namespace Network
                 CreateServer();
             }
         }
+
         private void CreateServer()
         {
             int newSvPort = GetMinUnusedPort();
-            //System.Diagnostics.Process.Start(serverPath);
+            usedPorts.Add(newSvPort);
+
+            ProcessStartInfo serverInfo = new ProcessStartInfo(serverPath, newSvPort.ToString());
+            serverInfo.UseShellExecute = true;
+            Process newServer = Process.Start(serverInfo);
+            runningServers.Add(newServer);
+
+            processToPort[newServer] = newSvPort;
+
             byte[] newSvDirection1 = new ServerDirection(ipAddress, newSvPort).Serialize();
             SaveHeldMessage(newSvDirection1, connectingToServerPairs[0]);
             byte[] newSvDirection2 = new ServerDirection(ipAddress, newSvPort).Serialize();
@@ -208,10 +217,38 @@ namespace Network
 
         private void SaveHeldMessage(byte[] data, int clientId)
         {
-            Debug.Log($"MessageId {ServerDirection.messageId}");
+            Logger.Log($"MessageId {ServerDirection.messageId}");
             HeldMessage held = new HeldMessage(ServerDirection.messageId, data);
             heldMessages.Add(held);
             heldMessageToClientId[held] = clientId;
+        }
+
+        // private void ConnectToServer(int port)
+        // {
+        //     UdpConnection newServer = new UdpConnection(ipAddress, port, this);
+        //
+        //     newServer.Send(new Ping(0).Serialize());
+        //     runningServers.Add(newServer);
+        // }
+
+        private void CheckActiveServers()
+        {
+            List<Process> processesToRemove = new List<Process>();
+            for (int i = 0; i < runningServers.Count; i++)
+            {
+                if (runningServers[i].HasExited)
+                {
+                    usedPorts.Remove(processToPort[runningServers[i]]);
+                    processToPort.Remove(runningServers[i]);
+                    processesToRemove.Add(runningServers[i]);
+                    Logger.Log($"Process[{i}] was already closed");
+                }
+            }
+
+            for (int i = 0; i < processesToRemove.Count; i++)
+            {
+                runningServers.Remove(processesToRemove[i]);
+            }
         }
     }
 }

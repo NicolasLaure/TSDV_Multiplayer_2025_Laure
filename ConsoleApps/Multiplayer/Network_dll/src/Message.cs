@@ -1,61 +1,60 @@
 using System;
+using Network.CheckSum;
 using Network.Enums;
+using Network.Messages;
 
 namespace Network
 {
     public abstract class Message<T>
     {
+        public bool isEncrypted = false;
         public MessageType messageType;
         public Attributes attribs;
 
+        public int clientId = -1;
+        public static int messageId = -1;
         public short messageStart;
         public short messageEnd;
 
-        public int messageId = 0;
-
         public byte[] GetFormattedData(byte[] input)
         {
-            int headerSize = sizeof(short) * 2;
+            int headerSize = sizeof(bool) + sizeof(short) * 2;
             int tailSize = 0;
             if (messageType != MessageType.Ping)
             {
-                headerSize += sizeof(short) * 2 + sizeof(int);
+                headerSize += sizeof(short) * 2 + sizeof(int) * 2;
 
-                if (attribs == Attributes.Checksum)
+                if (attribs.HasFlag(Attributes.Checksum))
                     tailSize = sizeof(int) * 2;
             }
 
             byte[] header = new byte[headerSize];
-            byte[] tail = tailSize == 0 ? null : new byte[tailSize];
             byte[] data = new byte[headerSize + tailSize + input.Length];
 
             messageStart = (short)headerSize;
             messageEnd = (short)(headerSize + input.Length);
 
-            int offset = 0;
-            Buffer.BlockCopy(BitConverter.GetBytes((short)messageType), 0, header, offset, sizeof(short));
-            offset += sizeof(short);
-            Buffer.BlockCopy(BitConverter.GetBytes((short)attribs), 0, header, offset, sizeof(short));
-            offset += sizeof(short);
+            Buffer.BlockCopy(BitConverter.GetBytes(isEncrypted), 0, header, MessageOffsets.IsEncryptedIndex, sizeof(bool));
+            Buffer.BlockCopy(BitConverter.GetBytes((short)messageType), 0, header, MessageOffsets.MessageTypeIndex, sizeof(short));
+            Buffer.BlockCopy(BitConverter.GetBytes((short)attribs), 0, header, MessageOffsets.AttribsIndex, sizeof(short));
             if (messageType != MessageType.Ping)
             {
-                Buffer.BlockCopy(BitConverter.GetBytes(messageId), 0, header, offset, sizeof(int));
-                offset += sizeof(int);
+                Buffer.BlockCopy(BitConverter.GetBytes(clientId), 0, header, MessageOffsets.ClientIdIndex, sizeof(int));
+                Buffer.BlockCopy(BitConverter.GetBytes(messageId), 0, header, MessageOffsets.IdIndex, sizeof(int));
 
-                Buffer.BlockCopy(BitConverter.GetBytes(messageStart), 0, header, offset, sizeof(short));
-                offset += sizeof(short);
-                Buffer.BlockCopy(BitConverter.GetBytes(messageEnd), 0, header, offset, sizeof(short));
+                Buffer.BlockCopy(BitConverter.GetBytes(messageStart), 0, header, MessageOffsets.StartIndex, sizeof(short));
+                Buffer.BlockCopy(BitConverter.GetBytes(messageEnd), 0, header, MessageOffsets.EndIndex, sizeof(short));
             }
 
-            Buffer.BlockCopy(header, 0, data, 0, header.Length);
+            Buffer.BlockCopy(header, 0, data, 0, headerSize);
             Buffer.BlockCopy(input, 0, data, messageStart, input.Length);
 
-            if (tail == null) return data;
+            if (tailSize == 0) return data;
 
-            ChecksumBytes(data, out byte[] first, out byte[] second);
-            Buffer.BlockCopy(first, 0, tail, 0, sizeof(int));
-            Buffer.BlockCopy(second, 0, tail, 0 + first.Length, sizeof(int));
-            Buffer.BlockCopy(tail, 0, data, messageEnd, tail.Length);
+            CheckSumCalculations.ChecksumBytes(data[..messageEnd], out byte[] first, OperationsList.OperationsCheckSum1);
+            Buffer.BlockCopy(first, 0, data, messageEnd, sizeof(int));
+            CheckSumCalculations.ChecksumBytes(data[..(messageEnd + sizeof(int))], out byte[] second, OperationsList.OperationsCheckSum2);
+            Buffer.BlockCopy(second, 0, data, messageEnd + first.Length, sizeof(int));
 
             return data;
         }
@@ -64,25 +63,20 @@ namespace Network
         {
             byte[] payload;
             int payloadSize;
-            int offset = 0;
 
-            MessageType type = (MessageType)BitConverter.ToInt16(message, offset);
-            offset += sizeof(short);
-            Attributes messageAttributes = (Attributes)BitConverter.ToInt16(message, offset);
-            offset += sizeof(short);
+            MessageType type = (MessageType)BitConverter.ToInt16(message, MessageOffsets.MessageTypeIndex);
+            Attributes messageAttributes = (Attributes)BitConverter.ToInt16(message, MessageOffsets.AttribsIndex);
 
             if (type == MessageType.Ping)
             {
-                payloadSize = message.Length - sizeof(short) * 2;
+                payloadSize = message.Length - sizeof(short) * 2 - sizeof(bool);
                 payload = new byte[payloadSize];
-                Buffer.BlockCopy(message, sizeof(short) * 2, payload, 0, payloadSize);
+                Buffer.BlockCopy(message, sizeof(bool) + sizeof(short) * 2, payload, 0, payloadSize);
                 return payload;
             }
 
-            offset += sizeof(int);
-            short messageStart = BitConverter.ToInt16(message, offset);
-            offset += sizeof(short);
-            short messageEnd = BitConverter.ToInt16(message, offset);
+            short messageStart = BitConverter.ToInt16(message, MessageOffsets.StartIndex);
+            short messageEnd = BitConverter.ToInt16(message, MessageOffsets.EndIndex);
 
             payloadSize = messageEnd - messageStart;
             payload = new byte[payloadSize];
@@ -93,18 +87,5 @@ namespace Network
 
         public abstract byte[] Serialize();
         public abstract T Deserialize(byte[] message);
-
-        public void ChecksumBytes(byte[] data, out byte[] first, out byte[] second)
-        {
-            CheckSum(data, out short firstNum, out short secondNum);
-            first = BitConverter.GetBytes(firstNum);
-            second = BitConverter.GetBytes(secondNum);
-        }
-
-        public void CheckSum(byte[] data, out short first, out short second)
-        {
-            first = (short)((data.Length - sizeof(short) * 2) * 32 / 15);
-            second = (short)(Math.Pow(data.Length - sizeof(short), 5) / 6);
-        }
     }
 }

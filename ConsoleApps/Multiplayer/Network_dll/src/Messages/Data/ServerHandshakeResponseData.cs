@@ -3,11 +3,11 @@ using System.Numerics;
 
 namespace Network.Messages
 {
-    public struct HandshakeResponseData
+    public struct ServerHandshakeResponseData
     {
         public int id;
-        public int count;
         public int seed;
-        public List<Vector3> positions;
+        public int count;
+        public List<(bool isActive, byte[] position)> cubes;
     }
 }

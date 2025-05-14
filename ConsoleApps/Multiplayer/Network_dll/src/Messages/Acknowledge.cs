@@ -5,17 +5,17 @@ namespace Network.Messages
 {
     public class Acknowledge : Message<(MessageType, int)>
     {
-        private MessageType acknowledgedType;
-        private int acknowledgedId;
+        public MessageType acknowledgedType;
+        public int acknowledgedId;
 
-        public Acknowledge(MessageType type, int messageId)
+        public Acknowledge(MessageType type, int acknowledgedId)
         {
             messageType = MessageType.Acknowledge;
             attribs = Attributes.None;
-            this.messageId = messageId;
+            messageId++;
 
             acknowledgedType = type;
-            acknowledgedId = messageId;
+            this.acknowledgedId = acknowledgedId;
         }
 
         public Acknowledge(byte[] data)

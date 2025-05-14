@@ -1,17 +1,17 @@
 using System;
+using System.Diagnostics;
 
 namespace Network.Utilities
 {
-    public static class Time
+    public class Time
     {
-        public static float deltaTime;
-        public static float timeSinceStartup;
+        public static DateTime startTime;
 
-        private static DateTime startupTime;
-
-        static Time()
+        Time()
         {
-            startupTime = DateTime.Now;
+            startTime = DateTime.UtcNow;
         }
+
+        public static float time => ((float)((DateTime.UtcNow - startTime).TotalMilliseconds / 1000));
     }
 }
