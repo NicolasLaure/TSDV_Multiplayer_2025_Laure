@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using Network.CheckSum;
 using Network.Enums;
 using Network.Messages;
-using UnityEngine;
 
 namespace Network
 {
@@ -13,7 +11,8 @@ namespace Network
         public MessageType messageType;
         public Attributes attribs;
 
-        public int messageId = 0;
+        public int clientId = -1;
+        public static int messageId = -1;
         public short messageStart;
         public short messageEnd;
 
@@ -23,7 +22,7 @@ namespace Network
             int tailSize = 0;
             if (messageType != MessageType.Ping)
             {
-                headerSize += sizeof(short) * 2 + sizeof(int);
+                headerSize += sizeof(short) * 2 + sizeof(int) * 2;
 
                 if (attribs.HasFlag(Attributes.Checksum))
                     tailSize = sizeof(int) * 2;
@@ -40,6 +39,7 @@ namespace Network
             Buffer.BlockCopy(BitConverter.GetBytes((short)attribs), 0, header, MessageOffsets.AttribsIndex, sizeof(short));
             if (messageType != MessageType.Ping)
             {
+                Buffer.BlockCopy(BitConverter.GetBytes(clientId), 0, header, MessageOffsets.ClientIdIndex, sizeof(int));
                 Buffer.BlockCopy(BitConverter.GetBytes(messageId), 0, header, MessageOffsets.IdIndex, sizeof(int));
 
                 Buffer.BlockCopy(BitConverter.GetBytes(messageStart), 0, header, MessageOffsets.StartIndex, sizeof(short));

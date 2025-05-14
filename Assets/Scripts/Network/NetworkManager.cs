@@ -24,7 +24,15 @@ namespace Network
         protected int seed;
         protected Random rngGenerator;
         protected readonly List<CriticalMessage> criticalMessages = new List<CriticalMessage>();
-        protected int defaultPort = 60325;
+
+        protected readonly Dictionary<int, Dictionary<MessageType, int>> clientIdToMessageId = new Dictionary<int, Dictionary<MessageType, int>>();
+        protected readonly Dictionary<int, Dictionary<MessageType, List<HeldMessage>>> heldImportantAndOrder = new Dictionary<int, Dictionary<MessageType, List<HeldMessage>>>();
+
+        protected readonly Dictionary<int, Random> idToIVKeyGenerator = new Dictionary<int, Random>();
+
+        protected List<HeldMessage> heldMessages = new List<HeldMessage>();
+
+        public int defaultPort = 60325;
 
         public int Seed => seed;
 
@@ -66,6 +74,80 @@ namespace Network
             data = Encrypter.Decrypt(IvKey, rawData);
 
             return CheckHeader(out type, out attributes, data);
+        }
+
+        protected void SaveMessageId(int clientId, MessageType type, int messageId)
+        {
+            if (!clientIdToMessageId.ContainsKey(clientId))
+                clientIdToMessageId.Add(clientId, new Dictionary<MessageType, int>());
+            if (!clientIdToMessageId[clientId].ContainsKey(type))
+                clientIdToMessageId[clientId][type] = -1;
+
+            clientIdToMessageId[clientId][type] = messageId > clientIdToMessageId[clientId][type] ? messageId : clientIdToMessageId[clientId][type];
+        }
+
+        protected int ReadMessageId(int clientId, MessageType type)
+        {
+            if (!clientIdToMessageId.ContainsKey(clientId))
+                clientIdToMessageId.Add(clientId, new Dictionary<MessageType, int>());
+            if (!clientIdToMessageId[clientId].ContainsKey(type))
+                clientIdToMessageId[clientId][type] = -1;
+
+            return clientIdToMessageId[clientId][type];
+        }
+
+        protected void SaveHeldMessage(int clientId, MessageType type, int messageId, byte[] message)
+        {
+            if (!heldImportantAndOrder.ContainsKey(clientId))
+                heldImportantAndOrder[clientId] = new Dictionary<MessageType, List<HeldMessage>>();
+            if (!heldImportantAndOrder[clientId].ContainsKey(type))
+                heldImportantAndOrder[clientId][type] = new List<HeldMessage>();
+
+            int messageCount = heldImportantAndOrder[clientId][type].Count;
+            for (int i = 0; i < messageCount; i++)
+            {
+                if (messageId < heldImportantAndOrder[clientId][type][i].id)
+                {
+                    heldImportantAndOrder[clientId][type].Insert(i, new HeldMessage(messageId, message));
+                    return;
+                }
+            }
+
+            heldImportantAndOrder[clientId][type].Add(new HeldMessage(messageId, message));
+        }
+
+        protected bool AreHeldMessages(int clientId, MessageType messageType)
+        {
+            return heldImportantAndOrder.ContainsKey(clientId) && heldImportantAndOrder[clientId].ContainsKey(messageType) && heldImportantAndOrder[clientId][messageType].Count > 0;
+        }
+
+        protected bool TryGetHeldMessage(MessageType type, int messageId, out HeldMessage heldMessage)
+        {
+            for (int i = 0; i < heldMessages.Count; i++)
+            {
+                if (heldMessages[i].id == messageId && (MessageType)BitConverter.ToInt16(heldMessages[i].message, MessageOffsets.MessageTypeIndex) == type)
+                {
+                    heldMessage = heldMessages[i];
+                    return true;
+                }
+            }
+
+            heldMessage = null;
+            return false;
+        }
+
+        protected bool TryRemoveHeldMessage(MessageType type, int messageId)
+        {
+            for (int i = 0; i < heldMessages.Count; i++)
+            {
+                if (heldMessages[i].id == messageId && (MessageType)BitConverter.ToInt16(heldMessages[i].message, MessageOffsets.MessageTypeIndex) == type)
+                {
+                    heldMessages.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

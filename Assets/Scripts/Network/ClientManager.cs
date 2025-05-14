@@ -30,13 +30,11 @@ namespace Network
         public Action onDisconnection;
         public int Id => id;
 
-        private List<HeldMessage> _heldMessages = new List<HeldMessage>();
-
         private int _elo = 0;
 
-        public void StartClient(IPAddress ip, int elo)
+        public void StartClient(IPAddress ip, int port, int elo)
         {
-            port = defaultPort;
+            this.port = port;
             this.ipAddress = ip;
             lastPingTime = Time.time;
             ping = 0;
@@ -47,9 +45,9 @@ namespace Network
 
             HandshakeData handshakeData;
             handshakeData.ip = 0;
-            byte[] handshakeBytes = new PublicHandshake(handshakeData, 0).Serialize();
+            byte[] handshakeBytes = new PublicHandshake(handshakeData).Serialize();
             SendToServer(handshakeBytes);
-            _heldMessages.Add(new HeldMessage(0, handshakeBytes));
+            heldMessages.Add(new HeldMessage(PublicHandshake.messageId, handshakeBytes));
         }
 
         protected override void Update()
@@ -58,13 +56,13 @@ namespace Network
             ping = Time.time - lastPingTime;
             onPingUpdated?.Invoke((short)(ping * 1000));
 
-            for (int i = 0; i < _heldMessages.Count; i++)
+            for (int i = 0; i < heldMessages.Count; i++)
             {
-                if (Time.time - _heldMessages[i].heldSince >= maxResponseWait)
+                if (Time.time - heldMessages[i].heldSince >= maxResponseWait)
                 {
-                    Debug.Log($"Resending held message, Held Messages count: {_heldMessages.Count}");
-                    SendToServer(_heldMessages[i].message);
-                    _heldMessages[i].heldSince = Time.time;
+                    Debug.Log($"Resending held message, Held Messages count: {heldMessages.Count}");
+                    SendToServer(heldMessages[i].message);
+                    heldMessages[i].heldSince = Time.time;
                 }
             }
 
@@ -113,23 +111,54 @@ namespace Network
                 Debug.Log("CheckSum Okay");
             }
 
+            if (messageType == MessageType.Ping)
+            {
+                lastPingTime = Time.time;
+                SendToServer(new Ping(0).Serialize());
+                return;
+            }
+
+            int receivedClientId = BitConverter.ToInt32(data, MessageOffsets.ClientIdIndex);
+            int messageId = BitConverter.ToInt32(data, MessageOffsets.IdIndex);
+            if (messageAttribs.HasFlag(Attributes.Order))
+            {
+                if (messageAttribs.HasFlag(Attributes.Important))
+                {
+                    if (messageId > ReadMessageId(receivedClientId, messageType) + 1)
+                    {
+                        Debug.Log("Intermediate Message Lost");
+                        SaveHeldMessage(receivedClientId, messageType, messageId, data);
+                        return;
+                    }
+                }
+
+                if (messageId <= ReadMessageId(receivedClientId, messageType))
+                {
+                    Debug.Log($"MessageId {messageId} was older than, message {ReadMessageId(receivedClientId, messageType)}");
+                    return;
+                }
+            }
+
+
             switch (messageType)
             {
                 case MessageType.Acknowledge:
                     Acknowledge acknowledgedMessage = new Acknowledge(data);
                     TryRemoveHeldMessage(acknowledgedMessage.acknowledgedType, acknowledgedMessage.acknowledgedId);
-
                     break;
                 case MessageType.DisAcknowledge:
                     break;
                 case MessageType.Disconnect:
-                    onClientDisconnect?.Invoke(new Disconnect(data).id);
+                    Disconnect disconnect = new Disconnect(data);
+                    if (disconnect.id == -1)
+                    {
+                        EndClient();
+                        return;
+                    }
+
+                    onClientDisconnect?.Invoke(disconnect.id);
                     break;
                 case MessageType.Error:
-                    break;
-                case MessageType.Ping:
-                    lastPingTime = Time.time;
-                    SendToServer(new Ping(0).Serialize());
                     break;
                 case MessageType.AllPings:
                     ClientsPing allClientsPing = new AllPings(data).clientsPing;
@@ -149,13 +178,34 @@ namespace Network
 
                 case MessageType.MatchMakerHsResponse:
                     HandleMatchMakerHandshakeResponse(new MatchMakerHsResponse(data));
-                    SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateMatchMakerHandshake(_elo, 0).Serialize()));
+                    SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateMatchMakerHandshake(_elo).Serialize()));
+                    break;
+                case MessageType.ServerDirection:
+                    ServerDirection svDir = new ServerDirection(data);
+                    Debug.Log($"ServerIp {svDir.serverIp}, port: {svDir.serverPort}");
                     break;
                 case MessageType.Position:
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+
+            if (messageAttribs.HasFlag(Attributes.Important))
+                SendToServer(new Acknowledge(messageType, messageId).Serialize());
+
+            if (messageAttribs.HasFlag(Attributes.Critical) && messageId > clientIdToMessageId[receivedClientId][messageType])
+                SaveCriticalMessage(receivedClientId, messageId, data);
+
+            SaveMessageId(receivedClientId, messageType, messageId);
+            if (messageAttribs.HasFlag(Attributes.Order) && messageAttribs.HasFlag(Attributes.Important) && AreHeldMessages(receivedClientId, messageType))
+            {
+                HeldMessage oldestHeldMessage = heldImportantAndOrder[receivedClientId][messageType][0];
+                if (oldestHeldMessage.id == messageId + 1)
+                {
+                    Debug.Log("Executing held message");
+                    OnReceiveData(oldestHeldMessage.message, ip);
+                }
             }
         }
 
@@ -195,28 +245,14 @@ namespace Network
                 testMessages.Add(new HeldMessage(i, new ImportantOrderMessage(i).Serialize()));
             }
 
-            _heldMessages.AddRange(testMessages);
+            heldMessages.AddRange(testMessages);
 
-            SendToServer(_heldMessages[0].message);
-            SendToServer(_heldMessages[2].message);
-            SendToServer(_heldMessages[4].message);
+            SendToServer(heldMessages[0].message);
+            SendToServer(heldMessages[2].message);
+            SendToServer(heldMessages[4].message);
             yield return new WaitForSeconds(0.05f);
-            SendToServer(_heldMessages[1].message);
-            SendToServer(_heldMessages[3].message);
-        }
-
-        private bool TryRemoveHeldMessage(MessageType type, int messageId)
-        {
-            for (int i = 0; i < _heldMessages.Count; i++)
-            {
-                if (_heldMessages[i].id == messageId && (MessageType)BitConverter.ToInt16(_heldMessages[i].message, MessageOffsets.MessageTypeIndex) == type)
-                {
-                    _heldMessages.RemoveAt(i);
-                    return true;
-                }
-            }
-
-            return false;
+            SendToServer(heldMessages[1].message);
+            SendToServer(heldMessages[3].message);
         }
     }
 }

@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
-using System.Net.Mail;
-using Network.CheckSum;
 using Network.Enums;
+using Network.Matchmaker;
 using Network.Messages;
 using Network.Messages.MatchMaker;
-using Network.Messages.TestMessages;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
+using MessageType = Network.Enums.MessageType;
 using Ping = Network.Messages.Ping;
-using Random = System.Random;
 
 namespace Network
 {
@@ -17,6 +17,16 @@ namespace Network
     {
         private readonly Dictionary<int, int> clientIdToElo = new Dictionary<int, int>();
         private List<int> initializedClientIds = new List<int>();
+        private List<int> connectingToServerPairs = new List<int>();
+
+        private int minSvPort = 60326;
+        private int maxSvPort = 60350;
+        private List<int> usedPorts = new List<int>();
+        private List<ActiveServer> _activeServers = new List<ActiveServer>();
+
+        private string serverPath;
+
+        private readonly Dictionary<HeldMessage, int> heldMessageToClientId = new Dictionary<HeldMessage, int>();
 
         private void OnEnable()
         {
@@ -33,6 +43,7 @@ namespace Network
         {
             int receivedClientId = GetReceivedClientId(ip);
 
+
             MessageType messageType;
             Attributes messageAttribs;
             if (BitConverter.ToBoolean(data, 0))
@@ -43,6 +54,9 @@ namespace Network
                 data = decryptedData;
             }
             else if (!CheckHeader(out messageType, out messageAttribs, data))
+                return;
+
+            if (receivedClientId == nextClientId && messageType != MessageType.HandShake)
                 return;
 
             if (messageType == MessageType.Ping)
@@ -76,13 +90,16 @@ namespace Network
             switch (messageType)
             {
                 case MessageType.HandShake:
+                    Debug.Log(messageId);
                     if (ReadMessageId(receivedClientId, messageType) != messageId)
                     {
                         if (!ipToId.ContainsKey(ip))
                         {
+                            Debug.Log("NEW CLIENT");
                             AddClient(ip);
                             receivedClientId = ipToId[ip];
                             SendToClient(new MatchMakerHsResponse(receivedClientId, seed).Serialize(), receivedClientId);
+                            heldMessages.Add(new HeldMessage(MatchMakerHsResponse.messageId, data));
                         }
                     }
                     else
@@ -96,9 +113,15 @@ namespace Network
                     initializedClientIds.Add(receivedClientId);
                     break;
                 case MessageType.Acknowledge:
+                    Acknowledge acknowledgedMessage = new Acknowledge(data);
+                    if (TryGetHeldMessage(acknowledgedMessage.acknowledgedType, acknowledgedMessage.acknowledgedId, out HeldMessage heldMessage) && heldMessageToClientId.ContainsKey(heldMessage))
+                        RemoveClient(heldMessageToClientId[heldMessage]);
+
+                    TryRemoveHeldMessage(acknowledgedMessage.acknowledgedType, acknowledgedMessage.acknowledgedId);
                     break;
                 case MessageType.Disconnect:
-                    RemoveClient(ip);
+                    if (ipToId.ContainsKey(ip))
+                        RemoveClient(ipToId[ip]);
                     Broadcast(data);
                     break;
                 case MessageType.Error:
@@ -125,26 +148,72 @@ namespace Network
             }
         }
 
+        protected override void RemoveClient(int id)
+        {
+            base.RemoveClient(id);
+
+            if (initializedClientIds.Contains(id))
+                initializedClientIds.Remove(id);
+            if (connectingToServerPairs.Contains(id))
+                connectingToServerPairs.Remove(id);
+
+            if (clientIdToElo.ContainsKey(id))
+                clientIdToElo.Remove(id);
+        }
+
         private void CheckQueue()
         {
             if (initializedClientIds.Count > 0 && !clientIdToElo.ContainsKey(initializedClientIds[initializedClientIds.Count - 1]))
                 return;
 
-            if (initializedClientIds.Count >= 4)
+            if (initializedClientIds.Count >= 2)
             {
-                for (int i = 0; i < initializedClientIds.Count; i++)
-                {
-                    Debug.Log($"Client[{initializedClientIds[i]}] has elo: {clientIdToElo[initializedClientIds[i]]}");
-                }
+                connectingToServerPairs = initializedClientIds.GetRange(0, 2);
+                initializedClientIds.RemoveRange(0, 2);
+                CreateServer();
             }
         }
 
         private void CreateServer()
         {
+            int newSvPort = GetMinUnusedPort();
+            //System.Diagnostics.Process.Start(serverPath);
+            byte[] newSvDirection1 = new ServerDirection(ipAddress, newSvPort).Serialize();
+            SaveHeldMessage(newSvDirection1, connectingToServerPairs[0]);
+            byte[] newSvDirection2 = new ServerDirection(ipAddress, newSvPort).Serialize();
+            SaveHeldMessage(newSvDirection2, connectingToServerPairs[1]);
+
+            SendToClient(newSvDirection1, connectingToServerPairs[0]);
+            SendToClient(newSvDirection2, connectingToServerPairs[1]);
+
+            _activeServers.Add(new ActiveServer(connectingToServerPairs.GetRange(0, 2), ipAddress, newSvPort));
         }
 
-        private void ConnectClients()
+        private int GetMinUnusedPort()
         {
+            for (int i = minSvPort; i < maxSvPort; i++)
+            {
+                bool freePort = true;
+
+                for (int j = 0; j < usedPorts.Count; j++)
+                {
+                    if (i == usedPorts[j])
+                        freePort = false;
+                }
+
+                if (freePort)
+                    return i;
+            }
+
+            throw new Exception("Not Enough Free Ports");
+        }
+
+        private void SaveHeldMessage(byte[] data, int clientId)
+        {
+            Debug.Log($"MessageId {ServerDirection.messageId}");
+            HeldMessage held = new HeldMessage(ServerDirection.messageId, data);
+            heldMessages.Add(held);
+            heldMessageToClientId[held] = clientId;
         }
     }
 }

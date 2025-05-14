@@ -15,6 +15,11 @@ namespace Cubes
 
         private List<Cube> _cubes = new List<Cube>();
 
+        private void OnEnable()
+        {
+            NonAuthoritativeServer.onServerStart += Initialize;
+        }
+
         protected override void Initialize()
         {
             if (NonAuthoritativeServer.Instance == null)

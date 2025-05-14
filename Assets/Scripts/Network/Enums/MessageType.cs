@@ -14,6 +14,7 @@ namespace Network.Enums
         Disconnect,
         Ping,
         AllPings,
+        ServerDirection,
         Position,
         Chat, //ToDo
         ImportantOrderTest,

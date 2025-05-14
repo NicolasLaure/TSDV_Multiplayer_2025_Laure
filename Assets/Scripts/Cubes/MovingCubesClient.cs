@@ -20,6 +20,7 @@ namespace Cubes
         private int instanceID = -1;
 
         private int positionMessageId = 0;
+
         protected override void Initialize()
         {
             onCubeUpdated.AddListener(OnCubeUpdate);
@@ -58,7 +59,7 @@ namespace Cubes
 
         private void SendCubePosition(Vector3 pos)
         {
-            NetworkManager<ClientManager>.Instance.SendToServer(new Position(pos, instanceID, positionMessageId).Serialize());
+            NetworkManager<ClientManager>.Instance.SendToServer(new Position(pos, instanceID).Serialize());
             positionMessageId++;
         }
 
@@ -101,13 +102,13 @@ namespace Cubes
 
         private void HandleQuit()
         {
-            ClientManager.Instance.EndClient();
             foreach (GameObject cube in cubes)
             {
                 Destroy(cube);
             }
 
             cubes.Clear();
+            ClientManager.Instance.EndClient();
         }
 
         private void HandleAbruptDisconnection()
@@ -124,7 +125,7 @@ namespace Cubes
         public void OrderTest()
         {
             if (ClientManager.Instance != null)
-                ClientManager.Instance.SendToServer(new Position(new Vector3(0, 0, 0), instanceID, 0).Serialize());
+                ClientManager.Instance.SendToServer(new Position(new Vector3(0, 0, 0), instanceID).Serialize());
         }
     }
 }

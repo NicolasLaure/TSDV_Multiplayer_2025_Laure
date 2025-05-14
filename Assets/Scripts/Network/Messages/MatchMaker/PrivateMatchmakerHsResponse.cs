@@ -9,8 +9,9 @@ namespace Network.Messages.MatchMaker
 
         PrivateMatchmakerHsResponse(int id)
         {
-            messageType = MessageType.Error;
+            messageType = MessageType.PrivateMatchmakerHsResponse;
             this.id = id;
+            messageId++;
         }
 
         PrivateMatchmakerHsResponse(byte[] data)

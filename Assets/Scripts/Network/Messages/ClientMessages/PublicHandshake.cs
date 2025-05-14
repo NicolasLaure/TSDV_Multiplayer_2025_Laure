@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Network.Enums;
+using UnityEngine;
 
 namespace Network.Messages
 {
@@ -8,11 +9,11 @@ namespace Network.Messages
     {
         private HandshakeData _handshakeData;
 
-        public PublicHandshake(HandshakeData handshakeData, int messageId)
+        public PublicHandshake(HandshakeData handshakeData)
         {
             messageType = MessageType.HandShake;
             attribs = Attributes.Important | Attributes.Critical;
-            this.messageId = messageId;
+            messageId++;
             _handshakeData = handshakeData;
         }
 

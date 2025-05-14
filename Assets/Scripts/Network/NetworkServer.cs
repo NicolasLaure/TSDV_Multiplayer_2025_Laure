@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 using Network.CheckSum;
-using Network.Enums;
 using Network.Messages;
 using Network.Messages.Server;
 using UnityEngine;
@@ -34,8 +34,6 @@ namespace Network
         protected readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
         protected readonly Dictionary<int, float> idLastPingTime = new Dictionary<int, float>();
 
-        protected readonly Dictionary<int, Dictionary<MessageType, int>> clientIdToMessageId = new Dictionary<int, Dictionary<MessageType, int>>();
-        protected readonly Dictionary<int, Dictionary<MessageType, List<HeldMessage>>> heldImportantAndOrder = new Dictionary<int, Dictionary<MessageType, List<HeldMessage>>>();
         protected readonly ServerHsResponse HeldServerHsSa;
 
         public Action<int> onNewClient;
@@ -43,11 +41,10 @@ namespace Network
 
         protected int nextClientId = 0; // This id should be generated during first handshake
 
-        protected readonly Dictionary<int, Random> idToIVKeyGenerator = new Dictionary<int, Random>();
-
         public void StartServer()
         {
             port = defaultPort;
+            ipAddress = GetIp();
             connection = new UdpConnection(port, this);
             rngGenerator = new Random((int)Time.realtimeSinceStartup);
             seed = rngGenerator.Next(0, int.MaxValue);
@@ -57,10 +54,27 @@ namespace Network
             OperationsList.Populate(rngGenerator);
         }
 
+
         protected override void Update()
         {
             base.Update();
             PingCheck();
+        }
+
+        private void OnDestroy()
+        {
+            EndServer();
+        }
+
+        public void EndServer()
+        {
+            if (connection == null)
+                return;
+
+            Broadcast(new Disconnect(-1).Serialize());
+            connection = null;
+            Instance = null;
+            Destroy(gameObject);
         }
 
         protected void AddClient(IPEndPoint ip)
@@ -96,12 +110,14 @@ namespace Network
             }
         }
 
-        protected void RemoveClient(int id)
+        protected virtual void RemoveClient(int id)
         {
             if (ipToId.ContainsValue(id))
             {
                 Debug.Log("Removing client: " + id);
                 ipToId.Remove(clients[id].ipEndPoint);
+                clientIdToMessageId.Remove(id);
+                idToIVKeyGenerator.Remove(id);
                 clients.Remove(id);
                 idLastPingTime.Remove(id);
                 clientIds.Remove(id);
@@ -134,52 +150,6 @@ namespace Network
             return nextClientId;
         }
 
-        protected void SaveMessageId(int clientId, MessageType type, int messageId)
-        {
-            if (!clientIdToMessageId.ContainsKey(clientId))
-                clientIdToMessageId.Add(clientId, new Dictionary<MessageType, int>());
-            if (!clientIdToMessageId[clientId].ContainsKey(type))
-                clientIdToMessageId[clientId][type] = -1;
-
-            clientIdToMessageId[clientId][type] = messageId > clientIdToMessageId[clientId][type] ? messageId : clientIdToMessageId[clientId][type];
-        }
-
-        protected int ReadMessageId(int clientId, MessageType type)
-        {
-            if (!clientIdToMessageId.ContainsKey(clientId))
-                clientIdToMessageId.Add(clientId, new Dictionary<MessageType, int>());
-            if (!clientIdToMessageId[clientId].ContainsKey(type))
-                clientIdToMessageId[clientId][type] = -1;
-
-            return clientIdToMessageId[clientId][type];
-        }
-
-        protected void SaveHeldMessage(int clientId, MessageType type, int messageId, byte[] message)
-        {
-            if (!heldImportantAndOrder.ContainsKey(clientId))
-                heldImportantAndOrder[clientId] = new Dictionary<MessageType, List<HeldMessage>>();
-            if (!heldImportantAndOrder[clientId].ContainsKey(type))
-                heldImportantAndOrder[clientId][type] = new List<HeldMessage>();
-
-            int messageCount = heldImportantAndOrder[clientId][type].Count;
-            for (int i = 0; i < messageCount; i++)
-            {
-                if (messageId < heldImportantAndOrder[clientId][type][i].id)
-                {
-                    heldImportantAndOrder[clientId][type].Insert(i, new HeldMessage(messageId, message));
-                    return;
-                }
-            }
-
-            heldImportantAndOrder[clientId][type].Add(new HeldMessage(messageId, message));
-        }
-
-
-        protected bool AreHeldMessages(int clientId, MessageType messageType)
-        {
-            return heldImportantAndOrder.ContainsKey(clientId) && heldImportantAndOrder[clientId].ContainsKey(messageType) && heldImportantAndOrder[clientId][messageType].Count > 0;
-        }
-
         private void PingCheck()
         {
             short[] clientsMs = new short[clientIds.Count];
@@ -196,6 +166,14 @@ namespace Network
             }
 
             Broadcast(new AllPings(clientsMs, clientIds.Count).Serialize());
+        }
+
+        private IPAddress GetIp()
+        {
+            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+            socket.Connect("8.8.8.8", 65530);
+            IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+            return endPoint.Address;
         }
     }
 }

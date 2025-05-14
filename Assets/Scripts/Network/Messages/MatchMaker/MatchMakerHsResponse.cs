@@ -14,7 +14,7 @@ namespace Network.Messages.MatchMaker
             attribs = Attributes.Important;
             MatchMakerHandshakeData.id = id;
             MatchMakerHandshakeData.seed = seed;
-            this.messageId = 0;
+            messageId++;
         }
 
         public MatchMakerHsResponse(byte[] data)

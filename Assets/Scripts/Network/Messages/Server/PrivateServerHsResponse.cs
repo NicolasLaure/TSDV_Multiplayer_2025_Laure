@@ -9,8 +9,9 @@ namespace Network.Messages.Server
 
         PrivateServerHsResponse(int id)
         {
-            messageType = MessageType.Error;
+            messageType = MessageType.PrivateHsResponse;
             this.id = id;
+            messageId++;
         }
 
         PrivateServerHsResponse(byte[] data)

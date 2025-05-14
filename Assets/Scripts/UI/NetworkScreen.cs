@@ -26,7 +26,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         int elo = Convert.ToInt32(rateInputField.text);
 
         Instantiate(clientPrefab);
-        ClientManager.Instance.StartClient(ipAddress, elo);
+        ClientManager.Instance.StartClient(ipAddress, ClientManager.Instance.defaultPort, elo);
 
         pingTextObject.SetActive(true);
         ClientManager.Instance.onDisconnection += Disconnect;

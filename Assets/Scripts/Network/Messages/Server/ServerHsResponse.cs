@@ -17,7 +17,7 @@ namespace Network.Messages.Server
             ServerHandshakeData.seed = seed;
             ServerHandshakeData.count = count;
             ServerHandshakeData.cubes = cubes;
-            this.messageId = 0;
+            messageId++;
         }
 
         public ServerHsResponse(byte[] data)

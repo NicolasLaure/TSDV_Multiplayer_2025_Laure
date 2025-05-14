@@ -13,6 +13,7 @@ public class AllPings : Message<ClientsPing>
     {
         messageType = MessageType.AllPings;
         attribs = Attributes.None;
+        messageId++;
         clientsPing.ms = ms;
         clientsPing.count = count;
     }
