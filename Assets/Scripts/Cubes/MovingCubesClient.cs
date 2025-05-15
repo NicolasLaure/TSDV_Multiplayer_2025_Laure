@@ -63,7 +63,9 @@ namespace Cubes
 
         private void SendCubePosition(Vector3 pos)
         {
-            _networkClient.SendToServer(new Position(pos, instanceID).Serialize());
+            Position cubePosition = new Position(pos, instanceID);
+            cubePosition.clientId = instanceID;
+            _networkClient.SendToServer(cubePosition.Serialize());
             positionMessageId++;
         }
 
