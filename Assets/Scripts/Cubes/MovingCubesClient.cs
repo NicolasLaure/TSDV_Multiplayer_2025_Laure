@@ -21,13 +21,17 @@ namespace Cubes
 
         private int positionMessageId = 0;
 
+        private NetworkClient _networkClient;
+
         protected override void Initialize()
         {
             onCubeUpdated.AddListener(OnCubeUpdate);
 
-            ClientManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
-            ClientManager.Instance.onClientDisconnect += RemoveCube;
-            ClientManager.Instance.onDisconnection += HandleAbruptDisconnection;
+            _networkClient = ClientManager.Instance.networkClient;
+
+            _networkClient.OnReceiveEvent += OnReceiveDataEvent;
+            _networkClient.onClientDisconnect += RemoveCube;
+            _networkClient.onDisconnection += HandleAbruptDisconnection;
 
             InputReader.Instance.onQuit += HandleQuit;
         }
@@ -51,7 +55,7 @@ namespace Cubes
 
         void OnCubeUpdate(Vector3 pos)
         {
-            if (ClientManager.Instance != null)
+            if (_networkClient != null)
             {
                 SendCubePosition(pos);
             }
@@ -59,7 +63,7 @@ namespace Cubes
 
         private void SendCubePosition(Vector3 pos)
         {
-            NetworkManager<ClientManager>.Instance.SendToServer(new Position(pos, instanceID).Serialize());
+            _networkClient.SendToServer(new Position(pos, instanceID).Serialize());
             positionMessageId++;
         }
 
@@ -86,11 +90,12 @@ namespace Cubes
 
         private void HandleHandshakeResponseData(ServerHsResponse response)
         {
-            instanceID = ClientManager.Instance.Id;
+            instanceID = _networkClient.Id;
             for (int i = 0; i < response.ServerHandshakeData.count; i++)
             {
-                GameObject newCube = Instantiate(cubePrefab, response.ServerHandshakeData.cubes[i].position, Quaternion.identity);
-                newCube.SetActive(response.ServerHandshakeData.cubes[i].isActive);
+                Vector3 position = ByteFormat.GetVector3FromBytes(response.ServerHandshakeData.cubes[i], sizeof(bool));
+                GameObject newCube = Instantiate(cubePrefab, position, Quaternion.identity);
+                newCube.SetActive(BitConverter.ToBoolean(response.ServerHandshakeData.cubes[i]));
                 cubes.Add(newCube);
             }
 
@@ -108,7 +113,7 @@ namespace Cubes
             }
 
             cubes.Clear();
-            ClientManager.Instance.EndClient();
+            _networkClient.EndClient();
         }
 
         private void HandleAbruptDisconnection()
@@ -124,8 +129,8 @@ namespace Cubes
         [ContextMenu("OrderTest")]
         public void OrderTest()
         {
-            if (ClientManager.Instance != null)
-                ClientManager.Instance.SendToServer(new Position(new Vector3(0, 0, 0), instanceID).Serialize());
+            if (_networkClient != null)
+                _networkClient.SendToServer(new Position(new Vector3(0, 0, 0), instanceID).Serialize());
         }
     }
 }

@@ -26,10 +26,11 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         int elo = Convert.ToInt32(rateInputField.text);
 
         Instantiate(clientPrefab);
-        ClientManager.Instance.StartClient(ipAddress, ClientManager.Instance.defaultPort, elo);
+        Debug.Log(ClientManager.Instance.networkClient.defaultPort);
+        ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, elo);
 
         pingTextObject.SetActive(true);
-        ClientManager.Instance.onDisconnection += Disconnect;
+        ClientManager.Instance.networkClient.onDisconnection += Disconnect;
 
         if (ChatScreen.Instance != null)
             SwitchToChatScreen();
@@ -51,6 +52,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public void Disconnect()
     {
         this.gameObject.SetActive(true);
-        ClientManager.Instance.onDisconnection -= Disconnect;
+        ClientManager.Instance.networkClient.onDisconnection -= Disconnect;
     }
 }

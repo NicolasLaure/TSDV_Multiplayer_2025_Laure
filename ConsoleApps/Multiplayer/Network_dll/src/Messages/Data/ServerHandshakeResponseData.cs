@@ -8,6 +8,6 @@ namespace Network.Messages
         public int id;
         public int seed;
         public int count;
-        public List<(bool isActive, byte[] position)> cubes;
+        public List<byte[]> cubes;
     }
 }

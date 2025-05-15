@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using Network.CheckSum;
 using Network.Encryption;
@@ -11,7 +12,7 @@ using Random = System.Random;
 
 namespace Network
 {
-    public abstract class NetworkManager<T> : IDisposable, IReceiveData where T : NetworkManager<T>
+    public abstract class NetworkManager<T> : IReceiveData where T : NetworkManager<T>
     {
         public IPAddress ipAddress { get; protected set; }
         public int port { get; protected set; }
@@ -148,10 +149,6 @@ namespace Network
             }
 
             return false;
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

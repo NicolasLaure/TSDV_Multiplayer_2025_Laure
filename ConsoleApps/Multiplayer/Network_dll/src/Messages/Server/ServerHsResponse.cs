@@ -9,7 +9,7 @@ namespace Network.Messages.Server
     {
         public ServerHandshakeResponseData ServerHandshakeData;
 
-        public ServerHsResponse(int id, int count, int seed, List<(bool isActive, byte[] position)> cubes)
+        public ServerHsResponse(int id, int count, int seed, List<byte[]> cubes)
         {
             messageType = MessageType.HandShakeResponse;
             attribs = Attributes.Important;
@@ -37,10 +37,8 @@ namespace Network.Messages.Server
             int offset = sizeof(int) * 3;
             for (int i = 0; i < ServerHandshakeData.count; i++)
             {
-                Buffer.BlockCopy(BitConverter.GetBytes(ServerHandshakeData.cubes[i].isActive), 0, data, offset, sizeof(bool));
-                offset += sizeof(bool);
-                Buffer.BlockCopy(ServerHandshakeData.cubes[i].position, 0, data, offset, sizeof(float) * 3);
-                offset += sizeof(float) * 3;
+                Buffer.BlockCopy(ServerHandshakeData.cubes[i], 0, data, offset, ServerHandshakeData.cubes[i].Length);
+                offset += sizeof(bool) + sizeof(float) * 3;
             }
 
             return GetFormattedData(data);
@@ -53,16 +51,13 @@ namespace Network.Messages.Server
             data.id = BitConverter.ToInt32(payload, 0);
             data.seed = BitConverter.ToInt32(payload, sizeof(int));
             data.count = BitConverter.ToInt32(payload, sizeof(int) * 2);
-            data.cubes = new List<(bool isActive, byte[] position)>();
+            data.cubes = new List<byte[]>();
 
             int offset = sizeof(int) * 3;
             for (int i = 0; i < data.count; i++)
             {
-                (bool isActive, byte[] position) cube;
-                cube.isActive = BitConverter.ToBoolean(payload, offset);
-                offset += sizeof(bool);
-                cube.position = payload[offset..(offset + sizeof(float) * 3)];
-                offset += sizeof(float) * 3;
+                byte[] cube = payload[offset..(offset + sizeof(bool) + sizeof(float) * 3)];
+                offset += sizeof(bool) + sizeof(float) * 3;
                 data.cubes.Add(cube);
             }
 

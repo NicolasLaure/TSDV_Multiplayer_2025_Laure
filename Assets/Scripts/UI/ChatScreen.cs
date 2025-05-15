@@ -13,15 +13,15 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
 
         this.gameObject.SetActive(false);
 
-        ClientManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
+        ClientManager.Instance.networkClient.OnReceiveEvent += OnReceiveDataEvent;
     }
 
     void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
     {
-        if (NonAuthoritativeServer.Instance)
-        {
-            NonAuthoritativeServer.Instance.Broadcast(data);
-        }
+        // if (NonAuthoritativeServer.Instance)
+        // {
+        //     NonAuthoritativeServer.Instance.Broadcast(data);
+        // }
 
         messages.text += System.Text.ASCIIEncoding.UTF8.GetString(data) + System.Environment.NewLine;
     }
@@ -30,15 +30,12 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
     {
         if (inputMessage.text != "")
         {
-            if (NonAuthoritativeServer.Instance)
-            {
-                NonAuthoritativeServer.Instance.Broadcast(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
-                messages.text += inputMessage.text + System.Environment.NewLine;
-            }
-            else
-            {
-                ClientManager.Instance.SendToServer(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
-            }
+            // if (NonAuthoritativeServer.Instance)
+            // {
+            //     NonAuthoritativeServer.Instance.Broadcast(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
+            //     messages.text += inputMessage.text + System.Environment.NewLine;
+            // }
+            ClientManager.Instance.networkClient.SendToServer(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
 
             inputMessage.ActivateInputField();
             inputMessage.Select();

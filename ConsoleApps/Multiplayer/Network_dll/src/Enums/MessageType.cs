@@ -3,22 +3,22 @@ namespace Network.Enums
     public enum MessageType : short
     {
         HandShake = -1,
-        HandShakeResponse,
-        MatchMakerHsResponse,
-        PrivateHandshake,
-        PrivateMatchMakerHandshake,
-        PrivateHsResponse,
-        PrivateMatchmakerHsResponse,
-        Acknowledge,
-        DisAcknowledge, //ToDo
-        Disconnect,
-        Ping,
-        AllPings,
-        ServerDirection,
-        Position,
-        Chat, //ToDo
-        ImportantOrderTest,
-        Console,
-        Error,
+        HandShakeResponse = 0,
+        MatchMakerHsResponse = 1,
+        PrivateHandshake = 2,
+        PrivateMatchMakerHandshake = 3,
+        PrivateHsResponse = 4,
+        PrivateMatchmakerHsResponse = 5,
+        Acknowledge = 6,
+        DisAcknowledge = 7, //ToDo
+        Disconnect = 8,
+        Ping = 9,
+        AllPings = 10,
+        ServerDirection = 11,
+        Position = 12,
+        Chat = 13, //ToDo
+        ImportantOrderTest = 14,
+        Console = 15,
+        Error = 16,
     }
 }

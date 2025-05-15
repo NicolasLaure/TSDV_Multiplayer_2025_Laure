@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Net;
 using Network.Enums;
@@ -11,6 +12,12 @@ namespace Network
     public class NonAuthoritativeServer : NetworkServer<NonAuthoritativeServer>
     {
         public static Action onServerStart;
+
+        public void Start(int port)
+        {
+            StartServer(port);
+            onServerStart?.Invoke();
+        }
 
         public override void OnReceiveData(byte[] data, IPEndPoint ip)
         {
@@ -58,7 +65,7 @@ namespace Network
             switch (messageType)
             {
                 case MessageType.HandShake:
-                    if (clientIdToMessageId[receivedClientId][messageType] != messageId)
+                    if (ReadMessageId(receivedClientId, messageType) != messageId)
                     {
                         if (!ipToId.ContainsKey(ip))
                         {

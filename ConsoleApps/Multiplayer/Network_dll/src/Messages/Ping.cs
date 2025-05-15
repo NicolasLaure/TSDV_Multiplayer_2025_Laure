@@ -3,11 +3,11 @@ using Network.Enums;
 
 namespace Network.Messages
 {
-    public class Ping : Message<short>
+    public class Ping : Message<double>
     {
-        public short ms;
+        public double ms;
 
-        public Ping(short ms)
+        public Ping(double ms)
         {
             messageType = MessageType.Ping;
             attribs = Attributes.None;
@@ -24,7 +24,7 @@ namespace Network.Messages
             return GetFormattedData(BitConverter.GetBytes(ms));
         }
 
-        public override short Deserialize(byte[] message)
+        public override double Deserialize(byte[] message)
         {
             return BitConverter.ToInt16(ExtractPayload(message));
         }

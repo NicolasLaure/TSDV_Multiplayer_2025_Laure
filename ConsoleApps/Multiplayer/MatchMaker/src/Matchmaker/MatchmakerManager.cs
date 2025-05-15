@@ -7,8 +7,6 @@ using Network.Matchmaker;
 using Network.Messages;
 using Network.Messages.MatchMaker;
 using Network.Utilities;
-using MessageType = Network.Enums.MessageType;
-using Ping = Network.Messages.Ping;
 
 namespace Network
 {
@@ -42,7 +40,6 @@ namespace Network
         {
             int receivedClientId = GetReceivedClientId(ip);
 
-
             MessageType messageType;
             Attributes messageAttribs;
             if (BitConverter.ToBoolean(data, 0))
@@ -60,8 +57,10 @@ namespace Network
 
             if (messageType == MessageType.Ping)
             {
-                short ms = (short)Math.Floor((Time.time - idLastPingTime[receivedClientId]) * 1000);
+                Logger.Log("New Ping");
+                double ms = Math.Floor((Time.time - idLastPingTime[receivedClientId]) * 1000);
                 idLastPingTime[receivedClientId] = Time.time;
+                Logger.Log($"MS: {ms}, ClientId {receivedClientId}");
                 SendToClient(new Ping(ms).Serialize(), receivedClientId);
                 return;
             }
@@ -222,14 +221,6 @@ namespace Network
             heldMessages.Add(held);
             heldMessageToClientId[held] = clientId;
         }
-
-        // private void ConnectToServer(int port)
-        // {
-        //     UdpConnection newServer = new UdpConnection(ipAddress, port, this);
-        //
-        //     newServer.Send(new Ping(0).Serialize());
-        //     runningServers.Add(newServer);
-        // }
 
         private void CheckActiveServers()
         {

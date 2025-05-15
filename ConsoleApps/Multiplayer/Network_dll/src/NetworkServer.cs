@@ -54,7 +54,6 @@ namespace Network
             OperationsList.Populate(rngGenerator);
         }
 
-
         public override void Update()
         {
             base.Update();
@@ -68,7 +67,6 @@ namespace Network
 
             Broadcast(new Disconnect(-1).Serialize());
             connection = null;
-            Dispose();
         }
 
         protected void AddClient(IPEndPoint ip)

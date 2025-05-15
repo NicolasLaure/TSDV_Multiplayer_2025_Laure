@@ -1,4 +1,5 @@
-﻿using Network;
+﻿using System;
+using Network;
 
 namespace MatchMaker
 {
@@ -10,6 +11,7 @@ namespace MatchMaker
         static void Main(string[] args)
         {
             _matchmakerManager.StartServer(_matchmakerManager.defaultPort);
+            Console.WriteLine($"MathchMaker initialized on port {_matchmakerManager.port}");
             while (!shouldDispose)
             {
                 _matchmakerManager.Update();

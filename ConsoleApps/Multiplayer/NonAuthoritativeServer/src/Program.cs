@@ -1,4 +1,5 @@
-﻿using Network;
+﻿using Cubes;
+using Network;
 using Network.Utilities;
 
 namespace Server
@@ -7,10 +8,12 @@ namespace Server
     {
         private static bool shouldDispose = false;
         private static NonAuthoritativeServer server = new NonAuthoritativeServer();
+        private static MovingCubesServer cubesServer = new MovingCubesServer(server);
 
         static void Main(string[] args)
         {
-            server.StartServer(int.Parse(args[0]));
+            cubesServer.Start();
+            server.Start(int.Parse(args[0]));
             Logger.Log($"Started Server on Port {server.port}");
             while (!shouldDispose)
             {

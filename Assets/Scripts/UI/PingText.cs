@@ -16,7 +16,7 @@ public class PingText : MonoBehaviour
             return;
         }
 
-        ClientManager.Instance.onPingUpdated += UpdatePing;
+        ClientManager.Instance.networkClient.onPingUpdated += UpdatePing;
     }
 
     private void UpdatePing(short ping)
