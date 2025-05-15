@@ -17,6 +17,7 @@ namespace Network
         private List<int> initializedClientIds = new List<int>();
         private List<int> connectingToServerPairs = new List<int>();
 
+        private int maxEloDifference = 400;
         private int minSvPort = 60326;
         private int maxSvPort = 60350;
         private List<int> usedPorts = new List<int>();
@@ -165,13 +166,48 @@ namespace Network
 
             if (initializedClientIds.Count >= 2)
             {
-                connectingToServerPairs = initializedClientIds.GetRange(0, 2);
-                initializedClientIds.RemoveRange(0, 2);
-                CreateServer();
+                PairPlayers();
             }
         }
 
-        private void CreateServer()
+        private void PairPlayers()
+        {
+            if (TryFindPairs(out int idOne, out int idTwo))
+            {
+                Logger.Log($"Pair A: {idOne}, B: {idTwo}");
+                connectingToServerPairs.Add(idOne);
+                connectingToServerPairs.Add(idTwo);
+                initializedClientIds.Remove(idOne);
+                initializedClientIds.Remove(idTwo);
+                CreateServer(idOne, idTwo);
+            }
+        }
+
+        private bool TryFindPairs(out int player1Id, out int player2Id)
+        {
+            for (int i = 0; i < initializedClientIds.Count; i++)
+            {
+                for (int j = 0; j < initializedClientIds.Count; j++)
+                {
+                    if (i == j)
+                        continue;
+
+                    if (Math.Abs(clientIdToElo[initializedClientIds[i]] - clientIdToElo[initializedClientIds[j]]) <= maxEloDifference)
+                    {
+                        player1Id = initializedClientIds[i];
+                        player2Id = initializedClientIds[j];
+                        return true;
+                    }
+                }
+            }
+
+            Logger.Log("Couldn't Find matching pair");
+            player1Id = -1;
+            player2Id = -1;
+            return false;
+        }
+
+        private void CreateServer(int clientOneId, int clientTwoId)
         {
             int newSvPort = GetMinUnusedPort();
             usedPorts.Add(newSvPort);
@@ -184,14 +220,17 @@ namespace Network
             processToPort[newServer] = newSvPort;
 
             byte[] newSvDirection1 = new ServerDirection(ipAddress, newSvPort).Serialize();
-            SaveHeldMessage(newSvDirection1, connectingToServerPairs[0]);
+            SaveHeldMessage(newSvDirection1, clientOneId);
             byte[] newSvDirection2 = new ServerDirection(ipAddress, newSvPort).Serialize();
-            SaveHeldMessage(newSvDirection2, connectingToServerPairs[1]);
+            SaveHeldMessage(newSvDirection2, clientTwoId);
 
-            SendToClient(newSvDirection1, connectingToServerPairs[0]);
-            SendToClient(newSvDirection2, connectingToServerPairs[1]);
+            SendToClient(newSvDirection1, clientOneId);
+            SendToClient(newSvDirection2, clientTwoId);
 
-            _activeServers.Add(new ActiveServer(connectingToServerPairs.GetRange(0, 2), ipAddress, newSvPort));
+            List<int> connectedPair = new List<int>();
+            connectedPair.Add(clientOneId);
+            connectedPair.Add(clientTwoId);
+            _activeServers.Add(new ActiveServer(connectedPair, ipAddress, newSvPort));
         }
 
         private int GetMinUnusedPort()
