@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Threading;
 using Network.Enums;
 using Network.Matchmaker;
 using Network.Messages;
@@ -21,7 +22,7 @@ namespace Network
         private List<int> usedPorts = new List<int>();
         private List<ActiveServer> _activeServers = new List<ActiveServer>();
 
-        private string serverPath = "NonAuthoritativeServer.exe";
+        public string serverPath = "NonAuthoritativeServer.exe";
 
         private readonly Dictionary<HeldMessage, int> heldMessageToClientId = new Dictionary<HeldMessage, int>();
 
@@ -57,10 +58,8 @@ namespace Network
 
             if (messageType == MessageType.Ping)
             {
-                Logger.Log("New Ping");
-                double ms = Math.Floor((Time.time - idLastPingTime[receivedClientId]) * 1000);
-                idLastPingTime[receivedClientId] = Time.time;
-                Logger.Log($"MS: {ms}, ClientId {receivedClientId}");
+                double ms = Math.Floor((ServerTime.time - idLastPingTime[receivedClientId]) * 1000);
+                idLastPingTime[receivedClientId] = ServerTime.time;
                 SendToClient(new Ping(ms).Serialize(), receivedClientId);
                 return;
             }

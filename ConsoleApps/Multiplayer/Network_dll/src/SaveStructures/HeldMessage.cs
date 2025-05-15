@@ -12,7 +12,7 @@ namespace Network
         {
             this.id = id;
             this.message = message;
-            heldSince = Time.time;
+            heldSince = ServerTime.time;
         }
     }
 }

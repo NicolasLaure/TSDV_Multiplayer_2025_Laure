@@ -6,7 +6,6 @@ namespace Server
 {
     class Program
     {
-        private static bool shouldDispose = false;
         private static NonAuthoritativeServer server = new NonAuthoritativeServer();
         private static MovingCubesServer cubesServer = new MovingCubesServer(server);
 
@@ -14,11 +13,7 @@ namespace Server
         {
             cubesServer.Start();
             server.Start(int.Parse(args[0]));
-            Logger.Log($"Started Server on Port {server.port}");
-            while (!shouldDispose)
-            {
-                server.Update();
-            }
+            server.ServerLoop();
         }
     }
 }

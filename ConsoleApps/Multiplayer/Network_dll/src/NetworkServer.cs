@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using Network.CheckSum;
 using Network.Messages;
 using Network.Messages.Server;
@@ -41,17 +42,31 @@ namespace Network
 
         protected int nextClientId = 0; // This id should be generated during first handshake
 
+        public int targetFPS = 60;
+        private bool shouldStop = false;
+
         public void StartServer(int port)
         {
+            Initialize();
             this.port = port;
             ipAddress = GetIp();
             connection = new UdpConnection(port, this);
-            rngGenerator = new Random((int)Time.time);
+            rngGenerator = new Random((int)ServerTime.time);
             seed = rngGenerator.Next(0, int.MaxValue);
             rngGenerator = new Random(seed);
+            Console.WriteLine($"Server initialized on port {port}");
             Logger.Log($"Server Seed: {seed}");
 
             OperationsList.Populate(rngGenerator);
+        }
+
+        public void ServerLoop()
+        {
+            while (!shouldStop)
+            {
+                Update();
+                Thread.Sleep(1000 / targetFPS);
+            }
         }
 
         public override void Update()
@@ -66,6 +81,7 @@ namespace Network
                 return;
 
             Broadcast(new Disconnect(-1).Serialize());
+            shouldStop = true;
             connection = null;
         }
 
@@ -77,13 +93,13 @@ namespace Network
                 int id = nextClientId;
                 ipToId[ip] = nextClientId;
                 Logger.Log("Adding client: " + ip.Address + " ID: " + id);
-                clients.Add(nextClientId, new Client(ip, nextClientId, Time.time));
-                idLastPingTime[nextClientId] = Time.time;
+                clients.Add(nextClientId, new Client(ip, nextClientId, ServerTime.time));
+                idLastPingTime[nextClientId] = ServerTime.time;
                 clientIds.Add(id);
 
                 idToIVKeyGenerator[id] = new Random(seed);
 
-                SendToClient(new Ping(0).Serialize(), nextClientId);
+                SendToClient(new Ping(0).Serialize(), ipToId[ip]);
                 onNewClient?.Invoke(nextClientId);
                 nextClientId++;
             }
@@ -120,6 +136,9 @@ namespace Network
         public void SendToClient(byte[] data, int clientId)
         {
             Client client = clients[clientId];
+            if (client == null)
+                Logger.LogError("Client Was Null");
+
             connection.Send(data, client.ipEndPoint);
         }
 
@@ -148,7 +167,7 @@ namespace Network
 
             for (int i = 0; i < clientIds.Count; i++)
             {
-                short ms = (short)((Time.time - idLastPingTime[clientIds[i]]) * 1000);
+                short ms = (short)((ServerTime.time - idLastPingTime[clientIds[i]]) * 1000);
                 clientsMs[i] = ms;
                 if (ms > TimeOutTime * 1000)
                 {

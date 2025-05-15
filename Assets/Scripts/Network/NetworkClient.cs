@@ -7,6 +7,7 @@ using Network.Enums;
 using Network.Messages;
 using Network.Messages.MatchMaker;
 using Network.Messages.Server;
+using Network.Utilities;
 using UnityEngine;
 using Ping = Network.Messages.Ping;
 using Random = System.Random;
@@ -31,8 +32,9 @@ namespace Network
 
         public void StartClient(IPAddress ip, int port, int elo)
         {
+            Initialize();
             this.port = port;
-            this.ipAddress = ip;
+            ipAddress = ip;
             lastPingTime = Time.time;
             ping = 0;
             _elo = elo;
@@ -44,6 +46,7 @@ namespace Network
             handshakeData.ip = 0;
             byte[] handshakeBytes = new PublicHandshake(handshakeData).Serialize();
             SendToServer(handshakeBytes);
+            Debug.Log("Handshake Sent");
             heldMessages.Add(new HeldMessage(PublicHandshake.messageId, handshakeBytes));
         }
 
@@ -55,7 +58,7 @@ namespace Network
 
             for (int i = 0; i < heldMessages.Count; i++)
             {
-                if (Time.time - heldMessages[i].heldSince >= maxResponseWait)
+                if (ServerTime.time - heldMessages[i].heldSince >= maxResponseWait)
                 {
                     Debug.Log($"Resending held message, Held Messages count: {heldMessages.Count}");
                     SendToServer(heldMessages[i].message);
@@ -72,7 +75,6 @@ namespace Network
             if (connection == null)
                 return;
 
-            Debug.Log($"Disconnected, Ping was{ping}");
             SendToServer(new Disconnect(id).Serialize());
             connection = null;
             onDisconnection?.Invoke();

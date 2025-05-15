@@ -36,8 +36,8 @@ namespace Network
 
             if (messageType == MessageType.Ping)
             {
-                short ms = (short)Math.Floor((Time.time - idLastPingTime[receivedClientId]) * 1000);
-                idLastPingTime[receivedClientId] = Time.time;
+                short ms = (short)Math.Floor((ServerTime.time - idLastPingTime[receivedClientId]) * 1000);
+                idLastPingTime[receivedClientId] = ServerTime.time;
                 SendToClient(new Ping(ms).Serialize(), receivedClientId);
                 return;
             }

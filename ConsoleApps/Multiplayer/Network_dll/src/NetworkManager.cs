@@ -34,10 +34,15 @@ namespace Network
         protected List<HeldMessage> heldMessages = new List<HeldMessage>();
 
         public int defaultPort = 60325;
-
+        protected ServerTime serverTime;
         public int Seed => seed;
 
         public abstract void OnReceiveData(byte[] data, IPEndPoint ip);
+
+        public void Initialize()
+        {
+            serverTime = new ServerTime();
+        }
 
         public virtual void Update()
         {

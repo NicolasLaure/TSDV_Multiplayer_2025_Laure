@@ -1,13 +1,12 @@
 using System;
-using System.Diagnostics;
 
 namespace Network.Utilities
 {
-    public class Time
+    public class ServerTime
     {
         public static DateTime startTime;
 
-        Time()
+        public ServerTime()
         {
             startTime = DateTime.UtcNow;
         }
