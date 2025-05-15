@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Network.Enums;
+using Utils;
 
 namespace Network.Messages.Server
 {
@@ -8,14 +9,14 @@ namespace Network.Messages.Server
     {
         public ServerHandshakeResponseData ServerHandshakeData;
 
-        public ServerHsResponse(int id, int count, int seed, List<byte[]> cubes)
+        public ServerHsResponse(int id, int count, int seed, List<byte[]> players)
         {
             messageType = MessageType.HandShakeResponse;
             attribs = Attributes.Important;
             ServerHandshakeData.id = id;
             ServerHandshakeData.seed = seed;
             ServerHandshakeData.count = count;
-            ServerHandshakeData.cubes = cubes;
+            ServerHandshakeData.players = players;
             messageId++;
         }
 
@@ -26,7 +27,7 @@ namespace Network.Messages.Server
 
         public override byte[] Serialize()
         {
-            int size = sizeof(int) * 3 + ServerHandshakeData.cubes.Count * (sizeof(float) * 3 + sizeof(bool));
+            int size = sizeof(int) * 3 + ServerHandshakeData.players.Count * (Constants.MatrixSize + sizeof(bool));
             byte[] data = new byte[size];
 
             Buffer.BlockCopy(BitConverter.GetBytes(ServerHandshakeData.id), 0, data, 0, sizeof(int));
@@ -36,8 +37,8 @@ namespace Network.Messages.Server
             int offset = sizeof(int) * 3;
             for (int i = 0; i < ServerHandshakeData.count; i++)
             {
-                Buffer.BlockCopy(ServerHandshakeData.cubes[i], 0, data, offset, ServerHandshakeData.cubes[i].Length);
-                offset += sizeof(bool) + sizeof(float) * 3;
+                Buffer.BlockCopy(ServerHandshakeData.players[i], 0, data, offset, ServerHandshakeData.players[i].Length);
+                offset += sizeof(bool) + Constants.MatrixSize;
             }
 
             return GetFormattedData(data);
@@ -50,14 +51,14 @@ namespace Network.Messages.Server
             data.id = BitConverter.ToInt32(payload, 0);
             data.seed = BitConverter.ToInt32(payload, sizeof(int));
             data.count = BitConverter.ToInt32(payload, sizeof(int) * 2);
-            data.cubes = new List<byte[]>();
+            data.players = new List<byte[]>();
 
             int offset = sizeof(int) * 3;
             for (int i = 0; i < data.count; i++)
             {
-                byte[] cube = payload[offset..(offset + sizeof(bool) + sizeof(float) * 3)];
-                offset += sizeof(bool) + sizeof(float) * 3;
-                data.cubes.Add(cube);
+                byte[] cube = payload[offset..(offset + sizeof(bool) + Constants.MatrixSize)];
+                offset += sizeof(bool) + Constants.MatrixSize;
+                data.players.Add(cube);
             }
 
             return data;

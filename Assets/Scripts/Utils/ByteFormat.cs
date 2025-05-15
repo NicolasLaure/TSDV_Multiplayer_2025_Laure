@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using Utils;
 
 public static class ByteFormat
 {
@@ -36,15 +37,18 @@ public static class ByteFormat
         }
 
         return new Vector3(BitConverter.ToSingle(components[0]), BitConverter.ToSingle(components[1]),
-            BitConverter.ToSingle(components[2]));
+        BitConverter.ToSingle(components[2]));
     }
 
     public static byte[] Get4X4Bytes(Matrix4x4 matrix4X4)
     {
-        byte[] matrixBytes = new byte[sizeof(float) * 12];
-        Buffer.BlockCopy(GetVector4Bytes(matrix4X4.GetRow(0)), 0, matrixBytes, 0, 4);
-        Buffer.BlockCopy(GetVector4Bytes(matrix4X4.GetRow(1)), 0, matrixBytes, 0, 4);
-        Buffer.BlockCopy(GetVector4Bytes(matrix4X4.GetRow(2)), 0, matrixBytes, 0, 4);
+        byte[] matrixBytes = new byte[Constants.MatrixSize];
+        int offset = 0;
+        Buffer.BlockCopy(GetVector4Bytes(matrix4X4.GetRow(0)), 0, matrixBytes, offset, Constants.Vector4Size);
+        offset += Constants.Vector4Size;
+        Buffer.BlockCopy(GetVector4Bytes(matrix4X4.GetRow(1)), 0, matrixBytes, offset, Constants.Vector4Size);
+        offset += Constants.Vector4Size;
+        Buffer.BlockCopy(GetVector4Bytes(matrix4X4.GetRow(2)), 0, matrixBytes, offset, Constants.Vector4Size);
         return matrixBytes;
     }
 
@@ -52,8 +56,10 @@ public static class ByteFormat
     {
         Matrix4x4 trs = Matrix4x4.identity;
         trs.SetRow(0, GetVector4FromBytes(bytes, offset));
-        trs.SetRow(1, GetVector4FromBytes(bytes, offset + sizeof(float) * 4));
-        trs.SetRow(2, GetVector4FromBytes(bytes, offset + sizeof(float) * 8));
+        offset += Constants.Vector4Size;
+        trs.SetRow(1, GetVector4FromBytes(bytes, offset));
+        offset += Constants.Vector4Size;
+        trs.SetRow(2, GetVector4FromBytes(bytes, offset));
         return trs;
     }
 
@@ -78,6 +84,6 @@ public static class ByteFormat
         }
 
         return new Vector4(BitConverter.ToSingle(components[0]), BitConverter.ToSingle(components[1]),
-            BitConverter.ToSingle(components[2]), BitConverter.ToSingle(components[3]));
+        BitConverter.ToSingle(components[2]), BitConverter.ToSingle(components[3]));
     }
 }

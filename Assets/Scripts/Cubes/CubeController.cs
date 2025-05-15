@@ -25,7 +25,7 @@ namespace Cubes
             if (dir != Vector3.zero)
             {
                 transform.position += dir * speed * Time.deltaTime;
-                MovingCubesClient.Instance.onCubeUpdated?.Invoke(transform.position);
+                FpsClient.Instance.onPlayerUpdated?.Invoke(transform.localToWorldMatrix);
             }
         }
 

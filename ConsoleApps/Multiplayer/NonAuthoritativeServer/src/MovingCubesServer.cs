@@ -5,13 +5,13 @@ using Network;
 using Network.Enums;
 using Network.Messages;
 using Network.Messages.Server;
+using Utils;
 
 namespace Cubes
 {
     public class MovingCubesServer
     {
-        private float horizontalOffset = 5f;
-        private List<byte[]> _cubes = new List<byte[]>();
+        private List<byte[]> _players = new List<byte[]>();
 
         private NonAuthoritativeServer serverInstance;
 
@@ -51,31 +51,29 @@ namespace Cubes
         private void ReceiveCubePos(byte[] data)
         {
             Position posMessage = new Position(data);
-            byte[] pos = posMessage.pos;
+            byte[] pos = posMessage.trs;
             int index = posMessage.instanceID;
 
-            _cubes[index] = pos;
+            //Buffer.BlockCopy(pos, 0, _players[index], sizeof(bool), pos.Length);
+            _players[index] = pos;
         }
 
         private void HandleNewClient(int id)
         {
-            if (id > _cubes.Count - 1)
+            if (id > _players.Count - 1)
             {
-                byte[] cube = new byte[13];
-                float x = horizontalOffset * _cubes.Count;
-                Buffer.BlockCopy(BitConverter.GetBytes(true), 0, cube, 0, sizeof(bool));
-                Buffer.BlockCopy(BitConverter.GetBytes(x), 0, cube, sizeof(bool), sizeof(float));
-                _cubes.Add(cube);
+                byte[] player = new byte[sizeof(bool) + Constants.MatrixSize];
+                Buffer.BlockCopy(BitConverter.GetBytes(true), 0, player, 0, sizeof(bool));
+                _players.Add(player);
             }
 
-
-            ServerHsResponse hsResponse = new ServerHsResponse(id, _cubes.Count, serverInstance.Seed, _cubes);
+            ServerHsResponse hsResponse = new ServerHsResponse(id, _players.Count, serverInstance.Seed, _players);
             serverInstance.SendToClient(hsResponse.Serialize(), id);
         }
 
         private void RemoveClient(int id)
         {
-            Buffer.BlockCopy(BitConverter.GetBytes(false), 0, _cubes[id], 0, sizeof(bool));
+            Buffer.BlockCopy(BitConverter.GetBytes(false), 0, _players[id], 0, sizeof(bool));
         }
     }
 }

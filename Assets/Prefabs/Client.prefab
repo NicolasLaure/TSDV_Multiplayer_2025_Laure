@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 542144133467161035}
   - component: {fileID: 3057039342802636066}
-  - component: {fileID: -1634821356252885747}
+  - component: {fileID: 8849897520394440356}
   m_Layer: 0
   m_Name: Client
   m_TagString: Untagged
@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb43f7f48d2371b479a68620126227be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-1634821356252885747
+--- !u!114 &8849897520394440356
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,12 +54,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 6540943213920370471}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd2e41fa4312ae8488f2e61171635c83, type: 3}
+  m_Script: {fileID: 11500000, guid: 6b1f68b988743eb418d5f73f0e1bc355, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onCubeUpdated:
+  playerPrefab: {fileID: 5223137963761588274, guid: 9537391158856e54fb7fc309b97041bf,
+    type: 3}
+  playerProperties: {fileID: 11400000, guid: 43835df3134367641881484aa7920938, type: 2}
+  spawnPoints: []
+  onPlayerUpdated:
     m_PersistentCalls:
       m_Calls: []
-  cubePrefab: {fileID: 4346985192501097846, guid: 29e1e3734bf62e24ebf141a8914ee52b,
-    type: 3}
-  playerSpeed: 5

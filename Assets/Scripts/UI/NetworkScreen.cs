@@ -25,7 +25,9 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
         int elo = Convert.ToInt32(rateInputField.text);
 
-        Instantiate(clientPrefab);
+        if (ClientManager.Instance == null)
+            Instantiate(clientPrefab);
+
         Debug.Log(ClientManager.Instance.networkClient.defaultPort);
         ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, elo);
 

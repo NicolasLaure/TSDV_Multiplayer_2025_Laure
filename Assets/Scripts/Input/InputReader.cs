@@ -9,6 +9,7 @@ namespace Input
         private PlayerInput _input;
 
         public Action<Vector2> onMove;
+        public Action<Vector2> onLook;
         public Action onQuit;
 
         protected override void Initialize()
@@ -18,6 +19,8 @@ namespace Input
 
             _input.Player.Move.performed += OnMove;
             _input.Player.Move.canceled += OnMove;
+            _input.Player.Look.performed += OnLook;
+            _input.Player.Look.canceled += OnLook;
 
             _input.Player.Quit.performed += OnQuit;
         }
@@ -25,6 +28,11 @@ namespace Input
         private void OnMove(InputAction.CallbackContext context)
         {
             onMove?.Invoke(context.ReadValue<Vector2>());
+        }
+
+        private void OnLook(InputAction.CallbackContext context)
+        {
+            onLook?.Invoke(context.ReadValue<Vector2>());
         }
 
         private void OnQuit(InputAction.CallbackContext context)
