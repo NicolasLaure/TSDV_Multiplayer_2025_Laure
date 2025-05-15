@@ -88,6 +88,7 @@ namespace Network
                 case MessageType.Disconnect:
                     RemoveClient(ip);
                     Broadcast(data);
+                    EndServer();
                     break;
                 case MessageType.Error:
                     break;

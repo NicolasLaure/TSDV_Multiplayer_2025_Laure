@@ -80,8 +80,8 @@ namespace Network
             if (connection == null)
                 return;
 
-            Broadcast(new Disconnect(-1).Serialize());
             shouldStop = true;
+            Broadcast(new Disconnect(-1).Serialize());
             connection = null;
         }
 
@@ -110,6 +110,7 @@ namespace Network
             if (ipToId.ContainsKey(ip))
             {
                 Logger.Log("Removing client: " + ip.Address);
+                idToIVKeyGenerator.Remove(ipToId[ip]);
                 clients.Remove(ipToId[ip]);
                 idLastPingTime.Remove(ipToId[ip]);
                 clientIds.Remove(ipToId[ip]);
@@ -139,11 +140,15 @@ namespace Network
             if (client == null)
                 Logger.LogError("Client Was Null");
 
-            connection.Send(data, client.ipEndPoint);
+            if (connection != null)
+                connection.Send(data, client.ipEndPoint);
         }
 
         public void Broadcast(byte[] data)
         {
+            if (connection == null)
+                return;
+
             using (var iterator = clients.GetEnumerator())
             {
                 while (iterator.MoveNext())
