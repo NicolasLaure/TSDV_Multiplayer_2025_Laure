@@ -396,11 +396,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectBtn: {fileID: 396509903}
-  startServerBtn: {fileID: 306608487}
-  portInputField: {fileID: 1558557928}
+  rateInputField: {fileID: 0}
   addressInputField: {fileID: 2123302590}
   pingTextObject: {fileID: 1364286041}
-  movingCubes: {fileID: 1416574781}
   clientPrefab: {fileID: 6540943213920370471, guid: d23ac760fae1f3348939a3ca0bdcb1fa,
     type: 3}
   serverPrefab: {fileID: 4876374338819648420, guid: 4380a6c7f5a0d174697d822b7a22b7be,
