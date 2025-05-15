@@ -52,6 +52,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public void Disconnect()
     {
         this.gameObject.SetActive(true);
-        ClientManager.Instance.networkClient.onDisconnection -= Disconnect;
+        if (ClientManager.Instance.networkClient != null)
+            ClientManager.Instance.networkClient.onDisconnection -= Disconnect;
     }
 }

@@ -15,5 +15,10 @@ namespace Network
         {
             networkClient.Update();
         }
+
+        private void OnDestroy()
+        {
+            networkClient.EndClient();
+        }
     }
 }
