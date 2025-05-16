@@ -76,6 +76,9 @@ namespace Cubes
             Position posMessage = new Position(data);
             Matrix4x4 trs = posMessage.trs;
             int index = posMessage.instanceID;
+            if (index == instanceID)
+                return;
+
             while (index >= players.Count)
             {
                 players.Add(Instantiate(playerPrefab));
@@ -85,6 +88,7 @@ namespace Cubes
                 players[index].SetActive(true);
 
             players[index].transform.position = trs.GetPosition();
+            players[index].transform.rotation = trs.rotation;
         }
 
         private void RemoveCube(int id)
