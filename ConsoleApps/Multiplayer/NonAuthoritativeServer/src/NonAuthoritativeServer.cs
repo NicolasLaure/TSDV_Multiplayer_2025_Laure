@@ -93,6 +93,7 @@ namespace Network
                 case MessageType.Error:
                     break;
                 case MessageType.Position:
+                case MessageType.Crouch:
                     Broadcast(data);
                     OnReceiveEvent?.Invoke(data, ip);
                     break;

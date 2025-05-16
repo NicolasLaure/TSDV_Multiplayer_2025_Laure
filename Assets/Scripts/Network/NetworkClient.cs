@@ -166,11 +166,6 @@ namespace Network
                 case MessageType.AllPings:
                     ClientsPing allClientsPing = new AllPings(data).clientsPing;
 
-                    for (int i = 0; i < allClientsPing.count; i++)
-                    {
-                        Debug.Log($"[{i}]: {allClientsPing.ms[i]}ms");
-                    }
-
                     break;
                 // Moving Cubes message
                 case MessageType.HandShakeResponse:
@@ -189,6 +184,7 @@ namespace Network
                     StartClient(svDir.serverIp, svDir.serverPort, _elo);
                     break;
                 case MessageType.Position:
+                case MessageType.Crouch:
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
                 default:

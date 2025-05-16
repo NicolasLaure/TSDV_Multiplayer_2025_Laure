@@ -43,6 +43,8 @@ namespace Cubes
                 case MessageType.Position:
                     ReceiveCubePos(data);
                     break;
+                case MessageType.Crouch:
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

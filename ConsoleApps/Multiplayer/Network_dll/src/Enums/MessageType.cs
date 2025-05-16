@@ -20,5 +20,7 @@ namespace Network.Enums
         ImportantOrderTest = 14,
         Console = 15,
         Error = 16,
+        Crouch = 17,
+        Shoot = 18
     }
 }

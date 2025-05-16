@@ -5,8 +5,7 @@ using UnityEngine;
 
 public class MouseLook : MonoBehaviour
 {
-    public float mouseSensitivity;
-    public float maxVerticalRotation;
+    public PlayerProperties playerProperties;
 
     private Vector2 _rotationDir = Vector2.zero;
     private float xAngle;
@@ -19,14 +18,14 @@ public class MouseLook : MonoBehaviour
         yAngle = transform.rotation.eulerAngles.y;
 
         InputReader.Instance.onLook += SetRotation;
-        //ClientManager.Instance.networkClient.onDisconnection += UnlockMouse;
+        ClientManager.Instance.networkClient.onDisconnection += UnlockMouse;
     }
 
     private void Update()
     {
-        transform.Rotate(Vector3.up, _rotationDir.x * mouseSensitivity * Time.deltaTime);
-        xAngle += _rotationDir.y * mouseSensitivity * Time.deltaTime;
-        yAngle = Mathf.Clamp(xAngle, -maxVerticalRotation, maxVerticalRotation);
+        transform.Rotate(Vector3.up, _rotationDir.x * playerProperties.mouseSensitivity * Time.deltaTime);
+        xAngle += _rotationDir.y * playerProperties.mouseSensitivity * Time.deltaTime;
+        yAngle = Mathf.Clamp(xAngle, -playerProperties.maxVerticalRotation, playerProperties.maxVerticalRotation);
         Camera.main.transform.localRotation = Quaternion.Euler(-xAngle, 0, 0);
     }
 

@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fd019d72df437e4db5408d86eabd822, type: 3}
   m_Name: PlayerProperties
   m_EditorClassIdentifier: 
-  speed: 5
+  speed: 10
   cameraOffset: {x: 0, y: 0.5, z: 0.2}
   mouseSensitivity: 5
   maxVerticalRotation: 80
+  _defaultSize: 1
+  _defaultYPosition: 1
+  crouchSize: 0.65
+  crouchYPosition: 0.65

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using FPS;
 using Input;
+using Messages.ClientMessages;
 using Network;
 using Network.Enums;
 using Network.Messages;
@@ -17,6 +19,7 @@ namespace Cubes
         [SerializeField] private PlayerProperties playerProperties;
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         public UnityEvent<Matrix4x4> onPlayerUpdated;
+        public UnityEvent<bool> onCrouch;
         private List<GameObject> players = new List<GameObject>();
         private int instanceID = -1;
 
@@ -27,6 +30,7 @@ namespace Cubes
         private void Start()
         {
             onPlayerUpdated.AddListener(OnCubeUpdate);
+            onCrouch.AddListener(OnCrouch);
 
             _networkClient = ClientManager.Instance.networkClient;
 
@@ -36,7 +40,6 @@ namespace Cubes
 
             InputReader.Instance.onQuit += HandleQuit;
         }
-
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
         {
@@ -49,6 +52,9 @@ namespace Cubes
                 case MessageType.Position:
                     ReceiveCubePos(data);
                     break;
+                case MessageType.Crouch:
+                    ReceiveCrouch(data);
+                    break;
                 default:
                     Debug.Log($"MessageType = {(int)messageType}");
                     throw new ArgumentOutOfRangeException();
@@ -60,6 +66,14 @@ namespace Cubes
             if (_networkClient != null)
             {
                 SendCubePosition(playerTrs);
+            }
+        }
+
+        void OnCrouch(bool isCrouching)
+        {
+            if (_networkClient != null)
+            {
+                _networkClient.SendToServer(new Crouch(isCrouching, instanceID).Serialize());
             }
         }
 
@@ -91,6 +105,25 @@ namespace Cubes
             players[index].transform.rotation = trs.rotation;
         }
 
+        private void ReceiveCrouch(byte[] data)
+        {
+            Crouch crouch = new Crouch(data);
+
+            if (crouch.clientId > players.Count)
+                return;
+
+            if (crouch.isCrouching)
+            {
+                Debug.Log($"Player[{crouch.clientId}] position Y: {playerProperties.crouchYPosition} Size Y: {playerProperties.crouchSize}");
+                players[crouch.clientId].GetComponent<TransformHandler>().SetHeight(playerProperties.crouchSize, playerProperties.crouchYPosition);
+            }
+            else
+            {
+                Debug.Log("Player wasn't crouching");
+                players[crouch.clientId].GetComponent<TransformHandler>().SetHeight(playerProperties._defaultSize, playerProperties._defaultYPosition);
+            }
+        }
+
         private void RemoveCube(int id)
         {
             players[id].SetActive(false);
@@ -115,9 +148,8 @@ namespace Cubes
             PlayerController playerController = player.AddComponent<PlayerController>();
             MouseLook playerLook = player.AddComponent<MouseLook>();
 
-            playerController.speed = playerProperties.speed;
-            playerLook.mouseSensitivity = playerProperties.mouseSensitivity;
-            playerLook.maxVerticalRotation = playerProperties.maxVerticalRotation;
+            playerController.playerProperties = playerProperties;
+            playerLook.playerProperties = playerProperties;
 
             Camera.main.transform.parent = players[instanceID].transform;
             Camera.main.transform.localPosition = playerProperties.cameraOffset;
