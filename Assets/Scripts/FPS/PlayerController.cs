@@ -1,5 +1,6 @@
 using Cubes;
 using Input;
+using Network;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -13,6 +14,7 @@ public class PlayerController : MonoBehaviour
     {
         InputReader.Instance.onMove += HandleDir;
         InputReader.Instance.onCrouch += ToggleCrouch;
+        InputReader.Instance.onShoot += Shoot;
     }
 
     void Update()
@@ -39,6 +41,12 @@ public class PlayerController : MonoBehaviour
     void HandleDir(Vector2 dir)
     {
         movementDir = new Vector3(dir.x, 0, dir.y);
+    }
+
+    private void Shoot()
+    {
+        Matrix4x4 bulletSpawnTrs = Matrix4x4.TRS(transform.position + playerProperties.shootingPoint, Camera.main.transform.rotation, Vector3.one);
+        FpsClient.Instance.SendInstantiateRequest(playerProperties.bulletPrefab, bulletSpawnTrs, (short)Colors.Black);
     }
 
     void ToggleCrouch()

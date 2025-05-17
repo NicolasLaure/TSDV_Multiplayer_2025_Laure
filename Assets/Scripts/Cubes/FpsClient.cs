@@ -6,6 +6,7 @@ using Input;
 using Messages.ClientMessages;
 using Network;
 using Network.Enums;
+using Network.Factory;
 using Network.Messages;
 using Network.Messages.Server;
 using UnityEngine;
@@ -18,17 +19,23 @@ namespace Cubes
         [SerializeField] private GameObject playerPrefab;
         [SerializeField] private PlayerProperties playerProperties;
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
+        [SerializeField] private HashHandler prefabsData;
         public UnityEvent<Matrix4x4> onPlayerUpdated;
         public UnityEvent<bool> onCrouch;
         private List<GameObject> players = new List<GameObject>();
-        private int instanceID = -1;
+        private int clientId = -1;
 
         private int positionMessageId = 0;
 
         private NetworkClient _networkClient;
+        private ClientFactory _clientFactory;
+
+        public static int instantiatedID = -1;
 
         private void Start()
         {
+            prefabsData.Initialize();
+            _clientFactory = new ClientFactory(prefabsData);
             onPlayerUpdated.AddListener(OnCubeUpdate);
             onCrouch.AddListener(OnCrouch);
 
@@ -55,6 +62,13 @@ namespace Cubes
                 case MessageType.Crouch:
                     ReceiveCrouch(data);
                     break;
+                case MessageType.InstantiateRequest:
+                    _clientFactory.Instantiate(new InstantiateRequest(data).instanceData);
+                    break;
+                case MessageType.DeInstantiateRequest:
+                    DeInstantiateRequest request = new DeInstantiateRequest(data);
+                    _clientFactory.DeInstantiate(request.instanceId);
+                    break;
                 default:
                     Debug.Log($"MessageType = {(int)messageType}");
                     throw new ArgumentOutOfRangeException();
@@ -73,14 +87,14 @@ namespace Cubes
         {
             if (_networkClient != null)
             {
-                _networkClient.SendToServer(new Crouch(isCrouching, instanceID).Serialize());
+                _networkClient.SendToServer(new Crouch(isCrouching, clientId).Serialize());
             }
         }
 
         private void SendCubePosition(Matrix4x4 playerTrs)
         {
-            Position cubePosition = new Position(playerTrs, instanceID);
-            cubePosition.clientId = instanceID;
+            Position cubePosition = new Position(playerTrs, clientId);
+            cubePosition.clientId = clientId;
             _networkClient.SendToServer(cubePosition.Serialize());
             positionMessageId++;
         }
@@ -90,7 +104,7 @@ namespace Cubes
             Position posMessage = new Position(data);
             Matrix4x4 trs = posMessage.trs;
             int index = posMessage.instanceID;
-            if (index == instanceID)
+            if (index == clientId)
                 return;
 
             while (index >= players.Count)
@@ -131,7 +145,7 @@ namespace Cubes
 
         private void HandleHandshakeResponseData(ServerHsResponse response)
         {
-            instanceID = _networkClient.Id;
+            clientId = _networkClient.Id;
             for (int i = 0; i < response.ServerHandshakeData.count; i++)
             {
                 Matrix4x4 trs = ByteFormat.Get4X4FromBytes(response.ServerHandshakeData.players[i], sizeof(bool));
@@ -141,8 +155,8 @@ namespace Cubes
                 players.Add(newPlayer);
             }
 
-            Transform spawnPos = spawnPoints[instanceID];
-            GameObject player = players[instanceID];
+            Transform spawnPos = spawnPoints[clientId];
+            GameObject player = players[clientId];
             player.transform.position = spawnPos.position;
             player.transform.rotation = spawnPos.rotation;
             PlayerController playerController = player.AddComponent<PlayerController>();
@@ -151,10 +165,10 @@ namespace Cubes
             playerController.playerProperties = playerProperties;
             playerLook.playerProperties = playerProperties;
 
-            Camera.main.transform.parent = players[instanceID].transform;
+            Camera.main.transform.parent = players[clientId].transform;
             Camera.main.transform.localPosition = playerProperties.cameraOffset;
 
-            SendCubePosition(players[instanceID].transform.localToWorldMatrix);
+            SendCubePosition(players[clientId].transform.localToWorldMatrix);
         }
 
         private void HandleQuit()
@@ -176,6 +190,27 @@ namespace Cubes
             }
 
             players.Clear();
+        }
+
+        public void SendInstantiateRequest(GameObject prefab, Matrix4x4 trs, short color)
+        {
+            if (!prefabsData.prefabToHash.ContainsKey(prefab))
+            {
+                Debug.Log("Invalid Prefab");
+                return;
+            }
+
+            InstanceData instanceData = new InstanceData
+            {
+                originalClientID = clientId,
+                prefabHash = prefabsData.prefabToHash[prefab],
+                instanceID = instantiatedID,
+                trs = ByteFormat.Get4X4Bytes(trs),
+                color = color
+            };
+
+            _networkClient.SendToServer(new InstantiateRequest(instanceData).Serialize());
+            instantiatedID++;
         }
     }
 }

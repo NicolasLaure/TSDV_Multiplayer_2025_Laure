@@ -21,6 +21,8 @@ namespace Network.Enums
         Console = 15,
         Error = 16,
         Crouch = 17,
-        Shoot = 18
+        Shoot = 18,
+        InstantiateRequest = 19,
+        DeInstantiateRequest = 20,
     }
 }

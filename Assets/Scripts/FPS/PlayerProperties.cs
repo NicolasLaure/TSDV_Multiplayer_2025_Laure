@@ -17,4 +17,8 @@ public class PlayerProperties : ScriptableObject
 
     public float crouchSize = 0.65f;
     public float crouchYPosition = 0.65f;
+
+    [Header("Shooting")]
+    public GameObject bulletPrefab;
+    public Vector3 shootingPoint = new Vector3(0, 0.5f, 1f);
 }

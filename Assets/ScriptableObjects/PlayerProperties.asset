@@ -20,3 +20,6 @@ MonoBehaviour:
   _defaultYPosition: 1
   crouchSize: 0.65
   crouchYPosition: 0.65
+  bulletPrefab: {fileID: 4016506669918870066, guid: af31b7f1d962dad4eb9897c6601ca781,
+    type: 3}
+  shootingPoint: {x: 0, y: 0.5, z: 1}

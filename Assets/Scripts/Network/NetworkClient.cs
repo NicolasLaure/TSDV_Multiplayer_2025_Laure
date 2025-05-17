@@ -100,7 +100,6 @@ namespace Network
 
             MessageType messageType = (MessageType)BitConverter.ToInt16(data, sizeof(bool));
             Attributes messageAttribs = (Attributes)BitConverter.ToInt16(data, sizeof(bool) + sizeof(short));
-            Debug.Log($"ReceivedType: {(int)messageType}");
 
             if (messageAttribs.HasFlag(Attributes.Checksum))
             {
@@ -185,6 +184,8 @@ namespace Network
                     break;
                 case MessageType.Position:
                 case MessageType.Crouch:
+                case MessageType.InstantiateRequest:
+                case MessageType.DeInstantiateRequest:
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
                 default:
