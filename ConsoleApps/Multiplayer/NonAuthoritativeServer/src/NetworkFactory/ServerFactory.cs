@@ -1,4 +1,5 @@
 using Network.Messages;
+using Network.Utilities;
 
 namespace Network
 {
@@ -17,6 +18,12 @@ namespace Network
                 server.Broadcast(new DeInstantiateRequest(instanceId).Serialize());
                 RemoveInstance(instanceId);
             }
+        }
+
+        public InstantiateAll GetObjectsToInstantiate()
+        {
+            List<InstanceData> instanceDatas = instanceIdToInstanceData.Values.ToList();
+            return new InstantiateAll(instanceDatas);
         }
     }
 }

@@ -7,7 +7,6 @@ namespace Network.Messages
     {
         public int id;
         public int seed;
-        public int count;
-        public List<byte[]> players;
+        public InstantiateAll objectsToInstantiate;
     }
 }

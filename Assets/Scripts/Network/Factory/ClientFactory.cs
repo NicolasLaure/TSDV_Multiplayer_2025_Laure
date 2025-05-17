@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Cubes;
+using Network.Messages;
 using UnityEngine;
 
 namespace Network.Factory
@@ -17,7 +19,14 @@ namespace Network.Factory
         public void Instantiate(InstanceData instanceData)
         {
             GameObject prefab = prefabsData.hashToPrefab[instanceData.prefabHash];
-            GameObject instance = GameObject.Instantiate(prefab);
+            Matrix4x4 trs = ByteFormat.Get4X4FromBytes(instanceData.trs, 0);
+            GameObject instance = GameObject.Instantiate(prefab, trs.GetPosition(), trs.rotation);
+            if (instanceData.originalClientID == FpsClient.Instance.clientId)
+            {
+                instance.GetComponent<IInstantiable>().SetData(instanceData);
+                instance.GetComponent<IInstantiable>().SetScripts();
+            }
+
             SaveGameObject(instanceData.instanceID, instance);
         }
 
@@ -25,6 +34,17 @@ namespace Network.Factory
         {
             RemoveGameObject(instanceId, instanceIdToGameObject[instanceId]);
             GameObject.Destroy(instanceIdToGameObject[instanceId]);
+        }
+
+        public void InstantiateMultiple(InstantiateAll objectsToInstantiate)
+        {
+            for (int i = 0; i < objectsToInstantiate.count; i++)
+            {
+                GameObject prefab = prefabsData.hashToPrefab[objectsToInstantiate.instancesData[i].prefabHash];
+                Matrix4x4 trs = ByteFormat.Get4X4FromBytes(objectsToInstantiate.instancesData[i].trs, 0);
+                GameObject instance = GameObject.Instantiate(prefab, trs.GetPosition(), trs.rotation);
+                SaveGameObject(objectsToInstantiate.instancesData[i].instanceID, instance);
+            }
         }
 
         private void SaveGameObject(int instanceId, GameObject gameObject)

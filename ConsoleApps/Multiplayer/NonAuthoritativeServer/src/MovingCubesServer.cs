@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Net;
 using Network;
 using Network.Enums;
@@ -69,7 +67,7 @@ namespace Cubes
                 _players.Add(player);
             }
 
-            ServerHsResponse hsResponse = new ServerHsResponse(id, _players.Count, serverInstance.Seed, _players);
+            ServerHsResponse hsResponse = new ServerHsResponse(id, serverInstance.Seed, serverInstance._svFactory.GetObjectsToInstantiate());
             serverInstance.SendToClient(hsResponse.Serialize(), id);
         }
 

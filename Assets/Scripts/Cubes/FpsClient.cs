@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using FPS;
 using Input;
@@ -23,14 +24,12 @@ namespace Cubes
         public UnityEvent<Matrix4x4> onPlayerUpdated;
         public UnityEvent<bool> onCrouch;
         private List<GameObject> players = new List<GameObject>();
-        private int clientId = -1;
+        public int clientId = -1;
 
         private int positionMessageId = 0;
 
         private NetworkClient _networkClient;
         private ClientFactory _clientFactory;
-
-        public static int instantiatedID = -1;
 
         private void Start()
         {
@@ -107,14 +106,6 @@ namespace Cubes
             if (index == clientId)
                 return;
 
-            while (index >= players.Count)
-            {
-                players.Add(Instantiate(playerPrefab));
-            }
-
-            if (!players[index].activeInHierarchy)
-                players[index].SetActive(true);
-
             players[index].transform.position = trs.GetPosition();
             players[index].transform.rotation = trs.rotation;
         }
@@ -146,28 +137,12 @@ namespace Cubes
         private void HandleHandshakeResponseData(ServerHsResponse response)
         {
             clientId = _networkClient.Id;
-            for (int i = 0; i < response.ServerHandshakeData.count; i++)
-            {
-                Matrix4x4 trs = ByteFormat.Get4X4FromBytes(response.ServerHandshakeData.players[i], sizeof(bool));
-                Vector3 position = trs.GetPosition();
-                GameObject newPlayer = Instantiate(playerPrefab, position, Quaternion.identity);
-                newPlayer.SetActive(BitConverter.ToBoolean(response.ServerHandshakeData.players[i]));
-                players.Add(newPlayer);
-            }
+            _clientFactory.InstantiateMultiple(response.ServerHandshakeData.objectsToInstantiate);
+
 
             Transform spawnPos = spawnPoints[clientId];
-            GameObject player = players[clientId];
-            player.transform.position = spawnPos.position;
-            player.transform.rotation = spawnPos.rotation;
-            PlayerController playerController = player.AddComponent<PlayerController>();
-            MouseLook playerLook = player.AddComponent<MouseLook>();
 
-            playerController.playerProperties = playerProperties;
-            playerLook.playerProperties = playerProperties;
-
-            Camera.main.transform.parent = players[clientId].transform;
-            Camera.main.transform.localPosition = playerProperties.cameraOffset;
-
+            SendInstantiateRequest(playerPrefab, Matrix4x4.TRS(spawnPoints[clientId].position, spawnPos.rotation, Vector3.one), (short)Colors.Red);
             SendCubePosition(players[clientId].transform.localToWorldMatrix);
         }
 
@@ -204,13 +179,12 @@ namespace Cubes
             {
                 originalClientID = clientId,
                 prefabHash = prefabsData.prefabToHash[prefab],
-                instanceID = instantiatedID,
+                instanceID = -1,
                 trs = ByteFormat.Get4X4Bytes(trs),
                 color = color
             };
 
             _networkClient.SendToServer(new InstantiateRequest(instanceData).Serialize());
-            instantiatedID++;
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Network
     {
         public static Action onServerStart;
 
-        private ServerFactory _svFactory;
+        public ServerFactory _svFactory;
 
         public void Start(int port)
         {

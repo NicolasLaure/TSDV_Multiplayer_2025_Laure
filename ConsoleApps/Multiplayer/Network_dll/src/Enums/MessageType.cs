@@ -24,5 +24,6 @@ namespace Network.Enums
         Shoot = 18,
         InstantiateRequest = 19,
         DeInstantiateRequest = 20,
+        InstantiateAll = 21
     }
 }

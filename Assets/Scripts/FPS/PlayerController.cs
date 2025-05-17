@@ -45,7 +45,8 @@ public class PlayerController : MonoBehaviour
 
     private void Shoot()
     {
-        Matrix4x4 bulletSpawnTrs = Matrix4x4.TRS(transform.position + playerProperties.shootingPoint, Camera.main.transform.rotation, Vector3.one);
+        Vector3 bulletSpawnPosition = transform.right * playerProperties.shootingPoint.x + transform.up * playerProperties.shootingPoint.y + transform.forward * playerProperties.shootingPoint.z;
+        Matrix4x4 bulletSpawnTrs = Matrix4x4.TRS(transform.position + bulletSpawnPosition, Camera.main.transform.rotation, Vector3.one);
         FpsClient.Instance.SendInstantiateRequest(playerProperties.bulletPrefab, bulletSpawnTrs, (short)Colors.Black);
     }
 
