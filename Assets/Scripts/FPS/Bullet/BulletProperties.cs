@@ -6,5 +6,7 @@ namespace FPS.Bullet
     public class BulletProperties : ScriptableObject
     {
         public float speed;
+        public float bulletLife;
+        public int damage;
     }
 }

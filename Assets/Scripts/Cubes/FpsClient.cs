@@ -11,6 +11,7 @@ using Network.Messages;
 using Network.Messages.Server;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Cubes
 {
@@ -20,7 +21,7 @@ namespace Cubes
         [SerializeField] private PlayerProperties playerProperties;
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         [SerializeField] private HashHandler prefabsData;
-        public UnityEvent<EntityToUpdate> onPlayerUpdated;
+        public UnityEvent<EntityToUpdate> onEntityUpdated;
         public UnityEvent<bool> onCrouch;
         public int clientId = -1;
 
@@ -31,7 +32,7 @@ namespace Cubes
         {
             prefabsData.Initialize();
             _clientFactory = new ClientFactory(prefabsData);
-            onPlayerUpdated.AddListener(OnEntityUpdate);
+            onEntityUpdated.AddListener(OnEntityUpdate);
             onCrouch.AddListener(OnCrouch);
 
             _networkClient = ClientManager.Instance.networkClient;
@@ -40,6 +41,11 @@ namespace Cubes
             _networkClient.onDisconnection += HandleAbruptDisconnection;
 
             InputReader.Instance.onQuit += HandleQuit;
+        }
+
+        private void OnDestroy()
+        {
+            HandleQuit();
         }
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
@@ -107,9 +113,11 @@ namespace Cubes
             Debug.Log($"ClientId:{clientId}, SavedInstanceIdToEntity {originalId}");
 
             Matrix4x4 trs = posMessage.trs;
-            _clientFactory.TryGetGameObject(posMessage.instanceID, out GameObject entity);
-            entity.transform.position = trs.GetPosition();
-            entity.transform.rotation = trs.rotation;
+            if (_clientFactory.TryGetGameObject(posMessage.instanceID, out GameObject entity))
+            {
+                entity.transform.position = trs.GetPosition();
+                entity.transform.rotation = trs.rotation;
+            }
         }
 
         private void ReceiveCrouch(Crouch crouchData)
@@ -167,6 +175,12 @@ namespace Cubes
             };
 
             _networkClient.SendToServer(new InstantiateRequest(instanceData).Serialize());
+        }
+
+        public void SendDeInstantiateRequest(GameObject gameObject)
+        {
+            _clientFactory.TryGetInstanceId(gameObject, out int instanceId, out int originalClientId);
+            _networkClient.SendToServer(new DeInstantiateRequest(instanceId).Serialize());
         }
 
         public void SendIntegrityCheck(InstanceData instanceData)

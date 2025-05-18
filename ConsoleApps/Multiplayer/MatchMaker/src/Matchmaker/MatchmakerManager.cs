@@ -218,7 +218,7 @@ namespace Network
             runningServers.Add(newServer);
 
             processToPort[newServer] = newSvPort;
-
+            Thread.Sleep(50);
             byte[] newSvDirection1 = new ServerDirection(ipAddress, newSvPort).Serialize();
             SaveHeldMessage(newSvDirection1, clientOneId);
             byte[] newSvDirection2 = new ServerDirection(ipAddress, newSvPort).Serialize();

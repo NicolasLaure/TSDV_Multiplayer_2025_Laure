@@ -29,7 +29,7 @@ namespace Cubes
                 EntityToUpdate entityToUpdate;
                 entityToUpdate.gameObject = gameObject;
                 entityToUpdate.trs = transform.localToWorldMatrix;
-                FpsClient.Instance.onPlayerUpdated?.Invoke(entityToUpdate);
+                FpsClient.Instance.onEntityUpdated?.Invoke(entityToUpdate);
             }
         }
 

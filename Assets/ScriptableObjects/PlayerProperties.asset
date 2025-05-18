@@ -23,3 +23,4 @@ MonoBehaviour:
   bulletPrefab: {fileID: 4016506669918870066, guid: af31b7f1d962dad4eb9897c6601ca781,
     type: 3}
   shootingPoint: {x: 0, y: 0.5, z: 1}
+  onPlayerTakeDamage: {fileID: 11400000, guid: 5163e649bbaf5da4292b78af22b0af75, type: 2}

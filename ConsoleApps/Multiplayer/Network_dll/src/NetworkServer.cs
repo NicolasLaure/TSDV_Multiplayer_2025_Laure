@@ -51,12 +51,12 @@ namespace Network
             this.port = port;
             ipAddress = GetIp();
             connection = new UdpConnection(port, this);
+            connection.FlushReceiveData();
             rngGenerator = new Random((int)ServerTime.time);
             seed = rngGenerator.Next(0, int.MaxValue);
             rngGenerator = new Random(seed);
             Console.WriteLine($"Server initialized on port {port}");
             Logger.Log($"Server Seed: {seed}");
-
             OperationsList.Populate(rngGenerator);
         }
 

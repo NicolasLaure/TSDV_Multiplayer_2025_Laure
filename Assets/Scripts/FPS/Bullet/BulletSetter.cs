@@ -5,7 +5,7 @@ namespace FPS.Bullet
 {
     public class BulletSetter : MonoBehaviour, IInstantiable
     {
-        [SerializeField] private BulletProperties properties;
+        public BulletProperties properties;
 
         public void SetScripts()
         {

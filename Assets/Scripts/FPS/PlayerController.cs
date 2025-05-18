@@ -1,6 +1,8 @@
-using System;
 using Cubes;
+using Events;
 using FPS;
+using FPS.Bullet;
+using Health;
 using Input;
 using Network;
 using UnityEngine;
@@ -40,7 +42,7 @@ public class PlayerController : MonoBehaviour
         EntityToUpdate thisEntity;
         thisEntity.gameObject = gameObject;
         thisEntity.trs = trs;
-        FpsClient.Instance.onPlayerUpdated.Invoke(thisEntity);
+        FpsClient.Instance.onEntityUpdated.Invoke(thisEntity);
     }
 
     void HandleDir(Vector2 dir)
@@ -75,5 +77,17 @@ public class PlayerController : MonoBehaviour
     {
         transform.position = new Vector3(transform.position.x, yPos, transform.position.z);
         transform.localScale = new Vector3(1, yScale, 1);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("Hitted");
+        if (other.TryGetComponent<BulletSetter>(out BulletSetter bulletObject) && !other.TryGetComponent<BulletController>(out BulletController bulletController))
+        {
+            int damageTaken = isCrouching ? bulletObject.properties.damage / 2 : bulletObject.properties.damage;
+            HealthPoints playerHealth = GetComponent<HealthPoints>();
+            playerHealth.TryTakeDamage(damageTaken);
+            playerProperties.onPlayerTakeDamage.RaiseEvent(playerHealth.CurrentHp);
+        }
     }
 }

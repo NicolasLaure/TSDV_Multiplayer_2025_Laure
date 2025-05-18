@@ -1,3 +1,4 @@
+using Events;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "PlayerProperties", menuName = "Player/Properties", order = 0)]
@@ -21,4 +22,5 @@ public class PlayerProperties : ScriptableObject
     [Header("Shooting")]
     public GameObject bulletPrefab;
     public Vector3 shootingPoint = new Vector3(0, 0.5f, 1f);
+    public IntEventChannelSO onPlayerTakeDamage;
 }

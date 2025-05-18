@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Health;
 using Network;
 using Network.Factory;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace FPS
         public void SetScripts()
         {
             PlayerController playerController = gameObject.AddComponent<PlayerController>();
+            HealthPoints healthPoints = gameObject.AddComponent<HealthPoints>();
             MouseLook playerLook = gameObject.AddComponent<MouseLook>();
 
             playerController.playerProperties = _properties;
