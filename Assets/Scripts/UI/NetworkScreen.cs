@@ -14,8 +14,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 
     [SerializeField] private GameObject pingTextObject;
 
-    [SerializeField] private GameObject clientPrefab;
-    [SerializeField] private GameObject serverPrefab;
+    [SerializeField] private GameObject chatScreen;
 
     protected override void Initialize()
     {
@@ -29,8 +28,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         int elo = Convert.ToInt32(rateInputField.text);
         short color = (short)colorDropdown.value;
         Debug.Log($"Color Number {color}");
-        if (ClientManager.Instance == null)
-            Instantiate(clientPrefab);
 
         Debug.Log(ClientManager.Instance.networkClient.defaultPort);
         ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, username, elo, color);
@@ -38,21 +35,18 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         pingTextObject.SetActive(true);
         ClientManager.Instance.networkClient.onDisconnection += Disconnect;
 
-        if (ChatScreen.Instance != null)
-            SwitchToChatScreen();
-        else
-            SwitchToCubes();
+        SwitchToFps();
     }
 
     void SwitchToChatScreen()
     {
-        ChatScreen.Instance.gameObject.SetActive(true);
         this.gameObject.SetActive(false);
     }
 
-    void SwitchToCubes()
+    void SwitchToFps()
     {
         this.gameObject.SetActive(false);
+        chatScreen.SetActive(true);
     }
 
     public void Disconnect()

@@ -28,6 +28,7 @@ namespace Network
 
         public Action<int> onClientDisconnect;
         public Action onDisconnection;
+        public Action<string, byte[]> onChatMessageReceived;
         public int Id => id;
 
         public string username;
@@ -167,6 +168,9 @@ namespace Network
 
                     onClientDisconnect?.Invoke(disconnect.id);
                     break;
+                case MessageType.Chat:
+                    onChatMessageReceived?.Invoke(idToUsername[receivedClientId], data);
+                    break;
                 case MessageType.Error:
                     break;
                 case MessageType.AllPings:
@@ -270,8 +274,11 @@ namespace Network
 
         private void HandleNewUsername(OtherUsername usernamesMessage)
         {
-            if (!idToUsername.ContainsKey(usernamesMessage.id))
-                idToUsername[usernamesMessage.id] = usernamesMessage.username;
+            Debug.LogError($"Id: {usernamesMessage.id} ReceivedName = {usernamesMessage.username}");
+            if (idToUsername.ContainsKey(usernamesMessage.id) && idToUsername[usernamesMessage.id] != "")
+                return;
+
+            idToUsername[usernamesMessage.id] = usernamesMessage.username;
         }
     }
 }

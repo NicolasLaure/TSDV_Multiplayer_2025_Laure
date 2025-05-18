@@ -91,9 +91,9 @@ namespace Network
                         Logger.Log($"Decrypted Private Handshake Color {receivedMatchMakerHandshake.color}");
                         InstantiateAll objectsToInstantiate = _svFactory.GetObjectsToInstantiate();
                         PrivateServerHsResponse response = new PrivateServerHsResponse(objectsToInstantiate);
-                        SendToClient(Encrypter.Encrypt(idToIVKeyGenerator[ipToId[ip]].Next(), response.Serialize()), ipToId[ip]);
-                        SendToClient(new UsernamesMessage(GetAllUsernames()).Serialize(), ipToId[ip]);
-                        Broadcast(new UsernameMessage(GetUserName(ipToId[ip])).Serialize());
+                        SendToClient(Encrypter.Encrypt(idToIVKeyGenerator[receivedClientId].Next(), response.Serialize()), receivedClientId);
+                        SendToClient(new UsernamesMessage(GetAllUsernames()).Serialize(), receivedClientId);
+                        Broadcast(new UsernameMessage(GetUserName(receivedClientId)).Serialize());
                         break;
                     case MessageType.Acknowledge:
                         break;
@@ -105,6 +105,9 @@ namespace Network
                         EndServer();
                         break;
                     case MessageType.Error:
+                        break;
+                    case MessageType.Chat:
+                        Broadcast(data);
                         break;
                     case MessageType.Position:
                     case MessageType.Crouch:
@@ -168,9 +171,10 @@ namespace Network
         protected OtherUsername GetUserName(int id)
         {
             OtherUsername username;
-            username.id = id;
+            username.id = clients[id].id;
             username.usernameLength = clients[id].username.Length;
             username.username = clients[id].username;
+            Logger.Log($"Got User:{username.id}, name={username.username}");
             return username;
         }
 

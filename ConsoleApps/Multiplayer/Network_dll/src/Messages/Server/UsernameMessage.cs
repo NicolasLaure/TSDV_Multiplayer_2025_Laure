@@ -15,6 +15,7 @@ public class UsernameMessage : Message<OtherUsername>
         attribs = Attributes.Checksum;
         this.username = this.username;
     }
+
     public UsernameMessage(byte[] data)
     {
         username = Deserialize(data);
@@ -30,7 +31,7 @@ public class UsernameMessage : Message<OtherUsername>
             data.AddRange(BitConverter.GetBytes(username.username[i]));
         }
 
-        return data.ToArray();
+        return GetFormattedData(data.ToArray());
     }
 
     public override OtherUsername Deserialize(byte[] message)

@@ -1,45 +1,40 @@
-﻿using System.Net;
+﻿using Cubes;
 using Network;
+using Network_dll.Messages.ClientMessages;
+using UnityEngine;
 using UnityEngine.UI;
 
-public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
+namespace UI
 {
-    public Text messages;
-    public InputField inputMessage;
-
-    protected override void Initialize()
+    public class ChatScreen : MonoBehaviour
     {
-        inputMessage.onEndEdit.AddListener(OnEndEdit);
+        public Text messages;
+        public InputField inputMessage;
 
-        this.gameObject.SetActive(false);
-
-        ClientManager.Instance.networkClient.OnReceiveEvent += OnReceiveDataEvent;
-    }
-
-    void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
-    {
-        // if (NonAuthoritativeServer.Instance)
-        // {
-        //     NonAuthoritativeServer.Instance.Broadcast(data);
-        // }
-
-        messages.text += System.Text.ASCIIEncoding.UTF8.GetString(data) + System.Environment.NewLine;
-    }
-
-    void OnEndEdit(string str)
-    {
-        if (inputMessage.text != "")
+        private void Start()
         {
-            // if (NonAuthoritativeServer.Instance)
-            // {
-            //     NonAuthoritativeServer.Instance.Broadcast(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
-            //     messages.text += inputMessage.text + System.Environment.NewLine;
-            // }
-            ClientManager.Instance.networkClient.SendToServer(System.Text.ASCIIEncoding.UTF8.GetBytes(inputMessage.text));
+            inputMessage.onEndEdit.AddListener(OnEndEdit);
+            ClientManager.Instance.networkClient.onChatMessageReceived += OnReceiveDataEvent;
+        }
 
-            inputMessage.ActivateInputField();
-            inputMessage.Select();
-            inputMessage.text = "";
+        void OnReceiveDataEvent(string username, byte[] data)
+        {
+            Chat chatMessage = new Chat(data);
+            messages.text += username + ": " + chatMessage.message + System.Environment.NewLine;
+        }
+
+        void OnEndEdit(string str)
+        {
+            if (inputMessage.text != "")
+            {
+                Chat message = new Chat(inputMessage.text);
+                message.clientId = FpsClient.Instance.clientId;
+                ClientManager.Instance.networkClient.SendToServer(message.Serialize());
+
+                inputMessage.ActivateInputField();
+                inputMessage.Select();
+                inputMessage.text = "";
+            }
         }
     }
 }
