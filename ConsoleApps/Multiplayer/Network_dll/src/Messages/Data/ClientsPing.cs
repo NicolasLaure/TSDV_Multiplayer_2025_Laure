@@ -1,5 +1,7 @@
+using Network_dll.Messages.Data;
+
 public struct ClientsPing
 {
     public int count;
-    public short[] ms;
+    public ClientPing[] clientPings;
 }

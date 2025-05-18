@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Network;
+using Network_dll.Messages.Data;
 using Network.Enums;
 
 public class AllPings : Message<ClientsPing>
@@ -8,12 +10,12 @@ public class AllPings : Message<ClientsPing>
 
     private int DataSize => sizeof(int) + clientsPing.count * sizeof(short);
 
-    public AllPings(short[] ms, int count)
+    public AllPings(ClientPing[] ms, int count)
     {
         messageType = MessageType.AllPings;
         attribs = Attributes.None;
         messageId++;
-        clientsPing.ms = ms;
+        clientsPing.clientPings = ms;
         clientsPing.count = count;
     }
 
@@ -24,11 +26,15 @@ public class AllPings : Message<ClientsPing>
 
     public override byte[] Serialize()
     {
-        byte[] data = new byte[DataSize];
-        Buffer.BlockCopy(BitConverter.GetBytes(clientsPing.count), 0, data, 0, sizeof(int));
-        Buffer.BlockCopy(clientsPing.ms, 0, data, sizeof(int), sizeof(short) * clientsPing.count);
+        List<byte> data = new List<byte>();
+        data.AddRange(BitConverter.GetBytes(clientsPing.count));
+        for (int i = 0; i < clientsPing.count; i++)
+        {
+            data.AddRange(BitConverter.GetBytes(clientsPing.clientPings[i].id));
+            data.AddRange(BitConverter.GetBytes(clientsPing.clientPings[i].ms));
+        }
 
-        return GetFormattedData(data);
+        return GetFormattedData(data.ToArray());
     }
 
     public override ClientsPing Deserialize(byte[] message)
@@ -36,12 +42,19 @@ public class AllPings : Message<ClientsPing>
         byte[] payload = ExtractPayload(message);
         ClientsPing incomingClientsPing;
         incomingClientsPing.count = BitConverter.ToInt32(payload, 0);
-        incomingClientsPing.ms = new short[incomingClientsPing.count];
-
+        List<ClientPing> pings = new List<ClientPing>();
+        int offset = sizeof(int);
         for (int i = 0; i < incomingClientsPing.count; i++)
         {
-            incomingClientsPing.ms[i] = BitConverter.ToInt16(payload, sizeof(int) + i * sizeof(short));
+            ClientPing ping;
+            ping.id = BitConverter.ToInt32(payload, offset);
+            offset += sizeof(int);
+            ping.ms = BitConverter.ToInt16(payload, offset);
+            offset += sizeof(short);
+            pings.Add(ping);
         }
+
+        incomingClientsPing.clientPings = pings.ToArray();
 
         return incomingClientsPing;
     }

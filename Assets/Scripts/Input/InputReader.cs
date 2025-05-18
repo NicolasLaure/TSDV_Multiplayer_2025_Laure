@@ -14,6 +14,8 @@ namespace Input
         public Action onCrouch;
         public Action onQuit;
 
+        public Action<bool> onPingScreen;
+
         protected override void Initialize()
         {
             _input = new PlayerInput();
@@ -28,6 +30,9 @@ namespace Input
             _input.Player.Crouch.performed += OnCrouch;
 
             _input.Player.Quit.performed += OnQuit;
+
+            _input.Player.PingScreen.started += OnPingScreen;
+            _input.Player.PingScreen.canceled += OnPingScreen;
         }
 
         private void OnMove(InputAction.CallbackContext context)
@@ -53,6 +58,14 @@ namespace Input
         private void OnCrouch(InputAction.CallbackContext context)
         {
             onCrouch?.Invoke();
+        }
+
+        private void OnPingScreen(InputAction.CallbackContext context)
+        {
+            if (context.started)
+                onPingScreen?.Invoke(true);
+            else if (context.canceled)
+                onPingScreen?.Invoke(false);
         }
     }
 }

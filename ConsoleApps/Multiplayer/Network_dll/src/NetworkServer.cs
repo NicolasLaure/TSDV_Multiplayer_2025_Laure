@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Network_dll.Messages.Data;
 using Network.CheckSum;
 using Network.Messages;
 using Network.Messages.Server;
@@ -170,12 +171,16 @@ namespace Network
 
         private void PingCheck()
         {
-            short[] clientsMs = new short[clientIds.Count];
+            List<ClientPing> clientPings = new List<ClientPing>();
 
             for (int i = 0; i < clientIds.Count; i++)
             {
                 short ms = (short)((ServerTime.time - idLastPingTime[clientIds[i]]) * 1000);
-                clientsMs[i] = ms;
+                ClientPing ping;
+                ping.id = clientIds[i];
+                ping.ms = ms;
+                clientPings.Add(ping);
+
                 if (ms > TimeOutTime * 1000)
                 {
                     Broadcast(new Disconnect(clientIds[i]).Serialize());
@@ -183,7 +188,8 @@ namespace Network
                 }
             }
 
-            Broadcast(new AllPings(clientsMs, clientIds.Count).Serialize());
+            Broadcast(new AllPings(clientPings.ToArray(), clientIds.Count).Serialize());
+            clientPings.Clear();
         }
 
         private IPAddress GetIp()

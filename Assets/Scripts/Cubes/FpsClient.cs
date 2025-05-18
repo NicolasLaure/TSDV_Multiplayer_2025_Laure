@@ -196,5 +196,10 @@ namespace Cubes
         {
             _networkClient.SendToServer(new InstanceIntegrityCheck(instanceData).Serialize());
         }
+
+        public string GetUsername(int id)
+        {
+            return _networkClient.GetUsername(id);
+        }
     }
 }

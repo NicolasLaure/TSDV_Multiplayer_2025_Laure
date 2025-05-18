@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using Input;
 using Network;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +13,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public InputField rateInputField;
     public Dropdown colorDropdown;
 
-    [SerializeField] private GameObject pingTextObject;
+    [SerializeField] private GameObject ping;
 
     [SerializeField] private GameObject chatScreen;
 
@@ -32,15 +33,15 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         Debug.Log(ClientManager.Instance.networkClient.defaultPort);
         ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, username, elo, color);
 
-        pingTextObject.SetActive(true);
         ClientManager.Instance.networkClient.onDisconnection += Disconnect;
 
+        InputReader.Instance.onPingScreen += OnPingScreen;
         SwitchToFps();
     }
 
-    void SwitchToChatScreen()
+    private void OnPingScreen(bool shouldEnable)
     {
-        this.gameObject.SetActive(false);
+        ping.SetActive(shouldEnable);
     }
 
     void SwitchToFps()
@@ -52,6 +53,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public void Disconnect()
     {
         this.gameObject.SetActive(true);
+        InputReader.Instance.onPingScreen -= OnPingScreen;
         if (ClientManager.Instance.networkClient != null)
             ClientManager.Instance.networkClient.onDisconnection -= Disconnect;
     }

@@ -1,26 +1,33 @@
-using System;
+using Cubes;
 using Network;
+using Network_dll.Messages.Data;
 using TMPro;
 using UnityEngine;
 
-public class PingText : MonoBehaviour
+namespace UI
 {
-    [SerializeField] private TextMeshProUGUI text;
-    private string header = "Ping: ";
-
-    private void OnEnable()
+    public class PingText : MonoBehaviour
     {
-        if (ClientManager.Instance)
+        [SerializeField] private TextMeshProUGUI text;
+
+        private void OnEnable()
         {
-            gameObject.SetActive(false);
-            return;
+            ClientManager.Instance.networkClient.onReceiveAllPings += UpdatePing;
         }
 
-        ClientManager.Instance.networkClient.onPingUpdated += UpdatePing;
-    }
+        private void OnDisable()
+        {
+            ClientManager.Instance.networkClient.onReceiveAllPings -= UpdatePing;
+        }
 
-    private void UpdatePing(short ping)
-    {
-        text.text = header + ping.ToString();
+        private void UpdatePing(ClientPing[] pings)
+        {
+            text.text = "";
+            for (int i = 0; i < pings.Length; i++)
+            {
+                string username = FpsClient.Instance.GetUsername(pings[i].id);
+                text.text += $"{username}: {pings[i].ms}ms" + System.Environment.NewLine;
+            }
+        }
     }
 }

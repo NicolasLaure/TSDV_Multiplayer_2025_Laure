@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using Network_dll.Messages.Data;
 using Network.CheckSum;
 using Network.Encryption;
 using Network.Enums;
@@ -19,6 +20,7 @@ namespace Network
     {
         private readonly Dictionary<int, string> idToUsername = new Dictionary<int, string>();
         public Action<short> onPingUpdated;
+        public Action<ClientPing[]> onReceiveAllPings;
 
         private float ping = 0;
         private float lastPingTime;
@@ -175,7 +177,7 @@ namespace Network
                     break;
                 case MessageType.AllPings:
                     ClientsPing allClientsPing = new AllPings(data).clientsPing;
-
+                    onReceiveAllPings?.Invoke(allClientsPing.clientPings);
                     break;
                 // Moving Cubes message
                 case MessageType.HandShakeResponse:
@@ -274,11 +276,19 @@ namespace Network
 
         private void HandleNewUsername(OtherUsername usernamesMessage)
         {
-            Debug.LogError($"Id: {usernamesMessage.id} ReceivedName = {usernamesMessage.username}");
             if (idToUsername.ContainsKey(usernamesMessage.id) && idToUsername[usernamesMessage.id] != "")
                 return;
 
             idToUsername[usernamesMessage.id] = usernamesMessage.username;
+        }
+
+        public string GetUsername(int id)
+        {
+            if (idToUsername.ContainsKey(id))
+                return idToUsername[id];
+
+            Debug.Log($"Id {id} was not a key in dictionary");
+            return "";
         }
     }
 }
