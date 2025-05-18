@@ -10,12 +10,13 @@ namespace Network.Messages
         public Matrix4x4 trs;
         public int instanceID;
 
-        public Position(Matrix4x4 pos, int instanceID)
+        public Position(Matrix4x4 pos, int instanceID, int clientId)
         {
             messageType = MessageType.Position;
             attribs = Attributes.Order;
             this.trs = pos;
             this.instanceID = instanceID;
+            this.clientId = clientId;
             messageId++;
         }
 
@@ -24,6 +25,7 @@ namespace Network.Messages
             (Matrix4x4, int) posAndIndex = Deserialize(data);
             trs = posAndIndex.Item1;
             instanceID = posAndIndex.Item2;
+            clientId = GetClientId(data);
         }
 
         public override byte[] Serialize()

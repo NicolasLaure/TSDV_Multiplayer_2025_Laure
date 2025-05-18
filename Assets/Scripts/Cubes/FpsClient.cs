@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Net;
 using FPS;
 using Input;
@@ -21,12 +20,9 @@ namespace Cubes
         [SerializeField] private PlayerProperties playerProperties;
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         [SerializeField] private HashHandler prefabsData;
-        public UnityEvent<Matrix4x4> onPlayerUpdated;
+        public UnityEvent<EntityToUpdate> onPlayerUpdated;
         public UnityEvent<bool> onCrouch;
-        private List<GameObject> players = new List<GameObject>();
         public int clientId = -1;
-
-        private int positionMessageId = 0;
 
         private NetworkClient _networkClient;
         private ClientFactory _clientFactory;
@@ -35,13 +31,12 @@ namespace Cubes
         {
             prefabsData.Initialize();
             _clientFactory = new ClientFactory(prefabsData);
-            onPlayerUpdated.AddListener(OnCubeUpdate);
+            onPlayerUpdated.AddListener(OnEntityUpdate);
             onCrouch.AddListener(OnCrouch);
 
             _networkClient = ClientManager.Instance.networkClient;
 
             _networkClient.OnReceiveEvent += OnReceiveDataEvent;
-            _networkClient.onClientDisconnect += RemoveCube;
             _networkClient.onDisconnection += HandleAbruptDisconnection;
 
             InputReader.Instance.onQuit += HandleQuit;
@@ -56,10 +51,13 @@ namespace Cubes
                     HandleHandshakeResponseData(new ServerHsResponse(data));
                     break;
                 case MessageType.Position:
-                    ReceiveCubePos(data);
+                    Position receivedPosition = new Position(data);
+                    ReceiveEntityPos(receivedPosition);
                     break;
                 case MessageType.Crouch:
-                    ReceiveCrouch(data);
+                    Crouch crouch = new Crouch(data);
+                    if (crouch.clientId != clientId)
+                        ReceiveCrouch(crouch);
                     break;
                 case MessageType.InstantiateRequest:
                     _clientFactory.Instantiate(new InstantiateRequest(data).instanceData);
@@ -74,11 +72,11 @@ namespace Cubes
             }
         }
 
-        void OnCubeUpdate(Matrix4x4 playerTrs)
+        void OnEntityUpdate(EntityToUpdate entityToToUpdate)
         {
             if (_networkClient != null)
             {
-                SendCubePosition(playerTrs);
+                SendEntityPosition(entityToToUpdate.gameObject, entityToToUpdate.trs);
             }
         }
 
@@ -90,81 +88,65 @@ namespace Cubes
             }
         }
 
-        private void SendCubePosition(Matrix4x4 playerTrs)
+        private void SendEntityPosition(GameObject entity, Matrix4x4 trs)
         {
-            Position cubePosition = new Position(playerTrs, clientId);
-            cubePosition.clientId = clientId;
-            _networkClient.SendToServer(cubePosition.Serialize());
-            positionMessageId++;
+            if (!_clientFactory.TryGetInstanceId(entity, out int instanceId, out int originalClientId) || originalClientId != clientId)
+                return;
+
+            Position entityPosition = new Position(trs, instanceId, clientId);
+            _networkClient.SendToServer(entityPosition.Serialize());
         }
 
-        private void ReceiveCubePos(byte[] data)
+        private void ReceiveEntityPos(Position posMessage)
         {
-            Position posMessage = new Position(data);
+            if (posMessage.clientId == clientId)
+                return;
+
+            Debug.Log($"ClientId:{clientId}, Pos Received ClientId:{posMessage.clientId}");
+            _clientFactory.TryGetOriginalId(posMessage.instanceID, out int originalId);
+            Debug.Log($"ClientId:{clientId}, SavedInstanceIdToEntity {originalId}");
+
             Matrix4x4 trs = posMessage.trs;
-            int index = posMessage.instanceID;
-            if (index == clientId)
-                return;
-
-            players[index].transform.position = trs.GetPosition();
-            players[index].transform.rotation = trs.rotation;
+            _clientFactory.TryGetGameObject(posMessage.instanceID, out GameObject entity);
+            entity.transform.position = trs.GetPosition();
+            entity.transform.rotation = trs.rotation;
         }
 
-        private void ReceiveCrouch(byte[] data)
+        private void ReceiveCrouch(Crouch crouchData)
         {
-            Crouch crouch = new Crouch(data);
-
-            if (crouch.clientId > players.Count)
+            if (!_clientFactory.TryGetGameObject(crouchData.instanceId, out GameObject entity))
                 return;
 
-            if (crouch.isCrouching)
+            if (crouchData.isCrouching)
             {
-                Debug.Log($"Player[{crouch.clientId}] position Y: {playerProperties.crouchYPosition} Size Y: {playerProperties.crouchSize}");
-                players[crouch.clientId].GetComponent<TransformHandler>().SetHeight(playerProperties.crouchSize, playerProperties.crouchYPosition);
+                Debug.Log($"Player[{crouchData.clientId}] position Y: {playerProperties.crouchYPosition} Size Y: {playerProperties.crouchSize}");
+                entity.GetComponent<TransformHandler>().SetHeight(playerProperties.crouchSize, playerProperties.crouchYPosition);
             }
             else
             {
                 Debug.Log("Player wasn't crouching");
-                players[crouch.clientId].GetComponent<TransformHandler>().SetHeight(playerProperties._defaultSize, playerProperties._defaultYPosition);
+                entity.GetComponent<TransformHandler>().SetHeight(playerProperties._defaultSize, playerProperties._defaultYPosition);
             }
-        }
-
-        private void RemoveCube(int id)
-        {
-            players[id].SetActive(false);
         }
 
         private void HandleHandshakeResponseData(ServerHsResponse response)
         {
             clientId = _networkClient.Id;
             _clientFactory.InstantiateMultiple(response.ServerHandshakeData.objectsToInstantiate);
-
-
             Transform spawnPos = spawnPoints[clientId];
 
-            SendInstantiateRequest(playerPrefab, Matrix4x4.TRS(spawnPoints[clientId].position, spawnPos.rotation, Vector3.one), (short)Colors.Red);
-            SendCubePosition(players[clientId].transform.localToWorldMatrix);
+            SendInstantiateRequest(playerPrefab, Matrix4x4.TRS(spawnPos.position, spawnPos.rotation, Vector3.one), (short)Colors.Red);
         }
 
         private void HandleQuit()
         {
-            foreach (GameObject cube in players)
-            {
-                Destroy(cube);
-            }
-
-            players.Clear();
+            _clientFactory.DeInstantiateAll();
             _networkClient.EndClient();
         }
 
         private void HandleAbruptDisconnection()
         {
-            foreach (GameObject cube in players)
-            {
-                Destroy(cube);
-            }
-
-            players.Clear();
+            _clientFactory.DeInstantiateAll();
         }
 
         public void SendInstantiateRequest(GameObject prefab, Matrix4x4 trs, short color)
@@ -185,6 +167,11 @@ namespace Cubes
             };
 
             _networkClient.SendToServer(new InstantiateRequest(instanceData).Serialize());
+        }
+
+        public void SendIntegrityCheck(InstanceData instanceData)
+        {
+            _networkClient.SendToServer(new InstanceIntegrityCheck(instanceData).Serialize());
         }
     }
 }

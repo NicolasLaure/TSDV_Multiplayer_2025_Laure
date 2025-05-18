@@ -1,4 +1,6 @@
+using System;
 using Cubes;
+using FPS;
 using Input;
 using Network;
 using UnityEngine;
@@ -35,7 +37,10 @@ public class PlayerController : MonoBehaviour
     private void SendActualPosition()
     {
         Matrix4x4 trs = transform.localToWorldMatrix;
-        FpsClient.Instance.onPlayerUpdated.Invoke(trs);
+        EntityToUpdate thisEntity;
+        thisEntity.gameObject = gameObject;
+        thisEntity.trs = trs;
+        FpsClient.Instance.onPlayerUpdated.Invoke(thisEntity);
     }
 
     void HandleDir(Vector2 dir)

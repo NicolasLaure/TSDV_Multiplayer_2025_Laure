@@ -12,8 +12,9 @@ namespace Network
     public class NonAuthoritativeServer : NetworkServer<NonAuthoritativeServer>
     {
         public static Action onServerStart;
-
         public ServerFactory _svFactory;
+
+        private readonly Dictionary<int, List<InstanceData>> instanceIdTointegrityChecks = new Dictionary<int, List<InstanceData>>();
 
         public void Start(int port)
         {
@@ -100,7 +101,6 @@ namespace Network
                     case MessageType.Position:
                     case MessageType.Crouch:
                         Broadcast(data);
-                        OnReceiveEvent?.Invoke(data, ip);
                         break;
                     case MessageType.ImportantOrderTest:
                         Logger.Log($"ImportantOrder: {new ImportantOrderMessage(data).number}");
@@ -112,6 +112,21 @@ namespace Network
                     case MessageType.DeInstantiateRequest:
                         DeInstantiateRequest deInstantiateRequest = new DeInstantiateRequest(data);
                         _svFactory.BroadcastDeInstantiation(ipToId[ip], deInstantiateRequest.instanceId, this);
+                        break;
+                    case MessageType.InstanceIntegrityCheck:
+                        InstanceIntegrityCheck integrityCheck = new InstanceIntegrityCheck(data);
+
+                        int instanceId = integrityCheck.instanceData.instanceID;
+                        if (!instanceIdTointegrityChecks.ContainsKey(instanceId))
+                            instanceIdTointegrityChecks[instanceId] = new List<InstanceData>();
+
+                        instanceIdTointegrityChecks[instanceId].Add(integrityCheck.instanceData);
+                        if (instanceIdTointegrityChecks[instanceId].Count == clientIds.Count)
+                        {
+                            _svFactory.CheckIntegrity(instanceIdTointegrityChecks[instanceId], instanceId, this);
+                            instanceIdTointegrityChecks.Remove(instanceId);
+                        }
+
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

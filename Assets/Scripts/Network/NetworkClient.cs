@@ -234,8 +234,6 @@ namespace Network
             rngGenerator = new Random(seed);
             ivKeyGenerator = new Random(seed);
             OperationsList.Populate(rngGenerator);
-
-            //StartCoroutine(SendMessedMessages());
         }
     }
 }

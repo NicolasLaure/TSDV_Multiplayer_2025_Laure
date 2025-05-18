@@ -8,12 +8,13 @@ namespace Network.Messages
         public byte[] trs;
         public int instanceID;
 
-        public Position(byte[] trs, int instanceID)
+        public Position(byte[] trs, int instanceID, int clientId)
         {
             messageType = MessageType.Position;
             attribs = Attributes.Order;
             this.trs = trs;
             this.instanceID = instanceID;
+            this.clientId = clientId;
             messageId++;
         }
 
@@ -22,6 +23,7 @@ namespace Network.Messages
             (byte[], int) posAndIndex = Deserialize(data);
             trs = posAndIndex.Item1;
             instanceID = posAndIndex.Item2;
+            clientId = GetClientId(data);
         }
 
         public override byte[] Serialize()

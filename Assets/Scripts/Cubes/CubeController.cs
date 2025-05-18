@@ -1,4 +1,5 @@
 using System;
+using FPS;
 using UnityEngine;
 
 namespace Cubes
@@ -25,7 +26,10 @@ namespace Cubes
             if (dir != Vector3.zero)
             {
                 transform.position += dir * speed * Time.deltaTime;
-                FpsClient.Instance.onPlayerUpdated?.Invoke(transform.localToWorldMatrix);
+                EntityToUpdate entityToUpdate;
+                entityToUpdate.gameObject = gameObject;
+                entityToUpdate.trs = transform.localToWorldMatrix;
+                FpsClient.Instance.onPlayerUpdated?.Invoke(entityToUpdate);
             }
         }
 

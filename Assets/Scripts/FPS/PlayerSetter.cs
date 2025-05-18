@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Network;
 using Network.Factory;
@@ -8,28 +9,24 @@ namespace FPS
     public class PlayerSetter : MonoBehaviour, IInstantiable
     {
         [SerializeField] private PlayerProperties _properties;
-        [SerializeField] private List<Transform> spawnPoints;
         [SerializeField] private HashHandler prefabs;
+        [SerializeField] private GameObject cameraPrefab;
 
-        public void SetData(InstanceData data)
+        public void SetScripts()
         {
-            Matrix4x4 trs = ByteFormat.Get4X4FromBytes(data.trs, 0);
-            transform.position = trs.GetPosition();
-            transform.rotation = trs.rotation;
-
             PlayerController playerController = gameObject.AddComponent<PlayerController>();
             MouseLook playerLook = gameObject.AddComponent<MouseLook>();
 
             playerController.playerProperties = _properties;
             playerLook.playerProperties = _properties;
 
+            if (Camera.main == null)
+            {
+                GameObject.Instantiate(cameraPrefab);
+            }
+
             Camera.main.transform.parent = transform;
             Camera.main.transform.localPosition = _properties.cameraOffset;
-        }
-
-        public void SetScripts()
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

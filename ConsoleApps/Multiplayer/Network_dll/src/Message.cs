@@ -87,5 +87,10 @@ namespace Network
 
         public abstract byte[] Serialize();
         public abstract T Deserialize(byte[] message);
+
+        protected int GetClientId(byte[] data)
+        {
+            return BitConverter.ToInt32(data, MessageOffsets.ClientIdIndex);
+        }
     }
 }
