@@ -60,7 +60,15 @@ MonoBehaviour:
   playerPrefab: {fileID: 5223137963761588274, guid: 9537391158856e54fb7fc309b97041bf,
     type: 3}
   playerProperties: {fileID: 11400000, guid: 43835df3134367641881484aa7920938, type: 2}
-  spawnPoints: []
-  onPlayerUpdated:
+  spawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  prefabsData: {fileID: 11400000, guid: 033e3d01b089e3c409d7de2fbd805924, type: 2}
+  colorHandler: {fileID: 11400000, guid: 52184fc5f8af67a418860a811870f43a, type: 2}
+  onEntityUpdated:
     m_PersistentCalls:
       m_Calls: []
+  onCrouch:
+    m_PersistentCalls:
+      m_Calls: []
+  clientId: -1

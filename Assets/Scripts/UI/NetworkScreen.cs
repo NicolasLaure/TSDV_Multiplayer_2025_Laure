@@ -7,8 +7,10 @@ using UnityEngine.UI;
 public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 {
     public Button connectBtn;
-    public InputField rateInputField;
     public InputField addressInputField;
+    public InputField usernameInputField;
+    public InputField rateInputField;
+    public Dropdown colorDropdown;
 
     [SerializeField] private GameObject pingTextObject;
 
@@ -23,13 +25,15 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     void OnConnectBtnClick()
     {
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
+        string username = usernameInputField.text;
         int elo = Convert.ToInt32(rateInputField.text);
-
+        short color = (short)colorDropdown.value;
+        Debug.Log($"Color Number {color}");
         if (ClientManager.Instance == null)
             Instantiate(clientPrefab);
 
         Debug.Log(ClientManager.Instance.networkClient.defaultPort);
-        ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, elo);
+        ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, username, elo, color);
 
         pingTextObject.SetActive(true);
         ClientManager.Instance.networkClient.onDisconnection += Disconnect;

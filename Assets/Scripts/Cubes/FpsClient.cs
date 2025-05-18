@@ -21,6 +21,7 @@ namespace Cubes
         [SerializeField] private PlayerProperties playerProperties;
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         [SerializeField] private HashHandler prefabsData;
+        [SerializeField] private ColorHandler colorHandler;
         public UnityEvent<EntityToUpdate> onEntityUpdated;
         public UnityEvent<bool> onCrouch;
         public int clientId = -1;
@@ -31,7 +32,7 @@ namespace Cubes
         private void Start()
         {
             prefabsData.Initialize();
-            _clientFactory = new ClientFactory(prefabsData);
+            _clientFactory = new ClientFactory(prefabsData, colorHandler);
             onEntityUpdated.AddListener(OnEntityUpdate);
             onCrouch.AddListener(OnCrouch);
 
@@ -55,6 +56,9 @@ namespace Cubes
             {
                 case MessageType.HandShakeResponse:
                     HandleHandshakeResponseData(new ServerHsResponse(data));
+                    break;
+                case MessageType.PrivateHsResponse:
+                    HandlePrivateHsResponseData(new PrivateServerHsResponse(data));
                     break;
                 case MessageType.Position:
                     Position receivedPosition = new Position(data);
@@ -140,10 +144,15 @@ namespace Cubes
         private void HandleHandshakeResponseData(ServerHsResponse response)
         {
             clientId = _networkClient.Id;
-            _clientFactory.InstantiateMultiple(response.ServerHandshakeData.objectsToInstantiate);
+        }
+
+        private void HandlePrivateHsResponseData(PrivateServerHsResponse response)
+        {
+            _clientFactory.InstantiateMultiple(response.objectsToInstantiate);
+
             Transform spawnPos = spawnPoints[clientId];
 
-            SendInstantiateRequest(playerPrefab, Matrix4x4.TRS(spawnPos.position, spawnPos.rotation, Vector3.one), (short)Colors.Red);
+            SendInstantiateRequest(playerPrefab, Matrix4x4.TRS(spawnPos.position, spawnPos.rotation, Vector3.one), _networkClient.color);
         }
 
         private void HandleQuit()
@@ -157,7 +166,7 @@ namespace Cubes
             _clientFactory.DeInstantiateAll();
         }
 
-        public void SendInstantiateRequest(GameObject prefab, Matrix4x4 trs, short color)
+        public void SendInstantiateRequest(GameObject prefab, Matrix4x4 trs, short instanceColor)
         {
             if (!prefabsData.prefabToHash.ContainsKey(prefab))
             {
@@ -171,7 +180,7 @@ namespace Cubes
                 prefabHash = prefabsData.prefabToHash[prefab],
                 instanceID = -1,
                 trs = ByteFormat.Get4X4Bytes(trs),
-                color = color
+                color = instanceColor
             };
 
             _networkClient.SendToServer(new InstantiateRequest(instanceData).Serialize());

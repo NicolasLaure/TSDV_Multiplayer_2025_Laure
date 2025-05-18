@@ -1,8 +1,10 @@
 using System;
 using System.Diagnostics;
 using System.Net;
+using Network.Encryption;
 using Network.Enums;
 using Network.Messages;
+using Network.Messages.Server;
 using Network.Messages.TestMessages;
 using Network.Utilities;
 using Ping = Network.Messages.Ping;
@@ -75,7 +77,8 @@ namespace Network
                         {
                             if (!ipToId.ContainsKey(ip))
                             {
-                                AddClient(ip);
+                                PublicHandshake handshake = new PublicHandshake(data);
+                                AddClient(ip, handshake.handshakeData.username);
                                 receivedClientId = ipToId[ip];
                             }
                         }
@@ -84,8 +87,13 @@ namespace Network
 
                         break;
                     case MessageType.PrivateHandshake:
-                        PrivateMatchMakerHandshake receivedMatchMakerHandshake = new PrivateMatchMakerHandshake(data);
-                        Logger.Log($"Decrypted Private Handshake Elo {receivedMatchMakerHandshake.elo}");
+                        PrivateHandshake receivedMatchMakerHandshake = new PrivateHandshake(data);
+                        Logger.Log($"Decrypted Private Handshake Color {receivedMatchMakerHandshake.color}");
+                        InstantiateAll objectsToInstantiate = _svFactory.GetObjectsToInstantiate();
+                        PrivateServerHsResponse response = new PrivateServerHsResponse(objectsToInstantiate);
+                        SendToClient(Encrypter.Encrypt(idToIVKeyGenerator[ipToId[ip]].Next(), response.Serialize()), ipToId[ip]);
+                        SendToClient(new UsernamesMessage(GetAllUsernames()).Serialize(), ipToId[ip]);
+                        Broadcast(new UsernameMessage(GetUserName(ipToId[ip])).Serialize());
                         break;
                     case MessageType.Acknowledge:
                         break;
@@ -155,6 +163,35 @@ namespace Network
                 Thread.Sleep(10000);
                 throw;
             }
+        }
+
+        protected OtherUsername GetUserName(int id)
+        {
+            OtherUsername username;
+            username.id = id;
+            username.usernameLength = clients[id].username.Length;
+            username.username = clients[id].username;
+            return username;
+        }
+
+        protected OtherUsername[] GetAllUsernames()
+        {
+            List<OtherUsername> usernames = new List<OtherUsername>();
+            using (var iterator = clients.GetEnumerator())
+            {
+                while (iterator.MoveNext())
+                {
+                    Client client = iterator.Current.Value;
+                    OtherUsername username;
+                    username.id = client.id;
+                    username.username = client.username;
+                    Logger.Log($"USERNAME CLIENT[{client.id}] = {username.username}");
+                    username.usernameLength = client.username.Length;
+                    usernames.Add(username);
+                }
+            }
+
+            return usernames.ToArray();
         }
     }
 }

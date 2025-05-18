@@ -9,13 +9,12 @@ namespace Network.Messages.Server
     {
         public ServerHandshakeResponseData ServerHandshakeData;
 
-        public ServerHsResponse(int id, int seed, InstantiateAll objectsToInstantiate)
+        public ServerHsResponse(int id, int seed)
         {
             messageType = MessageType.HandShakeResponse;
             attribs = Attributes.Important;
             ServerHandshakeData.id = id;
             ServerHandshakeData.seed = seed;
-            ServerHandshakeData.objectsToInstantiate = objectsToInstantiate;
             messageId++;
         }
 
@@ -30,7 +29,6 @@ namespace Network.Messages.Server
 
             data.AddRange(BitConverter.GetBytes(ServerHandshakeData.id));
             data.AddRange(BitConverter.GetBytes(ServerHandshakeData.seed));
-            data.AddRange(ServerHandshakeData.objectsToInstantiate.Serialize());
 
             return GetFormattedData(data.ToArray());
         }
@@ -41,7 +39,6 @@ namespace Network.Messages.Server
             ServerHandshakeResponseData data;
             data.id = BitConverter.ToInt32(payload, 0);
             data.seed = BitConverter.ToInt32(payload, sizeof(int));
-            data.objectsToInstantiate = new InstantiateAll(payload[(sizeof(int) * 2)..]);
             return data;
         }
     }

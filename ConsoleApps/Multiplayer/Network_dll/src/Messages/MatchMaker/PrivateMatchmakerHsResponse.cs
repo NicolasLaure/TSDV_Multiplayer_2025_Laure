@@ -7,14 +7,16 @@ namespace Network.Messages.MatchMaker
     {
         public int id;
 
-        PrivateMatchmakerHsResponse(int id)
+        public PrivateMatchmakerHsResponse(int id)
         {
+            isEncrypted = true;
             messageType = MessageType.PrivateMatchmakerHsResponse;
+            attribs = Attributes.Important | Attributes.Checksum;
             this.id = id;
             messageId++;
         }
 
-        PrivateMatchmakerHsResponse(byte[] data)
+        public PrivateMatchmakerHsResponse(byte[] data)
         {
             id = Deserialize(data);
         }

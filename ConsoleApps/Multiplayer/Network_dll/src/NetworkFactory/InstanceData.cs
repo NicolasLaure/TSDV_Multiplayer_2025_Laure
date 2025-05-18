@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using Utils;
+
 namespace Network;
 
 public struct InstanceData
@@ -7,6 +10,8 @@ public struct InstanceData
     public uint prefabHash;
     public byte[] trs;
     public short color;
+
+    public static int SizeOf => (sizeof(int) * 3 + Constants.MatrixSize + sizeof(short));
 
     public static bool operator ==(InstanceData left, InstanceData right)
     {

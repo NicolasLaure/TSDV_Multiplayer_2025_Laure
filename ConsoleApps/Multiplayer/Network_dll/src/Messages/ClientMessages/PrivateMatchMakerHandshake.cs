@@ -12,7 +12,7 @@ namespace Network.Messages
             isEncrypted = true;
             messageType = MessageType.PrivateMatchMakerHandshake;
             attribs = Attributes.Important | Attributes.Checksum;
-           messageId++;
+            messageId++;
             this.elo = elo;
         }
 

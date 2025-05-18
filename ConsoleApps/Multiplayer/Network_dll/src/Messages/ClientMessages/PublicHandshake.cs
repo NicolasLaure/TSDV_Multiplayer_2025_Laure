@@ -1,40 +1,49 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 using Network.Enums;
 
 namespace Network.Messages
 {
     public class PublicHandshake : Message<HandshakeData>
     {
-        private HandshakeData _handshakeData;
+        public HandshakeData handshakeData;
 
         public PublicHandshake(HandshakeData handshakeData)
         {
             messageType = MessageType.HandShake;
             attribs = Attributes.Important | Attributes.Critical;
             messageId++;
-            _handshakeData = handshakeData;
+            this.handshakeData = handshakeData;
         }
 
         public PublicHandshake(byte[] data)
         {
-            _handshakeData = Deserialize(data);
+            handshakeData = Deserialize(data);
         }
 
         public override byte[] Serialize()
         {
-            int size = Marshal.SizeOf(_handshakeData);
-            byte[] data = new byte[size];
+            List<byte> data = new List<byte>();
+            data.AddRange(BitConverter.GetBytes(handshakeData.usernameLength));
+            for (int i = 0; i < handshakeData.usernameLength; i++)
+            {
+                data.AddRange(BitConverter.GetBytes(handshakeData.username[i]));
+            }
 
-            Buffer.BlockCopy(BitConverter.GetBytes(_handshakeData.ip), 0, data, 0, sizeof(int));
-            return GetFormattedData(data);
+            return GetFormattedData(data.ToArray());
         }
 
         public override HandshakeData Deserialize(byte[] message)
         {
             byte[] payload = ExtractPayload(message);
             HandshakeData data;
-            data.ip = BitConverter.ToInt32(payload, 0);
+            data.usernameLength = BitConverter.ToInt32(payload);
+            int offset = sizeof(int);
+            char[] username = Encoding.Unicode.GetChars(payload, offset, data.usernameLength * 2);
+
+            data.username = new string(username);
             return data;
         }
     }

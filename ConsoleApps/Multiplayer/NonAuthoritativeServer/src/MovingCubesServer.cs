@@ -31,7 +31,7 @@ namespace Cubes
 
         private void HandleNewClient(int id)
         {
-            ServerHsResponse hsResponse = new ServerHsResponse(id, serverInstance.Seed, serverInstance._svFactory.GetObjectsToInstantiate());
+            ServerHsResponse hsResponse = new ServerHsResponse(id, serverInstance.Seed);
             serverInstance.SendToClient(hsResponse.Serialize(), id);
         }
     }

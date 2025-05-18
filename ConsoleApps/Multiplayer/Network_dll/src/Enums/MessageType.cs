@@ -25,6 +25,8 @@ namespace Network.Enums
         InstantiateRequest = 19,
         DeInstantiateRequest = 20,
         InstantiateAll = 21,
-        InstanceIntegrityCheck = 22
+        InstanceIntegrityCheck = 22,
+        Username = 23,
+        Usernames = 24
     }
 }

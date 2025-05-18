@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Net;
 using Network.CheckSum;
 using Network.Encryption;
@@ -16,6 +17,7 @@ namespace Network
 {
     public class NetworkClient : NetworkManager<NetworkClient>
     {
+        private readonly Dictionary<int, string> idToUsername = new Dictionary<int, string>();
         public Action<short> onPingUpdated;
 
         private float ping = 0;
@@ -28,22 +30,27 @@ namespace Network
         public Action onDisconnection;
         public int Id => id;
 
+        public string username;
         private int _elo = 0;
+        public short color;
 
-        public void StartClient(IPAddress ip, int port, int elo)
+        public void StartClient(IPAddress ip, int port, string username, int elo, short color)
         {
             Initialize();
             this.port = port;
             ipAddress = ip;
             lastPingTime = Time.time;
             ping = 0;
+            this.username = username;
             _elo = elo;
+            this.color = color;
 
             connection = new UdpConnection(ip, port, this);
             clientStartTime = Time.time;
 
             HandshakeData handshakeData;
-            handshakeData.ip = 0;
+            handshakeData.usernameLength = this.username.Length;
+            handshakeData.username = this.username;
             byte[] handshakeBytes = new PublicHandshake(handshakeData).Serialize();
             SendToServer(handshakeBytes);
             Debug.Log("Handshake Sent");
@@ -169,7 +176,10 @@ namespace Network
                 // Moving Cubes message
                 case MessageType.HandShakeResponse:
                     HandleHandshakeResponse(new ServerHsResponse(data));
-                    SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateHandshake(_elo).Serialize()));
+                    SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateHandshake(_elo, color).Serialize()));
+                    OnReceiveEvent?.Invoke(data, ip);
+                    break;
+                case MessageType.PrivateHsResponse:
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
 
@@ -177,16 +187,24 @@ namespace Network
                     HandleMatchMakerHandshakeResponse(new MatchMakerHsResponse(data));
                     SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateMatchMakerHandshake(_elo).Serialize()));
                     break;
+                case MessageType.PrivateMatchmakerHsResponse:
+                    break;
                 case MessageType.ServerDirection:
                     ServerDirection svDir = new ServerDirection(data);
                     Debug.Log($"ServerIp {svDir.serverIp}, port: {svDir.serverPort}");
-                    StartClient(svDir.serverIp, svDir.serverPort, _elo);
+                    StartClient(svDir.serverIp, svDir.serverPort, username, _elo, color);
                     break;
                 case MessageType.Position:
                 case MessageType.Crouch:
                 case MessageType.InstantiateRequest:
                 case MessageType.DeInstantiateRequest:
                     OnReceiveEvent?.Invoke(data, ip);
+                    break;
+                case MessageType.Username:
+                    HandleUsernameMessage(new UsernameMessage(data));
+                    break;
+                case MessageType.Usernames:
+                    HandleUsernamesMessage(new UsernamesMessage(data));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -234,6 +252,26 @@ namespace Network
             rngGenerator = new Random(seed);
             ivKeyGenerator = new Random(seed);
             OperationsList.Populate(rngGenerator);
+        }
+
+        private void HandleUsernamesMessage(UsernamesMessage usernamesMessage)
+        {
+            Debug.Log($"Usernames Count: {usernamesMessage.usernames.Length}");
+            for (int i = 0; i < usernamesMessage.usernames.Length; i++)
+            {
+                HandleNewUsername(usernamesMessage.usernames[i]);
+            }
+        }
+
+        private void HandleUsernameMessage(UsernameMessage usernamesMessage)
+        {
+            HandleNewUsername(usernamesMessage.username);
+        }
+
+        private void HandleNewUsername(OtherUsername usernamesMessage)
+        {
+            if (!idToUsername.ContainsKey(usernamesMessage.id))
+                idToUsername[usernamesMessage.id] = usernamesMessage.username;
         }
     }
 }

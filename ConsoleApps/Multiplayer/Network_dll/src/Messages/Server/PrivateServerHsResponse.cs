@@ -1,33 +1,41 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 using Network.Enums;
+using Network.Utilities;
 
 namespace Network.Messages.Server
 {
-    public class PrivateServerHsResponse : Message<int>
+    public class PrivateServerHsResponse : Message<InstantiateAll>
     {
-        public int id;
+        public InstantiateAll objectsToInstantiate;
 
-        PrivateServerHsResponse(int id)
+        public PrivateServerHsResponse(InstantiateAll objectsToInstantiate)
         {
+            isEncrypted = true;
             messageType = MessageType.PrivateHsResponse;
-            this.id = id;
+            attribs = Attributes.Important | Attributes.Checksum;
+            this.objectsToInstantiate = objectsToInstantiate;
             messageId++;
         }
 
-        PrivateServerHsResponse(byte[] data)
+        public PrivateServerHsResponse(byte[] data)
         {
-            id = Deserialize(data);
+            objectsToInstantiate = Deserialize(data);
         }
 
         public override byte[] Serialize()
         {
-            return GetFormattedData(BitConverter.GetBytes(id));
+            List<byte> data = new List<byte>();
+            data.AddRange(objectsToInstantiate.Serialize());
+            return GetFormattedData(data.ToArray());
         }
 
-        public override int Deserialize(byte[] message)
+        public override InstantiateAll Deserialize(byte[] message)
         {
             byte[] payload = ExtractPayload(message);
-            return BitConverter.ToInt32(payload);
+            return new InstantiateAll(payload);
         }
     }
 }

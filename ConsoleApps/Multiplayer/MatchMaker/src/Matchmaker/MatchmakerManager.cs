@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
+using Network.Encryption;
 using Network.Enums;
 using Network.Matchmaker;
 using Network.Messages;
@@ -93,9 +94,10 @@ namespace Network
                     {
                         if (!ipToId.ContainsKey(ip))
                         {
-                            Logger.Log("NEW CLIENT");
-                            AddClient(ip);
+                            PublicHandshake handshake = new PublicHandshake(data);
+                            AddClient(ip, handshake.handshakeData.username);
                             receivedClientId = ipToId[ip];
+                            Logger.Log($"NEW CLIENT, Id: {receivedClientId}, Username: {clients[receivedClientId].username}");
                             SendToClient(new MatchMakerHsResponse(receivedClientId, seed).Serialize(), receivedClientId);
                             heldMessages.Add(new HeldMessage(MatchMakerHsResponse.messageId, data));
                         }
@@ -109,6 +111,7 @@ namespace Network
                     Logger.Log($"client{receivedClientId} Elo Is {receivedMatchMakerHandshake.elo}");
                     clientIdToElo[receivedClientId] = receivedMatchMakerHandshake.elo;
                     initializedClientIds.Add(receivedClientId);
+                    SendToClient(Encrypter.Encrypt(idToIVKeyGenerator[ipToId[ip]].Next(), new PrivateMatchmakerHsResponse(ipToId[ip]).Serialize()), ipToId[ip]);
                     break;
                 case MessageType.Acknowledge:
                     Acknowledge acknowledgedMessage = new Acknowledge(data);

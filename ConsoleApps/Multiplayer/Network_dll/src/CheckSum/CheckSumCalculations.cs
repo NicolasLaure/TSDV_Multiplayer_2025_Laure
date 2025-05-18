@@ -26,33 +26,34 @@ namespace Network.CheckSum
         private static uint[] GetIntsFromData(byte[] data)
         {
             int quantityOfInts = (int)Math.Ceiling((double)data.Length / 4);
-            uint[] ints = new uint[quantityOfInts];
+            List<uint> ints = new List<uint>();
 
             for (int i = 0; i < quantityOfInts; i++)
             {
                 if (i * 4 + 3 < data.Length)
                 {
-                    ints[i] = BitConverter.ToUInt32(data, i * 4);
+                    ints.Add(BitConverter.ToUInt32(data, i * 4));
                 }
                 else
                 {
-                    int missingBytesQty = sizeof(int) - data.Length % sizeof(int) * sizeof(int);
+                    float remainder = (float)(data.Length % sizeof(int)) / sizeof(int);
+                    int missingBytesQty = sizeof(int) - (int)(remainder * sizeof(int));
                     byte[] missingBytes = new byte[sizeof(int)];
-                    for (int j = 0; j < missingBytesQty; j++)
+                    for (int j = 0; j < sizeof(int); j++)
                     {
                         missingBytes[j] = new byte();
                     }
 
                     for (int j = 0; j < sizeof(int) - missingBytesQty; j++)
                     {
-                        missingBytes[j] = data[i + j];
+                        missingBytes[j] = data[(i * 4) + j];
                     }
 
-                    ints[i] = BitConverter.ToUInt32(missingBytes);
+                    ints.Add(BitConverter.ToUInt32(missingBytes));
                 }
             }
 
-            return ints;
+            return ints.ToArray();
         }
 
         private static uint OperateThrough(Span<uint> dataAsInts, List<BitOperations> operationsList)

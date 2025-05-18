@@ -10,24 +10,31 @@ namespace Network.Factory
         private readonly Dictionary<int, GameObject> instanceIdToGameObject = new Dictionary<int, GameObject>();
         private readonly Dictionary<GameObject, int> gameObjectToId = new Dictionary<GameObject, int>();
 
-        private HashHandler prefabsData;
+        private HashHandler _prefabsData;
+        private ColorHandler _colorHandler;
 
-        public ClientFactory(HashHandler gameObjectsData)
+        public ClientFactory(HashHandler gameObjectsData, ColorHandler colorHandler)
         {
-            prefabsData = gameObjectsData;
+            _prefabsData = gameObjectsData;
+            _colorHandler = colorHandler;
         }
 
         public void Instantiate(InstanceData instanceData)
         {
-            if (!prefabsData.hashToPrefab.ContainsKey(instanceData.prefabHash))
+            if (!_prefabsData.hashToPrefab.ContainsKey(instanceData.prefabHash))
             {
                 Debug.Log("Couldn't Find prefab");
                 return;
             }
 
-            GameObject prefab = prefabsData.hashToPrefab[instanceData.prefabHash];
+            GameObject prefab = _prefabsData.hashToPrefab[instanceData.prefabHash];
             Matrix4x4 trs = ByteFormat.Get4X4FromBytes(instanceData.trs, 0);
             GameObject instance = GameObject.Instantiate(prefab, trs.GetPosition(), trs.rotation);
+            if (instance.TryGetComponent<MeshRenderer>(out MeshRenderer meshRenderer))
+            {
+                meshRenderer.material = _colorHandler.GetFromColor(instanceData.color);
+            }
+
             if (instanceData.originalClientID == FpsClient.Instance.clientId)
                 instance.GetComponent<IInstantiable>().SetScripts();
 
@@ -47,7 +54,7 @@ namespace Network.Factory
         {
             for (int i = 0; i < objectsToInstantiate.count; i++)
             {
-                GameObject prefab = prefabsData.hashToPrefab[objectsToInstantiate.instancesData[i].prefabHash];
+                GameObject prefab = _prefabsData.hashToPrefab[objectsToInstantiate.instancesData[i].prefabHash];
                 Matrix4x4 trs = ByteFormat.Get4X4FromBytes(objectsToInstantiate.instancesData[i].trs, 0);
                 GameObject instance = GameObject.Instantiate(prefab, trs.GetPosition(), trs.rotation);
                 SaveGameObject(objectsToInstantiate.instancesData[i], instance);

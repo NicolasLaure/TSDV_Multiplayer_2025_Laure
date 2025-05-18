@@ -16,14 +16,16 @@ namespace Network
     {
         public float timeStamp;
         public int id;
+        public string username;
         public IPEndPoint ipEndPoint;
         public short ping = 0;
 
-        public Client(IPEndPoint ipEndPoint, int id, float timeStamp)
+        public Client(IPEndPoint ipEndPoint, int id, string username, float timeStamp)
         {
             this.timeStamp = timeStamp;
             this.id = id;
             this.ipEndPoint = ipEndPoint;
+            this.username = username;
             ping = 0;
         }
     }
@@ -85,7 +87,7 @@ namespace Network
             connection = null;
         }
 
-        protected void AddClient(IPEndPoint ip)
+        protected void AddClient(IPEndPoint ip, string username)
         {
             //ipToId does not contain a previous connected Ip? Has something to do with creating a new Connection? 
             if (!ipToId.ContainsKey(ip))
@@ -93,7 +95,7 @@ namespace Network
                 int id = nextClientId;
                 ipToId[ip] = nextClientId;
                 Logger.Log("Adding client: " + ip.Address + " ID: " + id);
-                clients.Add(nextClientId, new Client(ip, nextClientId, ServerTime.time));
+                clients.Add(nextClientId, new Client(ip, nextClientId, username, ServerTime.time));
                 idLastPingTime[nextClientId] = ServerTime.time;
                 clientIds.Add(id);
 
