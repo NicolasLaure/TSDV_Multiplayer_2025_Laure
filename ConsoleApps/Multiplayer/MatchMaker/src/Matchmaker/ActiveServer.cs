@@ -1,19 +1,22 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 
 namespace Network.Matchmaker
 {
     public class ActiveServer
     {
-        public List<int> clientIds;
+        public List<Client> clients;
         public IPAddress serverIp;
         public int serverPort;
+        public Process process;
 
-        public ActiveServer(List<int> clients, IPAddress serverIp, int port)
+        public ActiveServer(List<Client> clients, IPAddress serverIp, int port, Process serverProcess)
         {
-            this.clientIds = clients;
+            this.clients = clients;
             this.serverIp = serverIp;
             serverPort = port;
+            process = serverProcess;
         }
     }
 }

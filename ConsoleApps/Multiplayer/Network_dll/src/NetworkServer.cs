@@ -147,6 +147,12 @@ namespace Network
                 connection.Send(data, client.ipEndPoint);
         }
 
+        public void SendToIp(byte[] data, IPEndPoint ip)
+        {
+            if (connection != null)
+                connection.Send(data, ip);
+        }
+
         public void Broadcast(byte[] data)
         {
             if (connection == null)

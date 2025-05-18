@@ -170,6 +170,10 @@ namespace Network
 
                     onClientDisconnect?.Invoke(disconnect.id);
                     break;
+                case MessageType.UsernameTaken:
+                    Debug.LogError($"USERNAME WAS TAKEN");
+                    EndClient();
+                    break;
                 case MessageType.Chat:
                     onChatMessageReceived?.Invoke(idToUsername[receivedClientId], data);
                     break;
