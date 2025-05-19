@@ -33,6 +33,8 @@ namespace Cubes
         private NetworkClient _networkClient;
         private ClientFactory _clientFactory;
 
+        private bool isGameOver = false;
+
         private void Start()
         {
             prefabsData.Initialize();
@@ -231,6 +233,10 @@ namespace Cubes
 
         public IEnumerator OnGameOver(bool hasWon)
         {
+            if (isGameOver)
+                yield break;
+
+            isGameOver = true;
             if (hasWon)
             {
                 winPanel.SetActive(true);
