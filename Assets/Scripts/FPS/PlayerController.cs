@@ -13,19 +13,25 @@ public class PlayerController : MonoBehaviour
     private Vector3 movementDir;
 
     private bool isCrouching = false;
+    private Matrix4x4 lastFrameTrs;
 
     void Start()
     {
         InputReader.Instance.onMove += HandleDir;
         InputReader.Instance.onCrouch += ToggleCrouch;
         InputReader.Instance.onShoot += Shoot;
+
+        lastFrameTrs = transform.localToWorldMatrix;
     }
 
     void Update()
     {
         Move();
 
-        SendActualPosition();
+        if (lastFrameTrs != transform.localToWorldMatrix)
+            SendActualPosition();
+
+        lastFrameTrs = transform.localToWorldMatrix;
     }
 
     private void Move()

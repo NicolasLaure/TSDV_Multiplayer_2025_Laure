@@ -13,24 +13,6 @@ using Random = System.Random;
 
 namespace Network
 {
-    public class Client
-    {
-        public float timeStamp;
-        public int id;
-        public string username;
-        public IPEndPoint ipEndPoint;
-        public short ping = 0;
-
-        public Client(IPEndPoint ipEndPoint, int id, string username, float timeStamp)
-        {
-            this.timeStamp = timeStamp;
-            this.id = id;
-            this.ipEndPoint = ipEndPoint;
-            this.username = username;
-            ping = 0;
-        }
-    }
-
     public abstract class NetworkServer<T> : NetworkManager<T> where T : NetworkServer<T>
     {
         protected readonly List<int> clientIds = new List<int>();
@@ -46,6 +28,7 @@ namespace Network
         protected int nextClientId = 0; // This id should be generated during first handshake
 
         public int targetFPS = 60;
+        public int afkDisconnectTime = 15;
         private bool shouldStop = false;
 
         public void StartServer(int port)

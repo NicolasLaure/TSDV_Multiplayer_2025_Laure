@@ -25,6 +25,12 @@ namespace Network
             onServerStart?.Invoke();
         }
 
+        public override void Update()
+        {
+            base.Update();
+            AfkCheck();
+        }
+
         public override void OnReceiveData(byte[] data, IPEndPoint ip)
         {
             try
@@ -108,10 +114,12 @@ namespace Network
                         break;
                     case MessageType.Chat:
                         Broadcast(data);
+                        SetPlayerActive(receivedClientId);
                         break;
                     case MessageType.Position:
                     case MessageType.Crouch:
                         Broadcast(data);
+                        SetPlayerActive(receivedClientId);
                         break;
                     case MessageType.ImportantOrderTest:
                         Logger.Log($"ImportantOrder: {new ImportantOrderMessage(data).number}");
@@ -119,6 +127,7 @@ namespace Network
                     case MessageType.InstantiateRequest:
                         InstantiateRequest instantiateRequest = new InstantiateRequest(data);
                         _svFactory.BroadcastInstantiation(instantiateRequest.instanceData, this);
+                        SetPlayerActive(receivedClientId);
                         break;
                     case MessageType.DeInstantiateRequest:
                         DeInstantiateRequest deInstantiateRequest = new DeInstantiateRequest(data);
@@ -165,6 +174,31 @@ namespace Network
                 Console.WriteLine(e);
                 Thread.Sleep(10000);
                 throw;
+            }
+        }
+
+        protected void SetPlayerActive(int id)
+        {
+            clients[id].lastActiveTime = ServerTime.time;
+        }
+
+        protected void AfkCheck()
+        {
+            using (var iterator = clients.GetEnumerator())
+            {
+                while (iterator.MoveNext())
+                {
+                    Client client = iterator.Current.Value;
+                    float afkTime = (ServerTime.time - client.lastActiveTime);
+
+                    if (afkTime > afkDisconnectTime)
+                    {
+                        SendToClient(new AfkDisconnect().Serialize(), client.id);
+                        Thread.Sleep(250);
+                        Broadcast(new Disconnect(client.id).Serialize());
+                        RemoveClient(client.id);
+                    }
+                }
             }
         }
 

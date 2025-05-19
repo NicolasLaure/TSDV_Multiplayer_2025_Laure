@@ -170,10 +170,6 @@ namespace Network
 
                     onClientDisconnect?.Invoke(disconnect.id);
                     break;
-                case MessageType.UsernameTaken:
-                    Debug.LogError($"USERNAME WAS TAKEN");
-                    EndClient();
-                    break;
                 case MessageType.Chat:
                     if (idToUsername.ContainsKey(receivedClientId))
                         onChatMessageReceived?.Invoke(idToUsername[receivedClientId], data);
@@ -216,6 +212,15 @@ namespace Network
                     break;
                 case MessageType.Usernames:
                     HandleUsernamesMessage(new UsernamesMessage(data));
+                    break;
+
+                case MessageType.Error_UsernameTaken:
+                    Debug.LogError($"USERNAME WAS TAKEN");
+                    EndClient();
+                    break;
+                case MessageType.Error_AfkDisconnect:
+                    Debug.LogError($"AFK DISCONNECT");
+                    EndClient();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
