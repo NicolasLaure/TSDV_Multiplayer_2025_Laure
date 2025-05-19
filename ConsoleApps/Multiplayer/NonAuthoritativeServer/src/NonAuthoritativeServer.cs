@@ -1,5 +1,7 @@
 using System.Net;
 using Network_dll.Messages.ClientMessages;
+using Network_dll.Messages.ErrorMessages;
+using Network.ChatSafety;
 using Network.Encryption;
 using Network.Enums;
 using Network.Messages;
@@ -14,6 +16,7 @@ namespace Network
     {
         public static Action onServerStart;
         public ServerFactory _svFactory;
+        private ChatGuardian _chatGuardian;
 
         private readonly Dictionary<int, List<InstanceData>> instanceIdTointegrityChecks = new Dictionary<int, List<InstanceData>>();
 
@@ -23,6 +26,7 @@ namespace Network
         public void Start(int port)
         {
             _svFactory = new ServerFactory();
+            _chatGuardian = new ChatGuardian();
             StartServer(port);
             onServerStart?.Invoke();
 
@@ -123,8 +127,20 @@ namespace Network
                     case MessageType.Error:
                         break;
                     case MessageType.Chat:
-                        Broadcast(data);
-                        SetPlayerActive(receivedClientId);
+                        Chat chatMessage = new Chat(data);
+                        if (_chatGuardian.IsSafeMessage(chatMessage.message))
+                        {
+                            Broadcast(data);
+                            SetPlayerActive(receivedClientId);
+                        }
+                        else
+                        {
+                            SavedClient clientData = _savedClientHandler.GetClientData(clients[receivedClientId].username);
+                            clientData.isBanned = true;
+                            _savedClientHandler.SaveClient(clientData);
+                            SendToClient(new UserIsBanned().Serialize(), receivedClientId);
+                        }
+
                         break;
                     case MessageType.Position:
                     case MessageType.Crouch:

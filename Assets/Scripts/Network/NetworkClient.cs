@@ -230,6 +230,11 @@ namespace Network
                     onError?.Invoke("Afk");
                     EndClient();
                     break;
+                case MessageType.Error_UserBanned:
+                    Debug.LogError($"USER BANNED");
+                    onError?.Invoke("UserWasBanned");
+                    EndClient();
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

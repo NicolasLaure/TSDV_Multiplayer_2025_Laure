@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using Network_dll.Messages.Data;
 using Network.CheckSum;
+using Network.FileManagement;
 using Network.Messages;
 using Network.Messages.Server;
 using Network.Utilities;
@@ -26,6 +27,7 @@ namespace Network
         public Action<int> onClientRemoved;
 
         protected int nextClientId = 0; // This id should be generated during first handshake
+        protected SavedClientHandler _savedClientHandler = new SavedClientHandler("SavedClients.txt");
 
         public int targetFPS = 60;
         public int afkDisconnectTime = 15;

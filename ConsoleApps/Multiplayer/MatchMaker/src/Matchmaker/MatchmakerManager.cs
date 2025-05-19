@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
+using Network_dll.Messages.ErrorMessages;
 using Network.Encryption;
 using Network.Enums;
 using Network.FileManagement;
@@ -17,7 +18,7 @@ namespace Network
     {
         private List<int> connectingToServerPairs = new List<int>();
 
-        private int minWaitingClients = 4;
+        private int minWaitingClients = 2;
         private int maxEloDifference = 400;
         private int minSvPort = 60326;
         private int maxSvPort = 60350;
@@ -27,7 +28,6 @@ namespace Network
         public string serverPath = "NonAuthoritativeServer.exe";
 
         private readonly Dictionary<HeldMessage, int> heldMessageToClientId = new Dictionary<HeldMessage, int>();
-        private SavedClientHandler _savedClientHandler = new SavedClientHandler("SavedClients.txt");
 
         public override void Update()
         {
@@ -112,7 +112,7 @@ namespace Network
                                 SavedClient clientData = _savedClientHandler.GetClientData(handshake.handshakeData.username);
                                 if (clientData.isBanned)
                                 {
-                                    SendToIp(new UsernameTaken().Serialize(), ip);
+                                    SendToIp(new UserIsBanned().Serialize(), ip);
                                     return;
                                 }
 
