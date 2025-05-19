@@ -18,15 +18,25 @@ namespace Network
 
         private readonly Dictionary<int, List<InstanceData>> instanceIdTointegrityChecks = new Dictionary<int, List<InstanceData>>();
 
+        private float maxEmptyTime = 3;
+        private float emptySince = 0;
+
         public void Start(int port)
         {
             _svFactory = new ServerFactory();
             StartServer(port);
             onServerStart?.Invoke();
+
+            emptySince = ServerTime.time;
         }
 
         public override void Update()
         {
+            if (clients.Count == 0 && ServerTime.time - emptySince >= maxEmptyTime)
+            {
+                EndServer();
+            }
+
             base.Update();
             AfkCheck();
         }
@@ -108,7 +118,8 @@ namespace Network
                     case MessageType.Disconnect:
                         RemoveClient(ip);
                         Broadcast(data);
-                        EndServer();
+                        if (clients.Count == 0)
+                            emptySince = ServerTime.time;
                         break;
                     case MessageType.Error:
                         break;

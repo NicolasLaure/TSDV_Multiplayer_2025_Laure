@@ -11,7 +11,6 @@ using Network.Messages;
 using Network.Messages.Server;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 namespace Cubes
 {

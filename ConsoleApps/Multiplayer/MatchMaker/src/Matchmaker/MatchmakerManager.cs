@@ -44,7 +44,6 @@ namespace Network
             }
         }
 
-
         public override void OnReceiveData(byte[] data, IPEndPoint ip)
         {
             try

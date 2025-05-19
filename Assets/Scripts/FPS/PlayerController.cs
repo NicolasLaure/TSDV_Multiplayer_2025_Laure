@@ -1,10 +1,9 @@
+using System;
 using Cubes;
-using Events;
 using FPS;
 using FPS.Bullet;
 using Health;
 using Input;
-using Network;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -22,6 +21,15 @@ public class PlayerController : MonoBehaviour
         InputReader.Instance.onShoot += Shoot;
 
         lastFrameTrs = transform.localToWorldMatrix;
+    }
+
+    private void OnDestroy()
+    {
+        if (Camera.main != null)
+            Camera.main.transform.parent = null;
+        InputReader.Instance.onMove -= HandleDir;
+        InputReader.Instance.onCrouch -= ToggleCrouch;
+        InputReader.Instance.onShoot -= Shoot;
     }
 
     void Update()

@@ -16,6 +16,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     [SerializeField] private GameObject ping;
 
     [SerializeField] private GameObject chatScreen;
+    [SerializeField] private GameObject mainCamera;
 
     protected override void Initialize()
     {
@@ -52,7 +53,10 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 
     public void Disconnect()
     {
-        this.gameObject.SetActive(true);
+        gameObject.SetActive(true);
+        if (Camera.main == null)
+            GameObject.Instantiate(mainCamera);
+
         InputReader.Instance.onPingScreen -= OnPingScreen;
         if (ClientManager.Instance.networkClient != null)
             ClientManager.Instance.networkClient.onDisconnection -= Disconnect;
