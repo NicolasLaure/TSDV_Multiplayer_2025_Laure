@@ -44,6 +44,7 @@ namespace Cubes
 
             _networkClient.OnReceiveEvent += OnReceiveDataEvent;
             _networkClient.onDisconnection += HandleAbruptDisconnection;
+            _networkClient.onClientDisconnect += HandleDisconnectedUser;
 
             InputReader.Instance.onQuit += HandleQuit;
         }
@@ -176,6 +177,14 @@ namespace Cubes
         private void HandleAbruptDisconnection()
         {
             _clientFactory.DeInstantiateAll();
+        }
+
+        private void HandleDisconnectedUser(int id)
+        {
+            if (id != clientId)
+            {
+                StartCoroutine(OnGameOver(true));
+            }
         }
 
         public void SendInstantiateRequest(GameObject prefab, Matrix4x4 trs, short instanceColor)
