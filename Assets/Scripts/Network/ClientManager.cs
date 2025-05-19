@@ -19,6 +19,8 @@ namespace Network
         private void OnDestroy()
         {
             networkClient.EndClient();
+            if (Instance == this)
+                Instance = null;
         }
     }
 }

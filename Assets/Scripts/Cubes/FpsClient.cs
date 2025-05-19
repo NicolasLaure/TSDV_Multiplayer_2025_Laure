@@ -14,6 +14,7 @@ using Network.Messages.Server;
 using UI;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace Cubes
 {
@@ -57,6 +58,8 @@ namespace Cubes
         private void OnDestroy()
         {
             HandleQuit();
+            if (Instance == this)
+                Instance = null;
         }
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
@@ -182,6 +185,7 @@ namespace Cubes
         private void HandleAbruptDisconnection()
         {
             _clientFactory.DeInstantiateAll();
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
         private void HandleDisconnectedUser(int id)
@@ -249,7 +253,7 @@ namespace Cubes
             if (hasWon)
             {
                 winPanel.SetActive(true);
-                _networkClient.SendToServer(new Win(_networkClient.username).Serialize());
+                _networkClient.SendToServer(new Win(_networkClient.username, _networkClient.GetOponentUsername()).Serialize());
             }
             else
                 losePanel.SetActive(true);

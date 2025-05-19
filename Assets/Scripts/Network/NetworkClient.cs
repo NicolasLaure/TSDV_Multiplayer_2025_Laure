@@ -90,6 +90,7 @@ namespace Network
             SendToServer(new Disconnect(id).Serialize());
             connection = null;
             onDisconnection?.Invoke();
+            
         }
 
         public void SendToServer(byte[] data)
@@ -311,6 +312,20 @@ namespace Network
                 return idToUsername[id];
 
             Debug.Log($"Id {id} was not a key in dictionary");
+            return "";
+        }
+
+        public string GetOponentUsername()
+        {
+            using (var iterator = idToUsername.GetEnumerator())
+            {
+                while (iterator.MoveNext())
+                {
+                    if (iterator.Current.Key != id)
+                        return iterator.Current.Value;
+                }
+            }
+
             return "";
         }
     }

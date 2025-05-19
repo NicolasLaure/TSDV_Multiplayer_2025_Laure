@@ -43,6 +43,16 @@ public class SavedClientHandler
         if (TryGetClientsList(out List<SavedClient> clients))
             savedClients.AddRange(clients);
 
+        for (int i = 0; i < savedClients.Count; i++)
+        {
+            if (savedClients[i].username == clientToSave.username)
+            {
+                savedClients[i] = clientToSave;
+                _fileHandler.WriteFile(JsonConvert.SerializeObject(savedClients));
+                return;
+            }
+        }
+
         savedClients.Add(clientToSave);
         _fileHandler.WriteFile(JsonConvert.SerializeObject(savedClients));
     }

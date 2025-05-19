@@ -2,6 +2,7 @@ using System.Net;
 using Network_dll.Messages.ClientMessages;
 using Network_dll.Messages.ErrorMessages;
 using Network.ChatSafety;
+using Network.Elo;
 using Network.Encryption;
 using Network.Enums;
 using Network.Messages;
@@ -17,6 +18,7 @@ namespace Network
         public static Action onServerStart;
         public ServerFactory _svFactory;
         private ChatGuardian _chatGuardian;
+        private EloHandler _eloHandler;
 
         private readonly Dictionary<int, List<InstanceData>> instanceIdTointegrityChecks = new Dictionary<int, List<InstanceData>>();
 
@@ -27,6 +29,7 @@ namespace Network
         {
             _svFactory = new ServerFactory();
             _chatGuardian = new ChatGuardian();
+            _eloHandler = new EloHandler(_savedClientHandler);
             StartServer(port);
             onServerStart?.Invoke();
 
@@ -181,6 +184,7 @@ namespace Network
                     case MessageType.Win:
                         Win win = new Win(data);
                         Logger.Log($"Player {win.winnerUsername} won the game");
+                        _eloHandler.EloCalculation(win.winnerUsername, win.loserUsername);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
