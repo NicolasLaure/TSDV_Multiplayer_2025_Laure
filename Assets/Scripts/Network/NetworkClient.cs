@@ -20,6 +20,7 @@ namespace Network
     {
         private readonly Dictionary<int, string> idToUsername = new Dictionary<int, string>();
         public Action<short> onPingUpdated;
+        public Action<string> onError;
         public Action<ClientPing[]> onReceiveAllPings;
 
         private float ping = 0;
@@ -221,10 +222,12 @@ namespace Network
 
                 case MessageType.Error_UsernameTaken:
                     Debug.LogError($"USERNAME WAS TAKEN");
+                    onError?.Invoke("Username is already used");
                     EndClient();
                     break;
                 case MessageType.Error_AfkDisconnect:
                     Debug.LogError($"AFK DISCONNECT");
+                    onError?.Invoke("Afk");
                     EndClient();
                     break;
                 default:

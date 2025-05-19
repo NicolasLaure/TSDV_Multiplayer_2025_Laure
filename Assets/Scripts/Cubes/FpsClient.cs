@@ -11,6 +11,7 @@ using Network.Enums;
 using Network.Factory;
 using Network.Messages;
 using Network.Messages.Server;
+using UI;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -24,6 +25,7 @@ namespace Cubes
         [SerializeField] private HashHandler prefabsData;
         [SerializeField] private ColorHandler colorHandler;
 
+        [SerializeField] private ErrorMessagePanel errorPanel;
         [SerializeField] private GameObject winPanel;
         [SerializeField] private GameObject losePanel;
         public UnityEvent<EntityToUpdate> onEntityUpdated;
@@ -47,6 +49,7 @@ namespace Cubes
             _networkClient.OnReceiveEvent += OnReceiveDataEvent;
             _networkClient.onDisconnection += HandleAbruptDisconnection;
             _networkClient.onClientDisconnect += HandleDisconnectedUser;
+            _networkClient.onError += HandleError;
 
             InputReader.Instance.onQuit += HandleQuit;
         }
@@ -229,6 +232,12 @@ namespace Cubes
         {
             _networkClient.SendToServer(new Death(clientId).Serialize());
             StartCoroutine(OnGameOver(false));
+        }
+
+        private void HandleError(string error)
+        {
+            errorPanel.gameObject.SetActive(true);
+            errorPanel.SetText(error);
         }
 
         public IEnumerator OnGameOver(bool hasWon)
