@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading;
 using Network.Encryption;
 using Network.Enums;
+using Network.FileManagement;
 using Network.Matchmaker;
 using Network.Messages;
 using Network.Messages.MatchMaker;
@@ -14,8 +15,6 @@ namespace Network
 {
     public class MatchmakerManager : NetworkServer<MatchmakerManager>
     {
-        private readonly Dictionary<int, int> clientIdToElo = new Dictionary<int, int>();
-        private List<int> initializedClientIds = new List<int>();
         private List<int> connectingToServerPairs = new List<int>();
 
         private int maxEloDifference = 400;
@@ -27,6 +26,7 @@ namespace Network
         public string serverPath = "NonAuthoritativeServer.exe";
 
         private readonly Dictionary<HeldMessage, int> heldMessageToClientId = new Dictionary<HeldMessage, int>();
+        private SavedClientHandler _savedClientHandler = new SavedClientHandler("SavedClients.txt");
 
         public override void Update()
         {
@@ -108,9 +108,18 @@ namespace Network
                                     return;
                                 }
 
+                                SavedClient clientData = _savedClientHandler.GetClientData(handshake.handshakeData.username);
+                                if (clientData.isBanned)
+                                {
+                                    SendToIp(new UsernameTaken().Serialize(), ip);
+                                    return;
+                                }
+
                                 AddClient(ip, handshake.handshakeData.username);
                                 receivedClientId = ipToId[ip];
-                                Logger.Log($"NEW CLIENT, Id: {receivedClientId}, Username: {clients[receivedClientId].username}");
+                                clients[receivedClientId].elo = clientData.elo;
+
+                                Logger.Log($"NEW CLIENT, Id: {receivedClientId}, Username: {clients[receivedClientId].username}, Elo:{clients[receivedClientId].elo}");
                                 SendToClient(new MatchMakerHsResponse(receivedClientId, seed).Serialize(), receivedClientId);
                                 heldMessages.Add(new HeldMessage(MatchMakerHsResponse.messageId, data));
                             }
@@ -121,10 +130,8 @@ namespace Network
                         break;
                     case MessageType.PrivateMatchMakerHandshake:
                         PrivateMatchMakerHandshake receivedMatchMakerHandshake = new PrivateMatchMakerHandshake(data);
-                        Logger.Log($"client{receivedClientId} Elo Is {receivedMatchMakerHandshake.elo}");
-                        clientIdToElo[receivedClientId] = receivedMatchMakerHandshake.elo;
-                        initializedClientIds.Add(receivedClientId);
-                        SendToClient(Encrypter.Encrypt(idToIVKeyGenerator[ipToId[ip]].Next(), new PrivateMatchmakerHsResponse(ipToId[ip]).Serialize()), ipToId[ip]);
+                        clients[receivedClientId].isInitialized = true;
+                        SendToClient(Encrypter.Encrypt(idToIVKeyGenerator[ipToId[ip]].Next(), new PrivateMatchmakerHsResponse(clients[receivedClientId].elo).Serialize()), ipToId[ip]);
                         break;
                     case MessageType.Acknowledge:
                         Acknowledge acknowledgedMessage = new Acknowledge(data);
@@ -173,24 +180,48 @@ namespace Network
         {
             base.RemoveClient(id);
 
-            if (initializedClientIds.Contains(id))
-                initializedClientIds.Remove(id);
             if (connectingToServerPairs.Contains(id))
                 connectingToServerPairs.Remove(id);
-
-            if (clientIdToElo.ContainsKey(id))
-                clientIdToElo.Remove(id);
         }
 
         private void CheckQueue()
         {
-            if (initializedClientIds.Count > 0 && !clientIdToElo.ContainsKey(initializedClientIds[initializedClientIds.Count - 1]))
-                return;
-
-            if (initializedClientIds.Count >= 2)
+            if (GetWaitingClientsCount() >= 2)
             {
                 PairPlayers();
             }
+        }
+
+        private int GetWaitingClientsCount()
+        {
+            int count = 0;
+            using (var iterator = clients.GetEnumerator())
+            {
+                while (iterator.MoveNext())
+                {
+                    Client client = iterator.Current.Value;
+                    if (client.isInitialized && !client.isConnectedToServer)
+                        count++;
+                }
+            }
+
+            return count;
+        }
+
+        private List<Client> GetWaitingClients()
+        {
+            List<Client> initializedClients = new List<Client>();
+            using (var iterator = clients.GetEnumerator())
+            {
+                while (iterator.MoveNext())
+                {
+                    Client client = iterator.Current.Value;
+                    if (client.isInitialized && !client.isConnectedToServer)
+                        initializedClients.Add(client);
+                }
+            }
+
+            return initializedClients;
         }
 
         private void PairPlayers()
@@ -200,14 +231,13 @@ namespace Network
                 Logger.Log($"Pair A: {idOne}, B: {idTwo}");
                 connectingToServerPairs.Add(idOne);
                 connectingToServerPairs.Add(idTwo);
-                initializedClientIds.Remove(idOne);
-                initializedClientIds.Remove(idTwo);
                 CreateServer(idOne, idTwo);
             }
         }
 
         private bool TryFindPairs(out int player1Id, out int player2Id)
         {
+            List<Client> initializedClientIds = GetWaitingClients();
             for (int i = 0; i < initializedClientIds.Count; i++)
             {
                 for (int j = 0; j < initializedClientIds.Count; j++)
@@ -215,10 +245,10 @@ namespace Network
                     if (i == j)
                         continue;
 
-                    if (Math.Abs(clientIdToElo[initializedClientIds[i]] - clientIdToElo[initializedClientIds[j]]) <= maxEloDifference)
+                    if (Math.Abs(initializedClientIds[i].elo - initializedClientIds[j].elo) <= maxEloDifference)
                     {
-                        player1Id = initializedClientIds[i];
-                        player2Id = initializedClientIds[j];
+                        player1Id = initializedClientIds[i].id;
+                        player2Id = initializedClientIds[j].id;
                         return true;
                     }
                 }
@@ -251,6 +281,8 @@ namespace Network
             List<Client> connectedPair = new List<Client>();
             connectedPair.Add(clients[clientOneId]);
             connectedPair.Add(clients[clientTwoId]);
+            clients[clientTwoId].isConnectedToServer = true;
+            clients[clientOneId].isConnectedToServer = true;
             _activeServers.Add(new ActiveServer(connectedPair, ipAddress, newSvPort, newServerProcess));
         }
 

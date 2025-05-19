@@ -5,25 +5,25 @@ namespace Network.Messages.MatchMaker
 {
     public class PrivateMatchmakerHsResponse : Message<int>
     {
-        public int id;
+        public int elo;
 
-        public PrivateMatchmakerHsResponse(int id)
+        public PrivateMatchmakerHsResponse(int elo)
         {
             isEncrypted = true;
             messageType = MessageType.PrivateMatchmakerHsResponse;
             attribs = Attributes.Important | Attributes.Checksum;
-            this.id = id;
+            this.elo = elo;
             messageId++;
         }
 
         public PrivateMatchmakerHsResponse(byte[] data)
         {
-            id = Deserialize(data);
+            elo = Deserialize(data);
         }
 
         public override byte[] Serialize()
         {
-            return GetFormattedData(BitConverter.GetBytes(id));
+            return GetFormattedData(BitConverter.GetBytes(elo));
         }
 
         public override int Deserialize(byte[] message)

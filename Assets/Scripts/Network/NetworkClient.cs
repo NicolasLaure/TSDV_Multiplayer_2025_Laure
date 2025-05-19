@@ -39,7 +39,7 @@ namespace Network
 
         public float timeAfterGameOver = 5f;
 
-        public void StartClient(IPAddress ip, int port, string username, int elo, short color)
+        public void StartClient(IPAddress ip, int port, string username, short color)
         {
             Initialize();
             this.port = port;
@@ -47,7 +47,6 @@ namespace Network
             lastPingTime = Time.time;
             ping = 0;
             this.username = username;
-            _elo = elo;
             this.color = color;
 
             connection = new UdpConnection(ip, port, this);
@@ -197,11 +196,13 @@ namespace Network
                     SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateMatchMakerHandshake(_elo).Serialize()));
                     break;
                 case MessageType.PrivateMatchmakerHsResponse:
+                    PrivateMatchmakerHsResponse MmHsResponse = new PrivateMatchmakerHsResponse(data);
+                    _elo = MmHsResponse.elo;
                     break;
                 case MessageType.ServerDirection:
                     ServerDirection svDir = new ServerDirection(data);
                     Debug.Log($"ServerIp {svDir.serverIp}, port: {svDir.serverPort}");
-                    StartClient(svDir.serverIp, svDir.serverPort, username, _elo, color);
+                    StartClient(svDir.serverIp, svDir.serverPort, username, color);
                     break;
                 case MessageType.Position:
                 case MessageType.Crouch:

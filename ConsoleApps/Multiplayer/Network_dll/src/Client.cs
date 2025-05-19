@@ -7,7 +7,10 @@ namespace Network
     {
         public float timeStamp;
         public int id;
+        public int elo = 0;
         public string username;
+        public bool isInitialized = false;
+        public bool isConnectedToServer = false;
         public IPEndPoint ipEndPoint;
         public short ping = 0;
         public float lastActiveTime = 0;

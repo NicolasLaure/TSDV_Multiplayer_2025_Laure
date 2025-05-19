@@ -11,7 +11,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public Button connectBtn;
     public InputField addressInputField;
     public InputField usernameInputField;
-    public InputField rateInputField;
     public Dropdown colorDropdown;
 
     [SerializeField] private GameObject ping;
@@ -30,12 +29,11 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     {
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
         string username = usernameInputField.text;
-        int elo = Convert.ToInt32(rateInputField.text);
         short color = (short)colorDropdown.value;
         Debug.Log($"Color Number {color}");
 
         Debug.Log(ClientManager.Instance.networkClient.defaultPort);
-        ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, username, elo, color);
+        ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, username, color);
 
         ClientManager.Instance.networkClient.onDisconnection += Disconnect;
 
