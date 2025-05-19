@@ -17,6 +17,7 @@ namespace Network
     {
         private List<int> connectingToServerPairs = new List<int>();
 
+        private int minWaitingClients = 4;
         private int maxEloDifference = 400;
         private int minSvPort = 60326;
         private int maxSvPort = 60350;
@@ -186,8 +187,9 @@ namespace Network
 
         private void CheckQueue()
         {
-            if (GetWaitingClientsCount() >= 2)
+            if (GetWaitingClientsCount() >= minWaitingClients)
             {
+                PairPlayers();
                 PairPlayers();
             }
         }

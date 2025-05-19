@@ -676,13 +676,14 @@ MonoBehaviour:
   connectBtn: {fileID: 396509903}
   addressInputField: {fileID: 2123302590}
   usernameInputField: {fileID: 1460245281}
-  rateInputField: {fileID: 0}
   colorDropdown: {fileID: 1462747440}
   ping: {fileID: 2044167109}
   chatScreen: {fileID: 1130635388}
   mainCamera: {fileID: 7568101541316388220, guid: ae1844ca2b5b7324bbb75a38978fe210,
     type: 3}
-  gameOverPanels: []
+  gameOverPanels:
+  - {fileID: 994002064}
+  - {fileID: 1318664106}
 --- !u!1 &304126657
 GameObject:
   m_ObjectHideFlags: 0

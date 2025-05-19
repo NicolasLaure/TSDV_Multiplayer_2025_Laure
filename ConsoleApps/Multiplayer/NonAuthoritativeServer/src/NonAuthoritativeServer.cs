@@ -214,7 +214,6 @@ namespace Network
                         SendToClient(new AfkDisconnect().Serialize(), client.id);
                         Thread.Sleep(250);
                         Broadcast(new Disconnect(client.id).Serialize());
-                        RemoveClient(client.id);
                     }
                 }
             }
