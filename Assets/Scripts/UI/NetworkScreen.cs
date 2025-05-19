@@ -34,7 +34,8 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 
         Debug.Log(ClientManager.Instance.networkClient.defaultPort);
         ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, username, color);
-
+        ClientManager.Instance.isServerActive = true;
+        
         ClientManager.Instance.networkClient.onDisconnection += Disconnect;
 
         InputReader.Instance.onPingScreen += OnPingScreen;

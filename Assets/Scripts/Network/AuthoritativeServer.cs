@@ -13,6 +13,9 @@ using Network.Messages;
 using Network.Messages.Server;
 using Network.Messages.TestMessages;
 using Network.Utilities;
+using UnityEngine;
+using Logger = Network.Utilities.Logger;
+using Ping = Network.Messages.Ping;
 
 namespace Network
 {
@@ -34,7 +37,7 @@ namespace Network
 
         public void Start(int port)
         {
-            _chatGuardian = new ChatGuardian();
+            //_chatGuardian = new ChatGuardian();
             _eloHandler = new EloHandler(_savedClientHandler);
             StartServer(port);
             onServerStart?.Invoke();
@@ -106,6 +109,7 @@ namespace Network
                             if (!ipToId.ContainsKey(ip))
                             {
                                 PublicHandshake handshake = new PublicHandshake(data);
+                                Debug.Log("HandhsakeReceived");
                                 AddClient(ip, handshake.handshakeData.username);
                                 receivedClientId = ipToId[ip];
                             }

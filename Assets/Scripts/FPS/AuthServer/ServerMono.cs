@@ -2,29 +2,32 @@ using Network;
 using Network.Factory;
 using UnityEngine;
 
-public class ServerMono : MonoBehaviourSingleton<ServerMono>
+namespace FPS.AuthServer
 {
-    public AuthoritativeServer networkServer;
-
-    public AuthServerFactory serverFactory;
-    [SerializeField] private HashHandler prefabsData;
-    [SerializeField] private ColorHandler colorHandler;
-
-    protected override void Initialize()
+    public class ServerMono : MonoBehaviourSingleton<ServerMono>
     {
-        serverFactory = new AuthServerFactory(prefabsData, colorHandler);
-        networkServer = new AuthoritativeServer(serverFactory);
-    }
+        public AuthoritativeServer networkServer;
 
-    private void Update()
-    {
-        networkServer.Update();
-    }
+        public AuthServerFactory serverFactory;
+        [SerializeField] private HashHandler prefabsData;
+        [SerializeField] private ColorHandler colorHandler;
 
-    private void OnDestroy()
-    {
-        networkServer.EndServer();
-        if (Instance == this)
-            Instance = null;
+        protected override void Initialize()
+        {
+            serverFactory = new AuthServerFactory(prefabsData, colorHandler);
+            networkServer = new AuthoritativeServer(serverFactory);
+        }
+
+        private void Update()
+        {
+            networkServer.Update();
+        }
+
+        private void OnDestroy()
+        {
+            networkServer.EndServer();
+            if (Instance == this)
+                Instance = null;
+        }
     }
 }

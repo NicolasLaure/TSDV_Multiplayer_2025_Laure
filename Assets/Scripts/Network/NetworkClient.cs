@@ -29,6 +29,7 @@ namespace Network
         private float clientStartTime;
         private Random ivKeyGenerator;
 
+        public Action onClientStart;
         public Action<int> onClientDisconnect;
         public Action onDisconnection;
         public Action<string, byte[]> onChatMessageReceived;
@@ -52,6 +53,7 @@ namespace Network
 
             connection = new UdpConnection(ip, port, this);
             clientStartTime = Time.time;
+            onClientStart?.Invoke();
 
             HandshakeData handshakeData;
             handshakeData.usernameLength = this.username.Length;

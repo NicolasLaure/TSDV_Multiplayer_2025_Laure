@@ -59,7 +59,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    protected void SendActualPosition()
+    protected virtual void SendActualPosition()
     {
         Matrix4x4 trs = transform.localToWorldMatrix;
         EntityToUpdate thisEntity;
@@ -73,14 +73,14 @@ public class PlayerController : MonoBehaviour
         movementDir = new Vector3(dir.x, 0, dir.y);
     }
 
-    protected void Shoot()
+    protected virtual void Shoot()
     {
         Vector3 bulletSpawnPosition = transform.right * playerProperties.shootingPoint.x + transform.up * playerProperties.shootingPoint.y + transform.forward * playerProperties.shootingPoint.z;
         Matrix4x4 bulletSpawnTrs = Matrix4x4.TRS(transform.position + bulletSpawnPosition, Camera.main.transform.rotation, Vector3.one);
         FpsClient.Instance.SendInstantiateRequest(playerProperties.bulletPrefab, bulletSpawnTrs, (short)Colors.Black);
     }
 
-    protected void ToggleCrouch()
+    protected virtual void ToggleCrouch()
     {
         isCrouching = !isCrouching;
 

@@ -6,23 +6,20 @@ namespace Network.Utilities
     {
         public static void Log(string text)
         {
-#if UNITY_EDITOR
-            UnityEngine.Debug.Log(text);
-#else
+            onLog?.Invoke(text);
             Console.WriteLine(text);
-#endif
         }
 
         public static void LogError(string text)
         {
-#if UNITY_EDITOR
-            UnityEngine.Debug.LogError(text);
-#else
+            onLogError?.Invoke(text);
             ConsoleColor previousColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(text);
             Console.ForegroundColor = previousColor;
-#endif
         }
+
+        public static Action<string> onLog;
+        public static Action<string> onLogError;
     }
 }

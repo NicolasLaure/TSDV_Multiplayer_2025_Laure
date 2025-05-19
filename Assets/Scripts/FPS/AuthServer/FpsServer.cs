@@ -5,7 +5,7 @@ using Network;
 using Network.Enums;
 using Network.Factory;
 using Network.Messages;
-using UnityEditor;
+using Network.Messages.Server;
 using UnityEngine;
 using MessageType = Network.Enums.MessageType;
 
@@ -18,7 +18,7 @@ namespace FPS.AuthServer
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         [SerializeField] private HashHandler prefabsData;
         [SerializeField] private ColorHandler colorHandler;
-        public Action<EntityToUpdate> onEntityUpdated;
+        public Action<(EntityToUpdate entityToToUpdate, int clientId)> onEntityUpdated;
 
         private AuthoritativeServer _networkServer;
         private AuthServerFactory _serverFactory;
@@ -30,7 +30,10 @@ namespace FPS.AuthServer
             _networkServer = ServerMono.Instance.networkServer;
             _serverFactory = ServerMono.Instance.serverFactory;
 
+            _networkServer.Start(_networkServer.defaultPort);
+            _networkServer.onNewClient += HandleHandshake;
             _networkServer.OnReceiveEvent += OnReceiveDataEvent;
+            onEntityUpdated += OnEntityUpdate;
         }
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ip)
@@ -65,6 +68,12 @@ namespace FPS.AuthServer
             }
         }
 
+        private void HandleHandshake(int clientId)
+        {
+            ServerHsResponse hsResponse = new ServerHsResponse(clientId, _networkServer.Seed);
+            _networkServer.SendToClient(hsResponse.Serialize(), clientId);
+        }
+
         private void HandlePrivateHandshake(PrivateHandshake privateHandshake)
         {
             Transform spawnPos = spawnPoints[privateHandshake.clientId];
@@ -78,11 +87,11 @@ namespace FPS.AuthServer
             newPlayer.GetComponent<AuthPlayerController>().id = privateHandshake.clientId;
         }
 
-        void OnEntityUpdate(EntityToUpdate entityToToUpdate, int clientId)
+        void OnEntityUpdate((EntityToUpdate entityToToUpdate, int clientId) entityAndId)
         {
             if (_networkServer != null)
             {
-                SendEntityPosition(entityToToUpdate.gameObject, entityToToUpdate.trs, clientId);
+                SendEntityPosition(entityAndId.entityToToUpdate.gameObject, entityAndId.entityToToUpdate.trs, entityAndId.clientId);
             }
         }
 
@@ -93,6 +102,26 @@ namespace FPS.AuthServer
 
             Position entityPosition = new Position(trs, instanceId, clientId);
             _networkServer.Broadcast(entityPosition.Serialize());
+        }
+
+        public void Instantiate(GameObject prefab, Matrix4x4 trs, short instanceColor, int clientId)
+        {
+            if (!prefabsData.prefabToHash.ContainsKey(prefab))
+            {
+                Debug.Log("Invalid Prefab");
+                return;
+            }
+
+            InstanceData instanceData = new InstanceData
+            {
+                originalClientID = clientId,
+                prefabHash = prefabsData.prefabToHash[prefab],
+                instanceID = -1,
+                trs = ByteFormat.Get4X4Bytes(trs),
+                color = instanceColor
+            };
+
+            _serverFactory.Instantiate(instanceData);
         }
     }
 }

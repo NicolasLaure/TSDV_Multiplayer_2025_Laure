@@ -6,6 +6,8 @@ namespace Network
     {
         public NetworkClient networkClient;
 
+        public bool isServerActive = false;
+
         protected override void Initialize()
         {
             networkClient = new NetworkClient();
@@ -13,7 +15,10 @@ namespace Network
 
         private void Update()
         {
-            networkClient.Update();
+            if (isServerActive)
+            {
+                networkClient.Update();
+            }
         }
 
         private void OnDestroy()

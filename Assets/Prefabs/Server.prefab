@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3522261599387971857}
-  - component: {fileID: 5943107120994268100}
-  - component: {fileID: 4023703460669702528}
+  - component: {fileID: 1269038517787804453}
+  - component: {fileID: 2887189815773958342}
   m_Layer: 0
   m_Name: Server
   m_TagString: Untagged
@@ -33,7 +33,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5943107120994268100
+--- !u!114 &1269038517787804453
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42,10 +42,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 4876374338819648420}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62c98d5d24756e44c8b9d1c2b368db4c, type: 3}
+  m_Script: {fileID: 11500000, guid: a5bb76cc6f76e82458b1f4ebeeac0311, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &4023703460669702528
+  playerPrefab: {fileID: 5223137963761588274, guid: 2a117f278fac861439e332532933a660,
+    type: 3}
+  playerProperties: {fileID: 11400000, guid: 43835df3134367641881484aa7920938, type: 2}
+  spawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  prefabsData: {fileID: 11400000, guid: eab75182eda64764d8897d1476da8514, type: 2}
+  colorHandler: {fileID: 11400000, guid: 52184fc5f8af67a418860a811870f43a, type: 2}
+--- !u!114 &2887189815773958342
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,7 +62,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 4876374338819648420}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e4e3aa180b69c447bd22c0fc8140924, type: 3}
+  m_Script: {fileID: 11500000, guid: 74fdac19d88a25647a45bb176a74348d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  horizontalOffset: 2
