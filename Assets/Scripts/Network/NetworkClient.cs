@@ -175,7 +175,8 @@ namespace Network
                     EndClient();
                     break;
                 case MessageType.Chat:
-                    onChatMessageReceived?.Invoke(idToUsername[receivedClientId], data);
+                    if (idToUsername.ContainsKey(receivedClientId))
+                        onChatMessageReceived?.Invoke(idToUsername[receivedClientId], data);
                     break;
                 case MessageType.Error:
                     break;

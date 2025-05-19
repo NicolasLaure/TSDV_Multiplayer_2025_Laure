@@ -240,7 +240,7 @@ namespace Network
             serverInfo.UseShellExecute = true;
             Process newServerProcess = Process.Start(serverInfo);
 
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
             byte[] newSvDirection1 = new ServerDirection(ipAddress, newSvPort).Serialize();
             SaveHeldMessage(newSvDirection1, clientOneId);
             byte[] newSvDirection2 = new ServerDirection(ipAddress, newSvPort).Serialize();
