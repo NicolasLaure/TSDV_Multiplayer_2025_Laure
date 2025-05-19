@@ -18,7 +18,7 @@ namespace Network
     {
         private List<int> connectingToServerPairs = new List<int>();
 
-        private int minWaitingClients = 2;
+        private int minWaitingClients = 4;
         private int maxEloDifference = 400;
         private int minSvPort = 60326;
         private int maxSvPort = 60350;
