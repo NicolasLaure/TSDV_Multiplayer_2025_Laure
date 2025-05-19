@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,17 +11,12 @@ namespace Health
         [SerializeField] private bool canTakeDamage = true;
 
         [Header("Internal events")]
-        [SerializeField] private UnityEvent onDeathEvent;
+        public Action onDeathEvent;
         [SerializeField] private UnityEvent<int> onTakeDamageEvent;
 
         public int MaxHealth
         {
             get { return maxHealth; }
-        }
-
-        public UnityEvent OnDeathEvent
-        {
-            get { return onDeathEvent; }
         }
 
         private bool _isInvincible = false;
@@ -37,10 +33,6 @@ namespace Health
         private void OnEnable()
         {
             _hasBeenDead = false;
-        }
-
-        private void OnDestroy()
-        {
         }
 
         public void SetCanTakeDamage(bool value)

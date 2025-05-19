@@ -1,10 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using FPS;
 using Input;
 using Messages.ClientMessages;
 using Network;
+using Network_dll.Messages.ClientMessages;
 using Network.Enums;
 using Network.Factory;
 using Network.Messages;
@@ -21,6 +23,9 @@ namespace Cubes
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         [SerializeField] private HashHandler prefabsData;
         [SerializeField] private ColorHandler colorHandler;
+
+        [SerializeField] private GameObject winPanel;
+        [SerializeField] private GameObject losePanel;
         public UnityEvent<EntityToUpdate> onEntityUpdated;
         public UnityEvent<bool> onCrouch;
         public int clientId = -1;
@@ -75,6 +80,13 @@ namespace Cubes
                     DeInstantiateRequest request = new DeInstantiateRequest(data);
                     _clientFactory.DeInstantiate(request.instanceId);
                     break;
+                case MessageType.Death:
+                    Death death = new Death(data);
+                    Debug.Log($"ClientId: {clientId}, deathClientId: {death.deadId}");
+                    if (death.deadId != clientId)
+                        StartCoroutine(OnGameOver(true));
+                    break;
+
                 default:
                     Debug.Log($"MessageType = {(int)messageType}");
                     throw new ArgumentOutOfRangeException();
@@ -142,7 +154,8 @@ namespace Cubes
 
         private void HandleHandshakeResponseData(ServerHsResponse response)
         {
-            clientId = _networkClient.Id;
+            clientId = response.ServerHandshakeData.id;
+            Debug.Log($"Client Id {clientId}");
         }
 
         private void HandlePrivateHsResponseData(PrivateServerHsResponse response)
@@ -199,6 +212,27 @@ namespace Cubes
         public string GetUsername(int id)
         {
             return _networkClient.GetUsername(id);
+        }
+
+        public void SendDeath()
+        {
+            _networkClient.SendToServer(new Death(clientId).Serialize());
+            StartCoroutine(OnGameOver(false));
+        }
+
+        public IEnumerator OnGameOver(bool hasWon)
+        {
+            if (hasWon)
+            {
+                winPanel.SetActive(true);
+                _networkClient.SendToServer(new Win(_networkClient.username).Serialize());
+            }
+            else
+                losePanel.SetActive(true);
+
+            _clientFactory.DeInstantiateAll();
+            yield return new WaitForSeconds(_networkClient.timeAfterGameOver);
+            _networkClient.EndClient();
         }
     }
 }

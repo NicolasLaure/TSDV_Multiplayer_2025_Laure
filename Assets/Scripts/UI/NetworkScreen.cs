@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using Input;
 using Network;
@@ -17,6 +18,8 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 
     [SerializeField] private GameObject chatScreen;
     [SerializeField] private GameObject mainCamera;
+
+    [SerializeField] private List<GameObject> gameOverPanels = new List<GameObject>();
 
     protected override void Initialize()
     {
@@ -54,6 +57,11 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     public void Disconnect()
     {
         gameObject.SetActive(true);
+        foreach (var panelObject in gameOverPanels)
+        {
+            panelObject.SetActive(false);
+        }
+
         if (Camera.main == null)
             GameObject.Instantiate(mainCamera);
 

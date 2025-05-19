@@ -1,6 +1,5 @@
-using System;
-using System.Diagnostics;
 using System.Net;
+using Network_dll.Messages.ClientMessages;
 using Network.Encryption;
 using Network.Enums;
 using Network.Messages;
@@ -158,6 +157,14 @@ namespace Network
                             instanceIdTointegrityChecks.Remove(instanceId);
                         }
 
+                        break;
+
+                    case MessageType.Death:
+                        Broadcast(data);
+                        break;
+                    case MessageType.Win:
+                        Win win = new Win(data);
+                        Logger.Log($"Player {win.winnerUsername} won the game");
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using Cubes;
 using FPS;
 using FPS.Bullet;
@@ -13,6 +15,7 @@ public class PlayerController : MonoBehaviour
 
     private bool isCrouching = false;
     private Matrix4x4 lastFrameTrs;
+    private HealthPoints _healthPoints;
 
     void Start()
     {
@@ -21,15 +24,21 @@ public class PlayerController : MonoBehaviour
         InputReader.Instance.onShoot += Shoot;
 
         lastFrameTrs = transform.localToWorldMatrix;
+
+        _healthPoints = GetComponent<HealthPoints>();
+        _healthPoints.onDeathEvent += OnDeath;
     }
 
     private void OnDestroy()
     {
         if (Camera.main != null)
             Camera.main.transform.parent = null;
+
         InputReader.Instance.onMove -= HandleDir;
         InputReader.Instance.onCrouch -= ToggleCrouch;
         InputReader.Instance.onShoot -= Shoot;
+
+        _healthPoints.onDeathEvent -= OnDeath;
     }
 
     void Update()
@@ -103,5 +112,10 @@ public class PlayerController : MonoBehaviour
             playerHealth.TryTakeDamage(damageTaken);
             playerProperties.onPlayerTakeDamage.RaiseEvent(playerHealth.CurrentHp);
         }
+    }
+
+    public void OnDeath()
+    {
+        FpsClient.Instance.SendDeath();
     }
 }

@@ -28,7 +28,9 @@ namespace Network.Enums
         InstanceIntegrityCheck = 22,
         Username = 23,
         Usernames = 24,
-        Error_UsernameTaken = 25,
-        Error_AfkDisconnect = 26
+        Win = 25,
+        Death = 26,
+        Error_UsernameTaken = 50,
+        Error_AfkDisconnect = 51
     }
 }

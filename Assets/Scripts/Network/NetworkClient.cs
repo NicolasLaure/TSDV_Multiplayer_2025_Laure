@@ -37,6 +37,8 @@ namespace Network
         private int _elo = 0;
         public short color;
 
+        public float timeAfterGameOver = 5f;
+
         public void StartClient(IPAddress ip, int port, string username, int elo, short color)
         {
             Initialize();
@@ -205,6 +207,7 @@ namespace Network
                 case MessageType.Crouch:
                 case MessageType.InstantiateRequest:
                 case MessageType.DeInstantiateRequest:
+                case MessageType.Death:
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
                 case MessageType.Username:
@@ -213,6 +216,7 @@ namespace Network
                 case MessageType.Usernames:
                     HandleUsernamesMessage(new UsernamesMessage(data));
                     break;
+
 
                 case MessageType.Error_UsernameTaken:
                     Debug.LogError($"USERNAME WAS TAKEN");

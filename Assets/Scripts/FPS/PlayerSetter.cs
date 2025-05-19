@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Health;
 using Network;
 using Network.Factory;
@@ -15,8 +13,8 @@ namespace FPS
 
         public void SetScripts()
         {
-            PlayerController playerController = gameObject.AddComponent<PlayerController>();
             HealthPoints healthPoints = gameObject.AddComponent<HealthPoints>();
+            PlayerController playerController = gameObject.AddComponent<PlayerController>();
             MouseLook playerLook = gameObject.AddComponent<MouseLook>();
 
             playerController.playerProperties = _properties;
@@ -24,7 +22,7 @@ namespace FPS
 
             if (Camera.main == null)
             {
-                GameObject.Instantiate(cameraPrefab);
+                Instantiate(cameraPrefab);
             }
 
             Camera.main.transform.parent = transform;
