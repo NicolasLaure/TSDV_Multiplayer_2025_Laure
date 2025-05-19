@@ -30,6 +30,8 @@ namespace Network.Enums
         Usernames = 24,
         Win = 25,
         Death = 26,
+        AxisInput = 27,
+        ActionInput = 28,
         Error_UsernameTaken = 50,
         Error_AfkDisconnect = 51,
         Error_UserBanned = 52

@@ -152,7 +152,7 @@ namespace Network
             }
         }
 
-        protected int GetReceivedClientId(IPEndPoint ip)
+        public int GetReceivedClientId(IPEndPoint ip)
         {
             if (ipToId.ContainsKey(ip))
                 return ipToId[ip];

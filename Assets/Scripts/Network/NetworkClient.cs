@@ -90,7 +90,6 @@ namespace Network
             SendToServer(new Disconnect(id).Serialize());
             connection = null;
             onDisconnection?.Invoke();
-            
         }
 
         public void SendToServer(byte[] data)
@@ -186,7 +185,9 @@ namespace Network
                 // Moving Cubes message
                 case MessageType.HandShakeResponse:
                     HandleHandshakeResponse(new ServerHsResponse(data));
-                    SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateHandshake(_elo, color).Serialize()));
+                    PrivateHandshake privateHandshake = new PrivateHandshake(_elo, color);
+                    privateHandshake.clientId = id;
+                    SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), privateHandshake.Serialize()));
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
                 case MessageType.PrivateHsResponse:
