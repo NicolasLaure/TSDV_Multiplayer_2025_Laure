@@ -15,6 +15,7 @@ namespace Network.Messages
             messageType = MessageType.AxisInput;
             attribs = Attributes.Order;
             this.axis = axis;
+            messageId++;
             axisType = type;
         }
 

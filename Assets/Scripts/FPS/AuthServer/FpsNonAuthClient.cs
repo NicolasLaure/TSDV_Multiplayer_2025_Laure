@@ -41,15 +41,19 @@ namespace FPS.AuthServer
             _clientFactory = new ClientFactory(prefabsData, colorHandler);
 
             _networkClient = ClientManager.Instance.networkClient;
+            _networkClient.SetAuthServer();
             _networkClient.onClientStart += Initialize;
         }
 
         private void Initialize()
         {
-            _inputReader.onMove += OnMove;
-            _inputReader.onLook += OnLook;
-            _inputReader.onCrouch += OnCrouch;
-            _inputReader.onShoot += OnShoot;
+            if (_networkClient.port != _networkClient.defaultPort)
+            {
+                _inputReader.onMove += OnMove;
+                _inputReader.onLook += OnLook;
+                _inputReader.onCrouch += OnCrouch;
+                _inputReader.onShoot += OnShoot;
+            }
 
             _networkClient.OnReceiveEvent += OnReceiveDataEvent;
             _networkClient.onDisconnection += HandleAbruptDisconnection;

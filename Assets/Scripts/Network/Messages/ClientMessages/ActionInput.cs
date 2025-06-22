@@ -11,6 +11,7 @@ namespace Network.Messages
         {
             messageType = MessageType.ActionInput;
             attribs = Attributes.Important;
+            messageId++;
             actionType = (short)type;
         }
 

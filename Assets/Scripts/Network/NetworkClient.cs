@@ -28,6 +28,7 @@ namespace Network
         private int id;
         private float clientStartTime;
         private Random ivKeyGenerator;
+        private bool isAuthServer = false;
 
         public Action onClientStart;
         public Action<int> onClientDisconnect;
@@ -58,6 +59,7 @@ namespace Network
             HandshakeData handshakeData;
             handshakeData.usernameLength = this.username.Length;
             handshakeData.username = this.username;
+            handshakeData.isAuthServer = isAuthServer;
             byte[] handshakeBytes = new PublicHandshake(handshakeData).Serialize();
             SendToServer(handshakeBytes);
             Debug.Log("Handshake Sent");
@@ -330,6 +332,11 @@ namespace Network
             }
 
             return "";
+        }
+
+        public void SetAuthServer()
+        {
+            isAuthServer = true;
         }
     }
 }
