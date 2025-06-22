@@ -32,6 +32,8 @@ namespace Network.Messages
                 data.AddRange(BitConverter.GetBytes(handshakeData.username[i]));
             }
 
+            data.AddRange(BitConverter.GetBytes(handshakeData.isAuthServer));
+
             return GetFormattedData(data.ToArray());
         }
 
@@ -42,8 +44,9 @@ namespace Network.Messages
             data.usernameLength = BitConverter.ToInt32(payload);
             int offset = sizeof(int);
             char[] username = Encoding.Unicode.GetChars(payload, offset, data.usernameLength * 2);
-
             data.username = new string(username);
+            offset += data.usernameLength * 2;
+            data.isAuthServer = BitConverter.ToBoolean(payload, offset);
             return data;
         }
     }

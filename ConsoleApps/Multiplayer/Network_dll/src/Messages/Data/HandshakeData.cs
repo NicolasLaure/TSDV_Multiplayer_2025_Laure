@@ -4,5 +4,6 @@ namespace Network.Messages
     {
         public int usernameLength;
         public string username;
+        public bool isAuthServer;
     }
 }

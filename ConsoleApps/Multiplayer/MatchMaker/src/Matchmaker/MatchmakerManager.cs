@@ -68,8 +68,8 @@ namespace Network
 
                 if (messageType == MessageType.Ping)
                 {
-                    double ms = Math.Floor((ServerTime.time - idLastPingTime[receivedClientId]) * 1000);
-                    idLastPingTime[receivedClientId] = ServerTime.time;
+                    double ms = Math.Floor((ServerTime.time - clients[receivedClientId].lastPingTime) * 1000);
+                    clients[receivedClientId].lastPingTime = ServerTime.time;
                     SendToClient(new Ping(ms).Serialize(), receivedClientId);
                     return;
                 }

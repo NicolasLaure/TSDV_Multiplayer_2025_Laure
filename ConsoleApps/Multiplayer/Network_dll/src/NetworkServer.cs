@@ -19,7 +19,6 @@ namespace Network
         protected readonly List<int> clientIds = new List<int>();
         protected readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
         protected readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
-        protected readonly Dictionary<int, float> idLastPingTime = new Dictionary<int, float>();
 
         protected readonly ServerHsResponse HeldServerHsSa;
 
@@ -82,7 +81,7 @@ namespace Network
                 ipToId[ip] = nextClientId;
                 Logger.Log("Adding client: " + ip.Address + " ID: " + id);
                 clients.Add(nextClientId, new Client(ip, nextClientId, username, ServerTime.time));
-                idLastPingTime[nextClientId] = ServerTime.time;
+                clients[nextClientId].lastPingTime = ServerTime.time;
                 clientIds.Add(id);
 
                 idToIVKeyGenerator[id] = new Random(seed);
@@ -100,7 +99,6 @@ namespace Network
                 Logger.Log("Removing client: " + ip.Address);
                 idToIVKeyGenerator.Remove(ipToId[ip]);
                 clients.Remove(ipToId[ip]);
-                idLastPingTime.Remove(ipToId[ip]);
                 clientIds.Remove(ipToId[ip]);
                 onClientRemoved?.Invoke(ipToId[ip]);
                 ipToId.Remove(ip);
@@ -116,7 +114,6 @@ namespace Network
                 clientIdToMessageId.Remove(id);
                 idToIVKeyGenerator.Remove(id);
                 clients.Remove(id);
-                idLastPingTime.Remove(id);
                 clientIds.Remove(id);
                 onClientRemoved?.Invoke(id);
             }
@@ -166,7 +163,7 @@ namespace Network
 
             for (int i = 0; i < clientIds.Count; i++)
             {
-                short ms = (short)((ServerTime.time - idLastPingTime[clientIds[i]]) * 1000);
+                short ms = (short)((ServerTime.time - clients[clientIds[i]].lastPingTime) * 1000);
                 ClientPing ping;
                 ping.id = clientIds[i];
                 ping.ms = ms;

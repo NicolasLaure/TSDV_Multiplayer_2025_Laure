@@ -11,9 +11,11 @@ namespace Network
         public string username;
         public bool isInitialized = false;
         public bool isConnectedToServer = false;
+        public bool isAuthServer;
         public IPEndPoint ipEndPoint;
         public short ping = 0;
         public float lastActiveTime = 0;
+        public float lastPingTime = 0;
 
         public Client(IPEndPoint ipEndPoint, int id, string username, float timeStamp)
         {
