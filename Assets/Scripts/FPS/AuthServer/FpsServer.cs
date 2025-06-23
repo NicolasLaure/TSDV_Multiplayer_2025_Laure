@@ -30,7 +30,8 @@ namespace FPS.AuthServer
             _networkServer = ServerMono.Instance.networkServer;
             _serverFactory = ServerMono.Instance.serverFactory;
 
-            _networkServer.Start(_networkServer.defaultPort);
+            string[] args = Environment.GetCommandLineArgs();
+            _networkServer.Start(int.Parse(args[1]));
             _networkServer.onNewClient += HandleHandshake;
             _networkServer.OnReceiveEvent += OnReceiveDataEvent;
             onEntityUpdated += OnEntityUpdate;

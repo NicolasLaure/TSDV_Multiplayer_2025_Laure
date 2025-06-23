@@ -265,12 +265,16 @@ namespace Network
             string serverPath = Path.Combine(directory, nonAuthServerPath);
             if (isAuthServer)
                 serverPath = Path.Combine(directory, authServerPath);
-            
+
             ProcessStartInfo serverInfo = new ProcessStartInfo(serverPath, newSvPort.ToString());
             serverInfo.UseShellExecute = true;
             Process newServerProcess = Process.Start(serverInfo);
 
-            Thread.Sleep(1000);
+            int sleepMs = 1000;
+            if (isAuthServer)
+                sleepMs = 3000;
+
+            Thread.Sleep(sleepMs);
             byte[] newSvDirection1 = new ServerDirection(ipAddress, newSvPort).Serialize();
             SaveHeldMessage(newSvDirection1, clientOneId);
             byte[] newSvDirection2 = new ServerDirection(ipAddress, newSvPort).Serialize();

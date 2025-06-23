@@ -126,6 +126,7 @@ namespace Network
                         SendToClient(Encrypter.Encrypt(idToIVKeyGenerator[receivedClientId].Next(), response.Serialize()), receivedClientId);
                         SendToClient(new UsernamesMessage(GetAllUsernames()).Serialize(), receivedClientId);
                         Broadcast(new UsernameMessage(GetUserName(receivedClientId)).Serialize());
+                        OnReceiveEvent?.Invoke(data, ip);
                         break;
                     case MessageType.Acknowledge:
                         break;
