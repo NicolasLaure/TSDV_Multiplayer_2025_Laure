@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Network_dll", "Network_dll\Network_dll.csproj", "{13638120-217D-40D4-824B-BB2B002224B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatchMaker", "MatchMaker\MatchMaker.csproj", "{70CC1E92-481F-4D29-84E5-166C120ACA36}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NonAuthoritativeServer", "NonAuthoritativeServer\NonAuthoritativeServer.csproj", "{0D24496F-857B-48FA-AD70-6712819A9373}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13638120-217D-40D4-824B-BB2B002224B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13638120-217D-40D4-824B-BB2B002224B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13638120-217D-40D4-824B-BB2B002224B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13638120-217D-40D4-824B-BB2B002224B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70CC1E92-481F-4D29-84E5-166C120ACA36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70CC1E92-481F-4D29-84E5-166C120ACA36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70CC1E92-481F-4D29-84E5-166C120ACA36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70CC1E92-481F-4D29-84E5-166C120ACA36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D24496F-857B-48FA-AD70-6712819A9373}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D24496F-857B-48FA-AD70-6712819A9373}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D24496F-857B-48FA-AD70-6712819A9373}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D24496F-857B-48FA-AD70-6712819A9373}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

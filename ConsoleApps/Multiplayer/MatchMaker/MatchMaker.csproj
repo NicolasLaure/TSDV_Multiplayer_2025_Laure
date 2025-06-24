@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <LangVersion>10</LangVersion>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Network_dll\Network_dll.csproj" />
+      <ProjectReference Include="..\NonAuthoritativeServer\NonAuthoritativeServer.csproj" />
+    </ItemGroup>
+
+</Project>
