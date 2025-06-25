@@ -65,6 +65,7 @@
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletSetter.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\Colors.cs" />
     <Compile Include="Assets\Scripts\Network\ClientManager.cs" />
+    <Compile Include="Assets\Scripts\ReflectionTest\TestModel.cs" />
     <Compile Include="Assets\Scripts\Events\FloatEventChannel.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\FpsServer.cs" />
     <Compile Include="Assets\Scripts\Cubes\Cube.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Assets\Scripts\Events\StringEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\Network\Enums\ActionType.cs" />
     <Compile Include="Assets\Scripts\Utils\MonoBehaviourSingleton.cs" />
+    <Compile Include="Assets\Scripts\Reflection\Reflection.cs" />
     <Compile Include="Assets\Scripts\Events\Vector3ChannelSO.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletController.cs" />
     <Compile Include="Assets\Scripts\Input\InputReader.cs" />
@@ -88,6 +90,7 @@
     <Compile Include="Assets\Scripts\Network\Factory\ColorHandler.cs" />
     <Compile Include="Assets\Scripts\Events\GameObjectEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\ClientPlayerSetter.cs" />
+    <Compile Include="Assets\Scripts\Reflection\Node.cs" />
     <Compile Include="Assets\Scripts\FPS\EntityToUpdate.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\AuthPlayerController.cs" />
     <Compile Include="Assets\Scripts\Events\BoolEventChannelSO.cs" />
