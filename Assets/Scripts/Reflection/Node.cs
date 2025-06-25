@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 namespace Reflection
 {
+    [Serializable]
     public class Node
     {
         private List<Node> _children = new List<Node>();
@@ -12,6 +14,7 @@ namespace Reflection
         public Node(object nodeObject)
         {
             this.nodeObject = nodeObject;
+            _parent = null;
         }
 
         public Node(object nodeObject, Node parent)
@@ -55,12 +58,13 @@ namespace Reflection
             return _children.IndexOf(child);
         }
 
-        public int[] GetRoute()
+        public int[] GetRoute(List<int> indices = null)
         {
-            List<int> indices = new List<int>();
+            indices ??= new List<int>();
+
             if (_parent != null)
             {
-                indices.AddRange(_parent.GetRoute());
+                _parent.GetRoute(indices);
                 indices.Add(_parent.GetChildIndex(this));
             }
 

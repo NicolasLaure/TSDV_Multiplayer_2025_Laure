@@ -1,5 +1,9 @@
+using System;
 using System.Collections;
 using System.Reflection;
+using JetBrains.Annotations;
+using NUnit.Compatibility;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 namespace Reflection
@@ -9,7 +13,11 @@ namespace Reflection
         private TestModel _testModel = new TestModel();
         private Node root;
 
-        [ContextMenu("Reflect")]
+        private void Start()
+        {
+            ReflectModel();
+        }
+
         public void ReflectModel()
         {
             root = PopulateTree(_testModel);
@@ -17,56 +25,50 @@ namespace Reflection
             Debug.Log($"Value At [2][2]: {root[2][2].nodeObject}");
         }
 
-        private Node PopulateTree(object obj)
+        private Node PopulateTree(object obj, Node root = null)
         {
-            Node rootNode = new Node(obj);
+            root ??= new Node(obj);
 
             foreach (FieldInfo field in obj.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
             {
-                Node childNode = new Node(field.GetValue(obj), rootNode);
-                if (field.FieldType != typeof(string) &&
-                    (field.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(field.FieldType)))
+                Node childNode = new Node(field.GetValue(obj), root);
+                Debug.Log($"Node{RouteString(childNode.GetRoute())} = {childNode.nodeObject}");
+                if (field.FieldType != typeof(string) && (field.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(field.FieldType)))
                 {
-                    Debug.Log($"Field{RouteString(childNode.GetRoute())} with Name: {field.Name} IS A COLLECTION");
                     foreach (object item in field.GetValue(obj) as ICollection)
                     {
-                        childNode.AddChild(PopulateTree(item));
+                        PopulateTree(item, childNode);
                     }
                 }
                 else if (!field.FieldType.IsPrimitive)
                 {
-                    Debug.Log($"Field{RouteString(childNode.GetRoute())}: with name: {field.Name} Is not primitive");
-                    childNode.AddChild(PopulateTree(field.GetValue(obj)));
+                    PopulateTree(field.GetValue(obj), childNode);
                 }
-
-                Debug.Log($"Field{RouteString(childNode.GetRoute())} with name: {field.Name}, and Value: {field.GetValue(obj)}");
             }
 
-            return rootNode;
+            return root;
         }
 
-        private void Reflect(object obj)
+        private object GetDataAt(int[] route)
         {
-            foreach (FieldInfo field in obj.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic |
-                                                                BindingFlags.Instance | BindingFlags.DeclaredOnly))
+            Node target = root;
+            for (int i = 0; i < route.Length; i++)
             {
-                if (field.FieldType != typeof(string) &&
-                    (field.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(field.FieldType)))
-                {
-                    Debug.Log($"Field Name: {field.Name} IS COLLECTION");
-                    foreach (object item in field.GetValue(obj) as ICollection)
-                    {
-                        Reflect(item);
-                    }
-                }
-                else if (!field.FieldType.IsPrimitive)
-                {
-                    Debug.Log($"Field: {field.Name} Is not primitive");
-                    Reflect(field.GetValue(obj));
-                }
-
-                Debug.Log("Field Name: " + field.Name + ", Value: " + field.GetValue(obj));
+                target = target[route[i]];
             }
+
+            return target.nodeObject;
+        }
+
+        private void SetDataAt(int[] route, object value)
+        {
+            Node target = root;
+            for (int i = 0; i < route.Length; i++)
+            {
+                target = target[route[i]];
+            }
+
+            target.nodeObject = value;
         }
 
         private string RouteString(int[] route)
@@ -78,6 +80,19 @@ namespace Reflection
             }
 
             return routeString;
+        }
+        
+        [ContextMenu("Test")]
+        private void Test()
+        {
+            int[] a = { 2, 1 };
+            int[] b = { 3, 1 };
+
+            Debug.Log($"Data at[2][1] = {GetDataAt(a)}");
+
+            Debug.Log($"Data at[3][1] = {GetDataAt(b)}");
+            SetDataAt(b, 321);
+            Debug.Log($"Data at[3][1] = {GetDataAt(b)}");
         }
     }
 }
