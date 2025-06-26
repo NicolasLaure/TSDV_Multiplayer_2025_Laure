@@ -1,9 +1,6 @@
-using System;
 using System.Collections;
 using System.Reflection;
-using JetBrains.Annotations;
-using NUnit.Compatibility;
-using UnityEditor.Rendering;
+using ReflectionTest;
 using UnityEngine;
 
 namespace Reflection
@@ -22,7 +19,7 @@ namespace Reflection
         {
             root = PopulateTree(_testModel);
             Debug.Log($"Root children count: {root.Count}");
-            Debug.Log($"Value At [2][2]: {root[2][2].nodeObject}");
+            // Debug.Log($"Value At [2][2]: {root[2][2].nodeObject}");
         }
 
         private Node PopulateTree(object obj, Node root = null)
@@ -31,7 +28,10 @@ namespace Reflection
 
             foreach (FieldInfo field in obj.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
             {
-                Node childNode = new Node(field.GetValue(obj), root);
+                Node childNode = new Node(field.GetValue(obj));
+                if (ShouldSync(field) || root.ShouldSync)
+                    childNode.ShouldSync = true;
+
                 Debug.Log($"Node{RouteString(childNode.GetRoute())} = {childNode.nodeObject}");
                 if (field.FieldType != typeof(string) && (field.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(field.FieldType)))
                 {
@@ -44,9 +44,17 @@ namespace Reflection
                 {
                     PopulateTree(field.GetValue(obj), childNode);
                 }
+
+                if (childNode.ShouldSync || childNode.ContainsSyncedNodes)
+                    childNode.SetParent(root);
             }
 
             return root;
+        }
+
+        private bool ShouldSync(FieldInfo info)
+        {
+            return info.GetCustomAttribute(typeof(Sync), false) != null;
         }
 
         private object GetDataAt(int[] route)
@@ -81,7 +89,7 @@ namespace Reflection
 
             return routeString;
         }
-        
+
         [ContextMenu("Test")]
         private void Test()
         {

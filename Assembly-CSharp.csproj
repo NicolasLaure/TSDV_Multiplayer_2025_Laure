@@ -82,6 +82,7 @@
     <Compile Include="Assets\Scripts\Network\Enums\ActionType.cs" />
     <Compile Include="Assets\Scripts\Utils\MonoBehaviourSingleton.cs" />
     <Compile Include="Assets\Scripts\Reflection\Reflection.cs" />
+    <Compile Include="Assets\Scripts\Reflection\Sync.cs" />
     <Compile Include="Assets\Scripts\Events\Vector3ChannelSO.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletController.cs" />
     <Compile Include="Assets\Scripts\Input\InputReader.cs" />
