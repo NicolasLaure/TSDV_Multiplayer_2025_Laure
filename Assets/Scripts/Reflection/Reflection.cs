@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using ReflectionTest;
 using UnityEngine;
@@ -9,17 +11,22 @@ namespace Reflection
     {
         private TestModel _testModel = new TestModel();
         private Node root;
+        private List<int[]> dirtyRoutes = new List<int[]>();
 
         private void Start()
         {
-            ReflectModel();
-        }
-
-        public void ReflectModel()
-        {
             root = PopulateTree(_testModel);
             Debug.Log($"Root children count: {root.Count}");
-            // Debug.Log($"Value At [2][2]: {root[2][2].nodeObject}");
+        }
+
+        private void Update()
+        {
+            dirtyRoutes.Clear();
+            DirtyRegistry.GetDirtyNodes(root, ref dirtyRoutes);
+            foreach (int[] route in dirtyRoutes)
+            {
+                Debug.Log($"DIRTY: {RouteString(route)}");
+            }
         }
 
         private Node PopulateTree(object obj, Node root = null)
@@ -68,7 +75,7 @@ namespace Reflection
             return target.nodeObject;
         }
 
-        private void SetDataAt(int[] route, object value)
+        private void SetDataAt(int[] route, object value, bool isRemoteData)
         {
             Node target = root;
             for (int i = 0; i < route.Length; i++)
@@ -76,7 +83,7 @@ namespace Reflection
                 target = target[route[i]];
             }
 
-            target.nodeObject = value;
+            target.UpdateValue(value, isRemoteData);
         }
 
         private string RouteString(int[] route)
@@ -93,14 +100,10 @@ namespace Reflection
         [ContextMenu("Test")]
         private void Test()
         {
-            int[] a = { 2, 1 };
-            int[] b = { 3, 1 };
-
-            Debug.Log($"Data at[2][1] = {GetDataAt(a)}");
-
-            Debug.Log($"Data at[3][1] = {GetDataAt(b)}");
-            SetDataAt(b, 321);
-            Debug.Log($"Data at[3][1] = {GetDataAt(b)}");
+            int[] route = { 0, 1 };
+            SetDataAt(route, 12, false);
+            int[] routeB = { 1, 0, 2 };
+            SetDataAt(routeB, 123, true);
         }
     }
 }

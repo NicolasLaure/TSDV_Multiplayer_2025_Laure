@@ -23,11 +23,12 @@ namespace ReflectionTest
     public class TestModel
     {
         private int qty = 0;
-        [Sync] private Vector3 vec3 = new Vector3(3, 1, 0);
+        // WARNING VECTOR3 INITIALIZED WITH 2 VALUES NOT SAVING THIRD
+        [Sync] private Vector3 vec3 = new Vector3(3, 1, 2);
         private int[] ints = { 1, 5, 3 };
-        [Sync] private TestClass testClass = new TestClass();
+        private TestClass testClass = new TestClass();
         // private TestClass[] testClasses = { new TestClass(30), new TestClass(12) };
-        //private List<List<int>> _listofList = new List<List<int>>();
+        private List<List<int>> _listofList = new List<List<int>>();
 
         public TestModel()
         {

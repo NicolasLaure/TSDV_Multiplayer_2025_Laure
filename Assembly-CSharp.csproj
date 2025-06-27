@@ -93,6 +93,7 @@
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\ClientPlayerSetter.cs" />
     <Compile Include="Assets\Scripts\Reflection\Node.cs" />
     <Compile Include="Assets\Scripts\FPS\EntityToUpdate.cs" />
+    <Compile Include="Assets\Scripts\Reflection\DirtyRegistry.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\AuthPlayerController.cs" />
     <Compile Include="Assets\Scripts\Events\BoolEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\Network\Messages\ClientMessages\AxisInput.cs" />

@@ -6,11 +6,11 @@ namespace Reflection
     [Serializable]
     public class Node
     {
-        private List<Node> _children = new List<Node>();
+        private List<Node> children = new List<Node>();
         private Node _parent;
         private bool _shouldSync;
         public object nodeObject;
-        public bool isDirty;
+        private int _lastHash = 0;
 
         public Node Parent => _parent;
 
@@ -18,7 +18,7 @@ namespace Reflection
         {
             get
             {
-                foreach (Node child in _children)
+                foreach (Node child in children)
                 {
                     if (child._shouldSync || child.ContainsSyncedNodes)
                         return true;
@@ -34,12 +34,14 @@ namespace Reflection
             set
             {
                 _shouldSync = value;
-                foreach (Node child in _children)
+                foreach (Node child in children)
                 {
                     child.ShouldSync = value;
                 }
             }
         }
+
+        public Node[] Children => children.ToArray();
 
         public Node(object nodeObject)
         {
@@ -56,14 +58,14 @@ namespace Reflection
 
         public Node this[int index]
         {
-            get { return _children[index]; }
+            get { return children[index]; }
         }
 
         public void AddChild(Node child)
         {
-            if (!_children.Contains(child))
+            if (!children.Contains(child))
             {
-                _children.Add(child);
+                children.Add(child);
                 if (child.Parent != this)
                     child.SetParent(this);
             }
@@ -71,7 +73,7 @@ namespace Reflection
 
         public void RemoveChild(Node child)
         {
-            _children.Remove(child);
+            children.Remove(child);
         }
 
         public void SetParent(Node parent)
@@ -80,17 +82,29 @@ namespace Reflection
             parent.AddChild(this);
         }
 
+        public void UpdateValue(object value, bool isRemote)
+        {
+            nodeObject = value;
+            if (isRemote)
+                UpdateHash();
+        }
+
+        public void UpdateHash()
+        {
+            _lastHash = nodeObject.GetHashCode();
+        }
+
         public int Count
         {
-            get { return _children.Count; }
+            get { return children.Count; }
         }
 
         public int GetChildIndex(Node child)
         {
-            if (!_children.Contains(child))
+            if (!children.Contains(child))
                 return -1;
 
-            return _children.IndexOf(child);
+            return children.IndexOf(child);
         }
 
         public int[] GetRoute(List<int> indices = null)
@@ -104,6 +118,14 @@ namespace Reflection
             }
 
             return indices.ToArray();
+        }
+
+        public bool CheckDirty()
+        {
+            int tmpHash = nodeObject.GetHashCode();
+            bool isDirty = tmpHash != _lastHash;
+            _lastHash = tmpHash;
+            return isDirty;
         }
     }
 }
