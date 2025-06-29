@@ -186,6 +186,10 @@ namespace Network
                         Logger.Log($"Player {win.winnerUsername} won the game");
                         _eloHandler.EloCalculation(win.winnerUsername, win.loserUsername);
                         break;
+                    case MessageType.Primitive:
+                        Broadcast(data);
+                        SetPlayerActive(receivedClientId);
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

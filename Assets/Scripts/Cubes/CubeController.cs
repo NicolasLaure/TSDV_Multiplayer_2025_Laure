@@ -1,4 +1,5 @@
 using System;
+using CustomMath;
 using FPS;
 using UnityEngine;
 
@@ -33,7 +34,7 @@ namespace Cubes
             }
         }
 
-        void HandleDir(Vector2 newDir)
+        void HandleDir(Vec3 newDir)
         {
             dir = new Vector3(newDir.x, 0, newDir.y);
         }

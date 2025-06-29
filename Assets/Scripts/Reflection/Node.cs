@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Network.Enums;
+using UnityEngine;
 
 namespace Reflection
 {
@@ -10,8 +12,8 @@ namespace Reflection
         private Node _parent;
         private bool _shouldSync;
         public object nodeObject;
-        private int _lastHash = 0;
-
+        private int _lastHash = -1;
+        public Attributes attributes = Attributes.None;
         public Node Parent => _parent;
 
         public bool ContainsSyncedNodes
@@ -123,6 +125,7 @@ namespace Reflection
         public bool CheckDirty()
         {
             int tmpHash = nodeObject.GetHashCode();
+            Debug.Log($"TmpHash: {tmpHash}, LastHash: {_lastHash}");
             bool isDirty = tmpHash != _lastHash;
             _lastHash = tmpHash;
             return isDirty;

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cubes;
+using CustomMath;
 using FPS;
 using FPS.Bullet;
 using Health;
@@ -68,7 +69,7 @@ public class PlayerController : MonoBehaviour
         FpsClient.Instance.onEntityUpdated.Invoke(thisEntity);
     }
 
-    protected void HandleDir(Vector2 dir)
+    protected void HandleDir(Vec3 dir)
     {
         movementDir = new Vector3(dir.x, 0, dir.y);
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Net;
+using CustomMath;
 using Input;
 using Messages.ClientMessages;
 using Network;
@@ -33,6 +34,7 @@ namespace FPS.AuthServer
         private ClientFactory _clientFactory;
 
         private bool isGameOver = false;
+        public Object Instance { get; set; }
 
 
         private void Start()
@@ -70,7 +72,6 @@ namespace FPS.AuthServer
                 Instance = null;
         }
 
-        public Object Instance { get; set; }
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
         {
@@ -112,19 +113,19 @@ namespace FPS.AuthServer
             }
         }
 
-        void OnMove(Vector2 movement)
+        void OnMove(Vec3 movement)
         {
             if (_networkClient != null)
             {
-                _networkClient.SendToServer(new AxisInput(movement, AxisType.Move).Serialize());
+                _networkClient.SendToServer(new AxisInput(new Vector2(movement.x, movement.y), AxisType.Move).Serialize());
             }
         }
 
-        void OnLook(Vector2 movement)
+        void OnLook(Vec3 movement)
         {
             if (_networkClient != null)
             {
-                _networkClient.SendToServer(new AxisInput(movement, AxisType.Look).Serialize());
+                _networkClient.SendToServer(new AxisInput(new Vector2(movement.x, movement.y), AxisType.Look).Serialize());
             }
         }
 

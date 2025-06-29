@@ -47,30 +47,37 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\FPS\AuthServer\ServerMono.cs" />
-    <Compile Include="Assets\Scripts\Network\MatchMaker.cs" />
+    <Compile Include="Assets\Scripts\CustomMath\Self_Plane.cs" />
+    <Compile Include="Assets\Scripts\ReflectionTest\ReflectionTest.cs" />
+    <Compile Include="Assets\Scripts\CustomMath\MY4X4.cs" />
     <Compile Include="Assets\Scripts\Events\IntEventChannelSO.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\CastlesModel.cs" />
     <Compile Include="Assets\Scripts\Cubes\MovingCubesServer.cs" />
     <Compile Include="Assets\Scripts\FPS\Health\ITakeDamage.cs" />
     <Compile Include="Assets\Scripts\Utils\LoggerHandler.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\AuthServerFactory.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletProperties.cs" />
+    <Compile Include="Assets\Scripts\CustomMath\MyTransform.cs" />
     <Compile Include="Assets\Scripts\UI\NetworkScreen.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\ClientFactory.cs" />
     <Compile Include="Assets\Scripts\Utils\ByteFormat.cs" />
     <Compile Include="Assets\Scripts\Network\Enums\AxisType.cs" />
     <Compile Include="Assets\Scripts\Events\TwoValuesEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\Network\AuthoritativeServer.cs" />
+    <Compile Include="Assets\Scripts\CustomMath\MyTransformVisualizer.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\AuthSvPlayerSetter.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\CastlesClient.cs" />
     <Compile Include="Assets\Scripts\FPS\PlayerSetter.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletSetter.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\Colors.cs" />
     <Compile Include="Assets\Scripts\Network\ClientManager.cs" />
-    <Compile Include="Assets\Scripts\ReflectionTest\TestModel.cs" />
+    <Compile Include="Assets\Scripts\CustomMath\MyQuaternion.cs" />
     <Compile Include="Assets\Scripts\Events\FloatEventChannel.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\FpsServer.cs" />
     <Compile Include="Assets\Scripts\Cubes\Cube.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\FpsNonAuthClient.cs" />
     <Compile Include="Assets\Scripts\UI\ErrorMessagePanel.cs" />
+    <Compile Include="Assets\Scripts\CustomMath\Vec3.cs" />
     <Compile Include="Assets\Scripts\Input\PlayerInput.cs" />
     <Compile Include="Assets\Scripts\FPS\TransformHandler.cs" />
     <Compile Include="Assets\Scripts\FPS\PlayerController.cs" />
@@ -81,7 +88,6 @@
     <Compile Include="Assets\Scripts\Events\StringEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\Network\Enums\ActionType.cs" />
     <Compile Include="Assets\Scripts\Utils\MonoBehaviourSingleton.cs" />
-    <Compile Include="Assets\Scripts\Reflection\Reflection.cs" />
     <Compile Include="Assets\Scripts\Reflection\Sync.cs" />
     <Compile Include="Assets\Scripts\Events\Vector3ChannelSO.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletController.cs" />
@@ -90,6 +96,7 @@
     <Compile Include="Assets\Scripts\Events\VoidEventSO.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\ColorHandler.cs" />
     <Compile Include="Assets\Scripts\Events\GameObjectEventChannelSO.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\CastlesView.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\ClientPlayerSetter.cs" />
     <Compile Include="Assets\Scripts\Reflection\Node.cs" />
     <Compile Include="Assets\Scripts\FPS\EntityToUpdate.cs" />
@@ -98,10 +105,12 @@
     <Compile Include="Assets\Scripts\Events\BoolEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\Network\Messages\ClientMessages\AxisInput.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\HashHandler.cs" />
+    <Compile Include="Assets\Scripts\Reflection\ReflectionHandler.cs" />
     <Compile Include="Assets\Scripts\Events\EventChannelSO.cs" />
     <Compile Include="Assets\Scripts\UI\PingText.cs" />
     <Compile Include="Assets\Scripts\FPS\Health\HealthPoints.cs" />
     <Compile Include="Assets\Scripts\Cubes\CubeController.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\CastlesController.cs" />
     <Compile Include="Assets\Scripts\Network\Messages\ClientMessages\Position.cs" />
     <Compile Include="Assets\Scripts\Network\Messages\ClientMessages\ActionInput.cs" />
     <Compile Include="Assets\Scripts\FPS\MouseLook.cs" />
@@ -445,17 +454,11 @@
     <Reference Include="Network_dll">
       <HintPath>E:\Software\IMAGE\ProyectosUnity\Multiplayer\Assets\Plugins\Network_dll.dll</HintPath>
     </Reference>
-    <Reference Include="NonAuthoritativeServer">
-      <HintPath>E:\Software\IMAGE\ProyectosUnity\Multiplayer\Assets\Plugins\NonAuthoritativeServer.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>E:\Software\IMAGE\ProyectosUnity\Multiplayer\Library\PackageCache\com.unity.nuget.newtonsoft-json@74deb55db2a0\Runtime\Newtonsoft.Json.dll</HintPath>
+      <HintPath>E:\Software\IMAGE\ProyectosUnity\Multiplayer\Assets\Plugins\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>E:\Software\IMAGE\ProyectosUnity\Multiplayer\Library\PackageCache\com.unity.nuget.mono-cecil@d6f9955a5d5f\Mono.Cecil.dll</HintPath>
-    </Reference>
-    <Reference Include="MatchMaker">
-      <HintPath>E:\Software\IMAGE\ProyectosUnity\Multiplayer\Assets\Plugins\MatchMaker.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>E:\program files (x86)\Unity\6000.0.42f1\Editor\Data\NetStandard\ref\2.1.0\netstandard.dll</HintPath>

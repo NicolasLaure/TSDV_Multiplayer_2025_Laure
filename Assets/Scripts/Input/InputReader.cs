@@ -1,4 +1,5 @@
 using System;
+using CustomMath;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,8 +9,8 @@ namespace Input
     {
         private PlayerInput _input;
 
-        public Action<Vector2> onMove;
-        public Action<Vector2> onLook;
+        public Action<Vec3> onMove;
+        public Action<Vec3> onLook;
         public Action onShoot;
         public Action onCrouch;
         public Action onQuit;
@@ -37,12 +38,12 @@ namespace Input
 
         private void OnMove(InputAction.CallbackContext context)
         {
-            onMove?.Invoke(context.ReadValue<Vector2>());
+            onMove?.Invoke(new Vec3(context.ReadValue<Vector2>()));
         }
 
         private void OnLook(InputAction.CallbackContext context)
         {
-            onLook?.Invoke(context.ReadValue<Vector2>());
+            onLook?.Invoke(new Vec3(context.ReadValue<Vector2>()));
         }
 
         private void OnQuit(InputAction.CallbackContext context)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using CustomMath;
 using Network;
 using Network.Enums;
 using Network.Factory;
@@ -50,9 +51,9 @@ namespace FPS.AuthServer
                 case MessageType.AxisInput:
                     AxisInput axisInput = new AxisInput(data);
                     if (axisInput.axisType == AxisType.Move)
-                        InputHandler.Instance.idToMoveActions[receivedClientId]?.Invoke(axisInput.axis);
+                        InputHandler.Instance.idToMoveActions[receivedClientId]?.Invoke(new Vec3(axisInput.axis));
                     else
-                        InputHandler.Instance.idToLookActions[receivedClientId]?.Invoke(axisInput.axis);
+                        InputHandler.Instance.idToLookActions[receivedClientId]?.Invoke(new Vec3(axisInput.axis));
 
                     break;
                 case MessageType.ActionInput:

@@ -1,4 +1,5 @@
 using System;
+using CustomMath;
 using Input;
 using Network;
 using UnityEngine;
@@ -29,7 +30,7 @@ public class MouseLook : MonoBehaviour
         Camera.main.transform.localRotation = Quaternion.Euler(-xAngle, 0, 0);
     }
 
-    public void SetRotation(Vector2 dir)
+    public void SetRotation(Vec3 dir)
     {
         _rotationDir = dir;
     }
