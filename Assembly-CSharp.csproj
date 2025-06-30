@@ -70,6 +70,7 @@
     <Compile Include="Assets\Scripts\FPS\PlayerSetter.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletSetter.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\Colors.cs" />
+    <Compile Include="Assets\Scripts\Reflection\RPC.cs" />
     <Compile Include="Assets\Scripts\Network\ClientManager.cs" />
     <Compile Include="Assets\Scripts\CustomMath\MyQuaternion.cs" />
     <Compile Include="Assets\Scripts\Events\FloatEventChannel.cs" />

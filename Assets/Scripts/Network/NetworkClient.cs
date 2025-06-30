@@ -216,6 +216,7 @@ namespace Network
                 case MessageType.InstantiateRequest:
                 case MessageType.DeInstantiateRequest:
                 case MessageType.Death:
+                case MessageType.Primitive:
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
                 case MessageType.Username:

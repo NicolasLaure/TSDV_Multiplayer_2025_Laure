@@ -15,5 +15,6 @@ public enum PrimitiveType : short
     TypeDecimal,
     TypeBool,
     TypeChar,
-    TypeString
+    TypeString,
+    NonPrimitive
 }

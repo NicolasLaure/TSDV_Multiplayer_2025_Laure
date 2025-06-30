@@ -12,7 +12,6 @@ namespace Reflection
         private Node _parent;
         private bool _shouldSync;
         public object nodeObject;
-        private int _lastHash = -1;
         public Attributes attributes = Attributes.None;
         public Node Parent => _parent;
 
@@ -84,16 +83,9 @@ namespace Reflection
             parent.AddChild(this);
         }
 
-        public void UpdateValue(object value, bool isRemote)
+        public void UpdateValue(object value)
         {
             nodeObject = value;
-            if (isRemote)
-                UpdateHash();
-        }
-
-        public void UpdateHash()
-        {
-            _lastHash = nodeObject.GetHashCode();
         }
 
         public int Count
@@ -120,15 +112,6 @@ namespace Reflection
             }
 
             return indices.ToArray();
-        }
-
-        public bool CheckDirty()
-        {
-            int tmpHash = nodeObject.GetHashCode();
-            Debug.Log($"TmpHash: {tmpHash}, LastHash: {_lastHash}");
-            bool isDirty = tmpHash != _lastHash;
-            _lastHash = tmpHash;
-            return isDirty;
         }
     }
 }

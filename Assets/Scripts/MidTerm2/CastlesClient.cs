@@ -11,6 +11,7 @@ using Reflection;
 using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using PrimitiveType = Network.Enums.PrimitiveType;
 
 namespace MidTerm2
 {
@@ -30,6 +31,8 @@ namespace MidTerm2
         private CastlesModel _model;
         private CastlesView _view;
         private ReflectionHandler _reflection;
+        private DirtyRegistry _registry;
+
         //[SerializeField] private CastlesController input;
 
         private void Start()
@@ -53,15 +56,17 @@ namespace MidTerm2
         {
             _model = new CastlesModel(_inputReader);
             _reflection = new ReflectionHandler();
-            _reflection._model = _model;
-            _reflection.Start();
+            _registry = new DirtyRegistry();
+
+            _registry.SetRegistry(_model);
         }
 
         private void Update()
         {
-            if (_reflection != null)
+            if (_reflection != null && _registry != null)
             {
-                _reflection.Update();
+                _reflection.Update(_model);
+                _registry.Update(_reflection.Root);
                 SendDirtyValues();
             }
         }
@@ -113,16 +118,26 @@ namespace MidTerm2
             if (_networkClient == null)
                 return;
 
-            foreach (int[] route in _reflection.DirtyRoutes)
+            foreach (int[] route in _registry.DirtyRoutes)
             {
-                _networkClient.SendToServer(_reflection.GetMessage(route).Serialize());
+                PrimitiveMessage message = _reflection.GetMessage(route);
+                if (message.data.type != PrimitiveType.NonPrimitive)
+                {
+                    Debug.Log($"Sent DataInClass: {ReflectionHandler.GetDataAt(_reflection.Root, route)}");
+                    Debug.Log($"Sent PrimitiveData: {message.data.obj}");
+                    _networkClient.SendToServer(message.Serialize());
+                }
             }
         }
 
         private void ReceiveValues(PrimitiveData data)
         {
-            if (_reflection != null)
-                _reflection.SetDataAt(data.route, data.obj, true);
+            Debug.Log($"Received primitive: {data.obj}");
+            if (_reflection != null && _registry != null)
+            {
+                ReflectionHandler.SetDataAt(_reflection.Root, data.route, data.obj);
+                ReflectionHandler.SetDataAt(_reflection.Root, data.route, data.obj);
+            }
         }
 
         private void HandleHandshakeResponseData(ServerHsResponse response)
@@ -143,7 +158,7 @@ namespace MidTerm2
 
         private void HandleAbruptDisconnection()
         {
-            _clientFactory.DeInstantiateAll();
+            //_clientFactory.DeInstantiateAll();
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 

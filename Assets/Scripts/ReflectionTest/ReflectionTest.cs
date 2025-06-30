@@ -10,19 +10,21 @@ namespace ReflectionTest
         [SerializeField] private InputReader _inputReader;
         private CastlesModel _model;
         private ReflectionHandler _reflection;
+        private DirtyRegistry _registry;
 
         void Start()
         {
             _model = new CastlesModel(_inputReader);
+            _registry = new DirtyRegistry();
             _reflection = new ReflectionHandler();
-            _reflection._model = _model;
-            _reflection.Start();
+            _registry.SetRegistry(_model);
         }
 
         void Update()
         {
-            _reflection.Update();
-            Debug.Log($"Float at [1][1]: {_reflection.GetDataAt(new int[] { 1, 1 })}");
+            _reflection.Update(_model);
+            _registry.Update(_reflection.Root);
+            Debug.Log($"Float at [1][1]: {ReflectionHandler.GetDataAt(_reflection.Root, new int[] { 1, 1 })}");
         }
 
         [ContextMenu("Test")]

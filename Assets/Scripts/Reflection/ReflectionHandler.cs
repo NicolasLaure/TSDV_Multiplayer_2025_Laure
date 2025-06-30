@@ -6,6 +6,7 @@ using Network_dll.Messages.Data;
 using Network.Enums;
 using Network.Messages;
 using UnityEngine;
+using Object = UnityEngine.Object;
 using PrimitiveType = Network.Enums.PrimitiveType;
 
 namespace Reflection
@@ -13,44 +14,16 @@ namespace Reflection
     [Serializable]
     public class ReflectionHandler
     {
-        public object _model;
-        private Node _root;
-        private List<int[]> dirtyRoutes = new List<int[]>();
+        private Node root;
 
-        public List<int[]> DirtyRoutes => dirtyRoutes;
+        public Node Root => root;
 
-        public ReflectionHandler()
+        public void Update(object model)
         {
-            _model = null;
+            root = PopulateTree(model);
         }
 
-        public ReflectionHandler(ref object baseClass)
-        {
-            _model = baseClass;
-        }
-
-        public void Start()
-        {
-            if (_model == null)
-                return;
-
-            _root = PopulateTree(_model);
-            Debug.Log($"Root children count: {_root.Count}");
-        }
-
-        public void Update()
-        {
-            if (_model == null)
-                return;
-            dirtyRoutes.Clear();
-            DirtyRegistry.GetDirtyNodes(_root, ref dirtyRoutes);
-            foreach (int[] route in dirtyRoutes)
-            {
-                Debug.Log($"DIRTY: {RouteString(route)}");
-            }
-        }
-
-        private Node PopulateTree(object obj, Node root = null)
+        public static Node PopulateTree(object obj, Node root = null)
         {
             root ??= new Node(obj);
 
@@ -85,26 +58,24 @@ namespace Reflection
 
                 if (childNode.ContainsSyncedNodes)
                     childNode.SetParent(root);
-
-                Debug.Log($"Node{RouteString(childNode.GetRoute())} = {childNode.nodeObject}");
             }
 
             return root;
         }
 
-        private bool ShouldSync(FieldInfo info)
+        private static bool ShouldSync(FieldInfo info)
         {
             return info.GetCustomAttribute(typeof(Sync), false) != null;
         }
 
-        private Attributes GetAttribs(FieldInfo info)
+        private static Attributes GetAttribs(FieldInfo info)
         {
             return ((Sync)info.GetCustomAttribute(typeof(Sync), false)).attribs;
         }
 
-        public object GetDataAt(int[] route)
+        public static object GetDataAt(Node root, int[] route)
         {
-            Node target = _root;
+            Node target = root;
             for (int i = 0; i < route.Length; i++)
             {
                 target = target[route[i]];
@@ -115,7 +86,7 @@ namespace Reflection
 
         public PrimitiveMessage GetMessage(int[] route)
         {
-            Node target = _root;
+            Node target = root;
             for (int i = 0; i < route.Length; i++)
             {
                 target = target[route[i]];
@@ -178,26 +149,26 @@ namespace Reflection
                     primitiveType = PrimitiveType.TypeString;
                     break;
                 default:
-                    Debug.LogError("ELEMENT WAS NOT PRIMITIVE");
-                    throw new ArgumentOutOfRangeException();
+                    primitiveType = PrimitiveType.NonPrimitive;
+                    break;
             }
 
             return primitiveType;
         }
 
-        public void SetDataAt(int[] route, object value, bool isRemoteData)
+        public static void SetDataAt(Node root, int[] route, object value)
         {
-            Node target = _root;
+            Node target = root;
             for (int i = 0; i < route.Length; i++)
             {
                 target = target[route[i]];
             }
 
             Debug.Log($"New data at{RouteString(route)}: {value}");
-            target.UpdateValue(value, isRemoteData);
+            target.UpdateValue(value);
         }
 
-        private string RouteString(int[] route)
+        private static string RouteString(int[] route)
         {
             string routeString = "";
             for (int i = 0; i < route.Length; i++)
@@ -206,15 +177,6 @@ namespace Reflection
             }
 
             return routeString;
-        }
-
-        [ContextMenu("Test")]
-        private void Test()
-        {
-            int[] route = { 0, 1 };
-            SetDataAt(route, 12, false);
-            int[] routeB = { 1, 0, 2 };
-            SetDataAt(routeB, 123, true);
         }
     }
 }

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Text;
-using System.Threading.Tasks;
 using Network_dll.Messages.Data;
 using Network.Enums;
 
@@ -31,6 +29,11 @@ public class PrimitiveMessage : Message<PrimitiveData>
     {
         List<byte> bytes = new List<byte>();
         bytes.AddRange(BitConverter.GetBytes((short)data.type));
+        bytes.AddRange(BitConverter.GetBytes(data.routeLength));
+        for (int i = 0; i < data.routeLength; i++)
+        {
+            bytes.AddRange(BitConverter.GetBytes(data.route[i]));
+        }
 
         switch (data.type)
         {
@@ -84,7 +87,7 @@ public class PrimitiveMessage : Message<PrimitiveData>
                 break;
         }
 
-        return bytes.ToArray();
+        return GetFormattedData(bytes.ToArray());
     }
 
     public override PrimitiveData Deserialize(byte[] message)
@@ -102,8 +105,9 @@ public class PrimitiveMessage : Message<PrimitiveData>
             route.Add(BitConverter.ToInt32(payload, offset));
             offset += sizeof(int);
         }
+
         newData.route = route.ToArray();
-        
+
         switch (newData.type)
         {
             case PrimitiveType.TypeSbyte:

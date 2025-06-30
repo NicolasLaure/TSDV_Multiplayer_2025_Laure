@@ -21,11 +21,13 @@ namespace MidTerm2
 
         private void Move(Vec3 vec3)
         {
-            a = vec3.x;
-            position.x = vec3.x;
-            position.y = vec3.y;
-            position.z = vec3.z;
-            Debug.Log($"NewPosition is: {position}");
+            a += vec3.x;
+        }
+
+        [RPC]
+        private void Test()
+        {
+            Debug.Log("Sending Something");
         }
     }
 }

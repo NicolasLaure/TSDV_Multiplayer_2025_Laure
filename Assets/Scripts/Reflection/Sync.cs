@@ -14,6 +14,7 @@ namespace Reflection
 
         public Sync(Attributes attributes)
         {
+            attribs = attributes;
         }
     }
 }
