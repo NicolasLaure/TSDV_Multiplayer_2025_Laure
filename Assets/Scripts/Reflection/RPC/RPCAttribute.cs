@@ -1,7 +1,7 @@
 using System;
 using Network.Enums;
 
-namespace Reflection
+namespace Reflection.RPC
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class RPCAttribute : Attribute

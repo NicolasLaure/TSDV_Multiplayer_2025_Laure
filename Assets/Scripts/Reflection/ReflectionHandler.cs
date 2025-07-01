@@ -6,6 +6,7 @@ using Network_dll.Messages.Data;
 using Network;
 using Network.Enums;
 using Network.Messages;
+using Reflection.RPC;
 using UnityEngine;
 using Utils;
 using PrimitiveType = Network.Enums.PrimitiveType;
@@ -17,7 +18,7 @@ namespace Reflection
         private Node root;
         private object _model;
         private NetworkClient _networkClient;
-
+        private RPCHooker<ModelType> _rpcHooker;
         public Node Root => root;
         private DirtyRegistry<ModelType> _dirtyRegistry = new DirtyRegistry<ModelType>();
 
@@ -27,6 +28,8 @@ namespace Reflection
         {
             _model = model;
             root = PopulateTree(_model);
+            _rpcHooker = new RPCHooker<ModelType>(ref model);
+            _rpcHooker.Hook();
         }
 
         public ReflectionHandler(ref ModelType model, NetworkClient networkClient)
@@ -34,6 +37,8 @@ namespace Reflection
             _model = model;
             _networkClient = networkClient;
             root = PopulateTree(_model);
+            _rpcHooker = new RPCHooker<ModelType>(ref model);
+            _rpcHooker.Hook();
         }
 
         public void Update()

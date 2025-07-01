@@ -24,12 +24,9 @@ namespace ReflectionTest
         }
 
         [ContextMenu("Test")]
-        private void TestManualSetting()
+        private void Test()
         {
-            Debug.Log($"Reflection _model.position.x = {_reflection.GetDataAt(new int[] { 1, 0 })}");
-            _model.position.x = 3;
-            Debug.Log($"Reflection _model.position.x = {_reflection.GetDataAt(new int[] { 1, 0 })}");
-            // _reflection.SetDataAt(new int[] { 1, 1 }, 2, _model);
+            _model.Test();
         }
     }
 }

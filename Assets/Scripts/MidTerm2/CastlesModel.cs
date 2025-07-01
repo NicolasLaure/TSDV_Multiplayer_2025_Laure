@@ -2,6 +2,8 @@ using System;
 using CustomMath;
 using Input;
 using Reflection;
+using Reflection.RPC;
+using ReflectionTest;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -12,6 +14,7 @@ namespace MidTerm2
     {
         [Sync] private float a = 0;
         [Sync] public Vec3 position;
+        private TestModel test = new TestModel();
 
         public CastlesModel(InputReader input)
         {
@@ -25,7 +28,7 @@ namespace MidTerm2
         }
 
         [RPC]
-        private void Test()
+        public void Test()
         {
             Debug.Log("Sending Something");
         }
