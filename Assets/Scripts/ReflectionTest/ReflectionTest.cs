@@ -20,13 +20,16 @@ namespace ReflectionTest
 
         void Update()
         {
+            _reflection.Update();
         }
 
         [ContextMenu("Test")]
         private void TestManualSetting()
         {
-            //_model.position.x = 3;
-            _reflection.SetDataAt(new int[] { 1, 1 }, 2, _model);
+            Debug.Log($"Reflection _model.position.x = {_reflection.GetDataAt(new int[] { 1, 0 })}");
+            _model.position.x = 3;
+            Debug.Log($"Reflection _model.position.x = {_reflection.GetDataAt(new int[] { 1, 0 })}");
+            // _reflection.SetDataAt(new int[] { 1, 1 }, 2, _model);
         }
     }
 }

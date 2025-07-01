@@ -21,7 +21,7 @@ namespace MidTerm2
 
         private void Move(Vec3 vec3)
         {
-            a += vec3.x;
+            position += vec3;
         }
 
         [RPC]

@@ -11,9 +11,9 @@ namespace Reflection
         private List<Node> children = new List<Node>();
         private Node _parent;
         private bool _shouldSync;
-        public object nodeObject;
         public Attributes attributes = Attributes.None;
-        private int _lastHash = -1;
+        public int lastHash = -1;
+        public int currentHash;
         public Node Parent => _parent;
 
         public bool ContainsSyncedNodes
@@ -45,15 +45,13 @@ namespace Reflection
 
         public Node[] Children => children.ToArray();
 
-        public Node(object nodeObject)
+        public Node()
         {
-            this.nodeObject = nodeObject;
             _parent = null;
         }
 
-        public Node(object nodeObject, Node parent)
+        public Node(Node parent)
         {
-            this.nodeObject = nodeObject;
             _parent = parent;
             parent.AddChild(this);
         }
@@ -84,11 +82,6 @@ namespace Reflection
             parent.AddChild(this);
         }
 
-        public void UpdateValue(object value)
-        {
-            nodeObject = value;
-        }
-
         public int Count
         {
             get { return children.Count; }
@@ -115,12 +108,11 @@ namespace Reflection
             return indices.ToArray();
         }
 
+        
         public bool CheckDirty()
         {
-            int tmpHash = nodeObject.GetHashCode();
-            Debug.Log($"TmpHash: {tmpHash}, LastHash: {_lastHash}");
-            bool isDirty = tmpHash != _lastHash;
-            _lastHash = tmpHash;
+            bool isDirty = currentHash != lastHash;
+            lastHash = currentHash;
             return isDirty;
         }
     }

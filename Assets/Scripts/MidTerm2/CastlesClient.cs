@@ -11,7 +11,6 @@ using Reflection;
 using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using PrimitiveType = Network.Enums.PrimitiveType;
 
 namespace MidTerm2
 {
@@ -58,8 +57,7 @@ namespace MidTerm2
 
         private void Update()
         {
-            if (_reflection != null)
-                _reflection.Update();
+            _reflection?.Update();
         }
 
         private void OnDestroy()
