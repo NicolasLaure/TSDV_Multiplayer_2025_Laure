@@ -3,16 +3,17 @@ using Network.Enums;
 
 namespace Reflection
 {
-    public class RPC : Attribute
+    [AttributeUsage(AttributeTargets.Method)]
+    public class RPCAttribute : Attribute
     {
         public Attributes attributes;
 
-        public RPC()
+        public RPCAttribute()
         {
             attributes = Attributes.None;
         }
 
-        public RPC(Attributes attributes)
+        public RPCAttribute(Attributes attributes)
         {
             this.attributes = this.attributes;
         }

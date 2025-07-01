@@ -50,6 +50,7 @@
     <Compile Include="Assets\Scripts\CustomMath\Self_Plane.cs" />
     <Compile Include="Assets\Scripts\ReflectionTest\ReflectionTest.cs" />
     <Compile Include="Assets\Scripts\Utils\Route.cs" />
+    <Compile Include="Assets\Code\TargetTestRPC.cs" />
     <Compile Include="Assets\Scripts\CustomMath\MY4X4.cs" />
     <Compile Include="Assets\Scripts\Events\IntEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\CastlesModel.cs" />
@@ -69,10 +70,10 @@
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\AuthSvPlayerSetter.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\CastlesClient.cs" />
     <Compile Include="Assets\Scripts\Reflection\IReflectiveModel.cs" />
+    <Compile Include="Assets\Code\RPCHooker.cs" />
     <Compile Include="Assets\Scripts\FPS\PlayerSetter.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletSetter.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\Colors.cs" />
-    <Compile Include="Assets\Scripts\Reflection\RPC.cs" />
     <Compile Include="Assets\Scripts\Network\ClientManager.cs" />
     <Compile Include="Assets\Scripts\CustomMath\MyQuaternion.cs" />
     <Compile Include="Assets\Scripts\Events\FloatEventChannel.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Assets\Scripts\UI\HealthDisplay.cs" />
     <Compile Include="Assets\Scripts\UI\ChatScreen.cs" />
     <Compile Include="Assets\Scripts\FPS\NonAuthoritative\FpsClient.cs" />
+    <Compile Include="Assets\Code\TestRPC.cs" />
     <Compile Include="Assets\Scripts\FPS\PlayerProperties.cs" />
     <Compile Include="Assets\Scripts\Events\StringEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\Network\Enums\ActionType.cs" />
@@ -117,6 +119,7 @@
     <Compile Include="Assets\Scripts\Network\Messages\ClientMessages\Position.cs" />
     <Compile Include="Assets\Scripts\Network\Messages\ClientMessages\ActionInput.cs" />
     <Compile Include="Assets\Scripts\FPS\MouseLook.cs" />
+    <Compile Include="Assets\Scripts\Reflection\RPCAttribute.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\InputHandler.cs" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
@@ -459,6 +462,9 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>E:\Software\IMAGE\ProyectosUnity\Multiplayer\Assets\Plugins\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>E:\Software\IMAGE\ProyectosUnity\Multiplayer\Assets\Plugins\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>E:\Software\IMAGE\ProyectosUnity\Multiplayer\Library\PackageCache\com.unity.nuget.mono-cecil@d6f9955a5d5f\Mono.Cecil.dll</HintPath>
