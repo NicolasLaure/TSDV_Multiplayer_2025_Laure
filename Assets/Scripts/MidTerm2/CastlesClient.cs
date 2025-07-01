@@ -30,9 +30,7 @@ namespace MidTerm2
 
         private CastlesModel _model;
         private CastlesView _view;
-        private ReflectionHandler _reflection;
-        private DirtyRegistry _registry;
-
+        private ReflectionHandler<CastlesModel> _reflection;
         //[SerializeField] private CastlesController input;
 
         private void Start()
@@ -55,20 +53,13 @@ namespace MidTerm2
         private void InitializeModel()
         {
             _model = new CastlesModel(_inputReader);
-            _reflection = new ReflectionHandler();
-            _registry = new DirtyRegistry();
-
-            _registry.SetRegistry(_model);
+            _reflection = new ReflectionHandler<CastlesModel>(ref _model, _networkClient);
         }
 
         private void Update()
         {
-            if (_reflection != null && _registry != null)
-            {
-                _reflection.Update(_model);
-                _registry.Update(_reflection.Root);
-                SendDirtyValues();
-            }
+            if (_reflection != null)
+                _reflection.Update();
         }
 
         private void OnDestroy()
@@ -104,39 +95,12 @@ namespace MidTerm2
                     break;
                 case MessageType.Primitive:
                     PrimitiveData primitive = new PrimitiveMessage(data).data;
-                    ReceiveValues(primitive);
+                    _reflection.ReceiveValues(primitive);
                     break;
 
                 default:
                     Debug.Log($"MessageType = {(int)messageType}");
                     throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        void SendDirtyValues()
-        {
-            if (_networkClient == null)
-                return;
-
-            foreach (int[] route in _registry.DirtyRoutes)
-            {
-                PrimitiveMessage message = _reflection.GetMessage(route);
-                if (message.data.type != PrimitiveType.NonPrimitive)
-                {
-                    Debug.Log($"Sent DataInClass: {ReflectionHandler.GetDataAt(_reflection.Root, route)}");
-                    Debug.Log($"Sent PrimitiveData: {message.data.obj}");
-                    _networkClient.SendToServer(message.Serialize());
-                }
-            }
-        }
-
-        private void ReceiveValues(PrimitiveData data)
-        {
-            Debug.Log($"Received primitive: {data.obj}");
-            if (_reflection != null && _registry != null)
-            {
-                ReflectionHandler.SetDataAt(_reflection.Root, data.route, data.obj);
-                ReflectionHandler.SetDataAt(_reflection.Root, data.route, data.obj);
             }
         }
 

@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 namespace MidTerm2
 {
     [Serializable]
-    public class CastlesModel
+    public class CastlesModel : IReflectiveModel
     {
         [Sync] private float a = 0;
         [Sync] public Vec3 position;

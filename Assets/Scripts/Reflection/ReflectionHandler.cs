@@ -3,24 +3,41 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Network_dll.Messages.Data;
+using Network;
 using Network.Enums;
 using Network.Messages;
 using UnityEngine;
-using Object = UnityEngine.Object;
 using PrimitiveType = Network.Enums.PrimitiveType;
 
 namespace Reflection
 {
     [Serializable]
-    public class ReflectionHandler
+    public class ReflectionHandler<ModelType> where ModelType : class, IReflectiveModel
     {
         private Node root;
+        private object _model;
+        private NetworkClient _networkClient;
 
         public Node Root => root;
+        private DirtyRegistry<ModelType> _registry;
 
-        public void Update(object model)
+        private BindingFlags _bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+
+        public ReflectionHandler(ref ModelType model)
         {
+            _model = model;
             root = PopulateTree(model);
+        }
+
+        public ReflectionHandler(ref ModelType model, NetworkClient networkClient)
+        {
+            _model = model;
+            _networkClient = networkClient;
+            root = PopulateTree(model);
+        }
+
+        public void Update()
+        {
         }
 
         public static Node PopulateTree(object obj, Node root = null)
@@ -156,7 +173,12 @@ namespace Reflection
             return primitiveType;
         }
 
-        public static void SetDataAt(Node root, int[] route, object value)
+        public void SetData(int[] route, object value)
+        {
+            _model = SetDataAt(route, value, _model);
+        }
+
+        public void SetDataAt(int[] route, object value)
         {
             Node target = root;
             for (int i = 0; i < route.Length; i++)
@@ -168,6 +190,16 @@ namespace Reflection
             target.UpdateValue(value);
         }
 
+        public object SetDataAt(int[] route, object value, object obj, int startIndex = 0)
+        {
+            FieldInfo info;
+            if (startIndex >= route.Length) return value;
+
+            info = obj.GetType().GetFields(_bindingFlags)[route[startIndex]];
+            obj.GetType().GetFields(_bindingFlags)[route[startIndex]].SetValue(obj, SetDataAt(route, value, info.GetValue(obj), startIndex + 1));
+            return obj;
+        }
+
         private static string RouteString(int[] route)
         {
             string routeString = "";
@@ -177,6 +209,30 @@ namespace Reflection
             }
 
             return routeString;
+        }
+
+        void SendDirtyValues()
+        {
+            if (_networkClient == null)
+                return;
+
+            foreach (int[] route in _registry.DirtyRoutes)
+            {
+                PrimitiveMessage message = GetMessage(route);
+                if (message.data.type != PrimitiveType.NonPrimitive)
+                {
+                    Debug.Log($"Sent DataInClass: {GetDataAt(root, route)}");
+                    Debug.Log($"Sent PrimitiveData: {message.data.obj}");
+                    _networkClient.SendToServer(message.Serialize());
+                }
+            }
+        }
+
+        public void ReceiveValues(PrimitiveData data)
+        {
+            Debug.Log($"Received primitive: {data.obj}");
+            SetDataAt(data.route, data.obj);
+            SetDataAt(data.route, data.obj);
         }
     }
 }

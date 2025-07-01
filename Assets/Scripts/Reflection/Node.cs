@@ -13,6 +13,7 @@ namespace Reflection
         private bool _shouldSync;
         public object nodeObject;
         public Attributes attributes = Attributes.None;
+        private int _lastHash = -1;
         public Node Parent => _parent;
 
         public bool ContainsSyncedNodes
@@ -112,6 +113,15 @@ namespace Reflection
             }
 
             return indices.ToArray();
+        }
+
+        public bool CheckDirty()
+        {
+            int tmpHash = nodeObject.GetHashCode();
+            Debug.Log($"TmpHash: {tmpHash}, LastHash: {_lastHash}");
+            bool isDirty = tmpHash != _lastHash;
+            _lastHash = tmpHash;
+            return isDirty;
         }
     }
 }
