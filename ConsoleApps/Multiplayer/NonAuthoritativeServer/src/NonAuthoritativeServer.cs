@@ -187,6 +187,7 @@ namespace Network
                         _eloHandler.EloCalculation(win.winnerUsername, win.loserUsername);
                         break;
                     case MessageType.Primitive:
+                    case MessageType.Rpc:
                         Broadcast(data);
                         SetPlayerActive(receivedClientId);
                         break;

@@ -1,10 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
-using UnityEditor.Rendering;
+using Network;
+using Network_dll.Messages.ClientMessages;
+using Network_dll.Messages.Data;
+using Network.Enums;
 using UnityEngine;
-using Utils;
 
 namespace Reflection.RPC
 {
@@ -13,9 +14,12 @@ namespace Reflection.RPC
         public static RPCHooker<ModelType> Instance;
         private object _model;
         private Harmony _harmony;
-        private Node methodsTree;
+        private Node _methodsTree;
+        private NetworkClient _network;
 
         private static readonly BindingFlags BindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
+
+        #region Constructors
 
         public RPCHooker(ref ModelType model)
         {
@@ -24,21 +28,62 @@ namespace Reflection.RPC
 
             _model = model;
             _harmony = new Harmony("RPC Hooks");
-            methodsTree = new Node();
+            _methodsTree = new Node();
         }
+
+        public RPCHooker(ref ModelType model, NetworkClient networkClient)
+        {
+            if (Instance == null)
+                Instance = this;
+
+            _model = model;
+            _network = networkClient;
+            _harmony = new Harmony("RPC Hooks");
+            _methodsTree = new Node();
+        }
+
+        #endregion
+
+        #region Harmony
 
         public void Hook()
         {
             List<MethodInfo> methods = new List<MethodInfo>();
-            GetMethods(methodsTree, _model, methods);
+            GetMethods(_methodsTree, _model, methods);
             Debug.Log($"Methods Count: {methods.Count}");
 
             foreach (MethodInfo method in methods)
             {
-                HarmonyMethod patch = new HarmonyMethod(typeof(RPCHooker<ModelType>).GetMethod(nameof(SendRPCMessage)));
-                _harmony.Patch(method, postfix: patch);
+                Hook(method);
             }
         }
+
+        public void Hook(MethodInfo method)
+        {
+            HarmonyMethod patch = new HarmonyMethod(typeof(RPCHooker<ModelType>).GetMethod(nameof(SendRPCMessage)));
+            _harmony.Patch(method, postfix: patch);
+        }
+
+        public void Unhook(MethodInfo method)
+        {
+            _harmony.Unpatch(method, HarmonyPatchType.Postfix, _harmony.Id);
+        }
+
+        public static void SendRPCMessage(MethodBase __originalMethod)
+        {
+            RpcData data;
+            int[] route = Instance.FindMethod(__originalMethod.Name);
+            data.routeLength = route.Length;
+            data.route = route;
+            RPCMessage message = new RPCMessage(data, Attributes.None);
+
+            message.clientId = Instance._network.Id;
+            Instance._network?.SendToServer(message.Serialize());
+        }
+
+        #endregion
+
+        #region TreeManagement
 
         private void GetMethods(Node rootNode, object obj, List<MethodInfo> methods)
         {
@@ -48,7 +93,6 @@ namespace Reflection.RPC
                 if (method.GetCustomAttribute(typeof(RPCAttribute), false) != null)
                 {
                     methodNode.ShouldSync = true;
-                    Debug.Log($"Adding Method with Route: {Route.RouteString(GetMethodNodeRoute(methodNode))}");
                     methods.Add(method);
                 }
             }
@@ -90,17 +134,28 @@ namespace Reflection.RPC
             return obj.GetType().GetMethods(BindingFlags)[route[startIndex]];
         }
 
+        private MethodInfo GetMethodAt(object obj, int[] route, out object methodHolder, int startIndex = 0)
+        {
+            if (startIndex < route.Length - 1)
+            {
+                FieldInfo info = obj.GetType().GetFields(BindingFlags)[route[startIndex]];
+                return GetMethodAt(info.GetValue(obj), route, out methodHolder, startIndex + 1);
+            }
+
+            methodHolder = obj;
+            return obj.GetType().GetMethods(BindingFlags)[route[startIndex]];
+        }
+
         private int[] FindMethod(string name, Node root = null)
         {
             if (root == null)
-                root = methodsTree;
+                root = _methodsTree;
 
             foreach (Node child in root.Children)
             {
                 if (child.ShouldSync)
                 {
                     string childName = GetMethodAt(_model, GetMethodNodeRoute(child)).Name;
-                    Debug.Log($"ChildName: {childName}");
                     if (childName == name)
                         return GetMethodNodeRoute(child);
                 }
@@ -139,9 +194,14 @@ namespace Reflection.RPC
             return qtyOfMethods;
         }
 
-        public static void SendRPCMessage(MethodBase __originalMethod)
+        #endregion
+
+        public void ReceiveRPCMessage(RpcData messageData)
         {
-            Debug.Log($"Send Method with Route {Route.RouteString(Instance.FindMethod(__originalMethod.Name))} To server");
+            MethodInfo method = GetMethodAt(_model, messageData.route, out object objectHolder);
+            Unhook(method);
+            method.Invoke(objectHolder, new object[] { });
+            Hook(method);
         }
     }
 }

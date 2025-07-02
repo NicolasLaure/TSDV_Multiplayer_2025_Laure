@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using Input;
 using Network;
+using Network_dll.Messages.ClientMessages;
 using Network_dll.Messages.Data;
 using Network.Enums;
 using Network.Factory;
@@ -94,6 +95,15 @@ namespace MidTerm2
                 case MessageType.Primitive:
                     PrimitiveData primitive = new PrimitiveMessage(data).data;
                     _reflection.ReceiveValues(primitive);
+                    break;
+                case MessageType.Rpc:
+                    RPCMessage rpcMessage = new RPCMessage(data);
+                    if (rpcMessage.clientId != _networkClient.Id)
+                    {
+                        RpcData rpc = rpcMessage.data;
+                        _reflection.rpcHooker.ReceiveRPCMessage(rpc);
+                    }
+
                     break;
 
                 default:

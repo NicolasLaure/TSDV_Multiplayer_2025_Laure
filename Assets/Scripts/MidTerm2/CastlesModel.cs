@@ -20,6 +20,7 @@ namespace MidTerm2
         {
             position = new Vec3(0.0f, 0.0f, 0.0f);
             input.onMove += Move;
+            input.onShoot += Test;
         }
 
         private void Move(Vec3 vec3)
@@ -30,7 +31,7 @@ namespace MidTerm2
         [RPC]
         public void Test()
         {
-            Debug.Log("Sending Something");
+            Debug.Log("Some Method");
         }
     }
 }

@@ -211,21 +211,12 @@ namespace Network
                     Debug.Log($"ServerIp {svDir.serverIp}, port: {svDir.serverPort}");
                     StartClient(svDir.serverIp, svDir.serverPort, username, color);
                     break;
-                case MessageType.Position:
-                case MessageType.Crouch:
-                case MessageType.InstantiateRequest:
-                case MessageType.DeInstantiateRequest:
-                case MessageType.Death:
-                case MessageType.Primitive:
-                    OnReceiveEvent?.Invoke(data, ip);
-                    break;
                 case MessageType.Username:
                     HandleUsernameMessage(new UsernameMessage(data));
                     break;
                 case MessageType.Usernames:
                     HandleUsernamesMessage(new UsernamesMessage(data));
                     break;
-
 
                 case MessageType.Error_UsernameTaken:
                     Debug.LogError($"USERNAME WAS TAKEN");
@@ -243,7 +234,8 @@ namespace Network
                     EndClient();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    OnReceiveEvent?.Invoke(data, ip);
+                    break;
             }
 
             if (messageAttribs.HasFlag(Attributes.Important))

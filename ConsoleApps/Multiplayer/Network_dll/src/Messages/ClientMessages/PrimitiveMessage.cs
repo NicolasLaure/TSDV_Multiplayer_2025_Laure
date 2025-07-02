@@ -23,6 +23,9 @@ public class PrimitiveMessage : Message<PrimitiveData>
         messageType = MessageType.Primitive;
         attribs = Attributes.None;
         this.data = Deserialize(message);
+        
+        clientId = BitConverter.ToInt32(message, MessageOffsets.ClientIdIndex);
+        messageId = BitConverter.ToInt32(message, MessageOffsets.IdIndex);
     }
 
     public override byte[] Serialize()
