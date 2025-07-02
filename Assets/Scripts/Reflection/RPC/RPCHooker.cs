@@ -75,7 +75,8 @@ namespace Reflection.RPC
             int[] route = Instance.FindMethod(__originalMethod.Name);
             data.routeLength = route.Length;
             data.route = route;
-            RPCMessage message = new RPCMessage(data, Attributes.None);
+            Node node = GetNode(Instance._methodsTree, route);
+            RPCMessage message = new RPCMessage(data, node.attributes);
 
             message.clientId = Instance._network.Id;
             Instance._network?.SendToServer(message.Serialize());
@@ -90,9 +91,11 @@ namespace Reflection.RPC
             foreach (MethodInfo method in obj.GetType().GetMethods(BindingFlags))
             {
                 Node methodNode = new Node(rootNode);
-                if (method.GetCustomAttribute(typeof(RPCAttribute), false) != null)
+                RPCAttribute rpcAttribute = (RPCAttribute)method.GetCustomAttribute(typeof(RPCAttribute), false);
+                if (rpcAttribute != null)
                 {
                     methodNode.ShouldSync = true;
+                    methodNode.attributes = rpcAttribute.attributes;
                     methods.Add(method);
                 }
             }
@@ -192,6 +195,14 @@ namespace Reflection.RPC
                     qtyOfMethods++;
 
             return qtyOfMethods;
+        }
+
+        private static Node GetNode(Node root, int[] route, int startIndex = 0)
+        {
+            if (startIndex < route.Length - 1)
+                return GetNode(root[route[startIndex]], route, startIndex + 1);
+
+            return root[route[startIndex]];
         }
 
         #endregion

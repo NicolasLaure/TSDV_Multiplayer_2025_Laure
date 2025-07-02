@@ -6,14 +6,7 @@ namespace Reflection.RPC
     [AttributeUsage(AttributeTargets.Method)]
     public class RPCAttribute : Attribute
     {
-        public Attributes attributes;
-        private int[] route;
-
-        public int[] Route
-        {
-            get => route;
-            set => route = value;
-        }
+        public Attributes attributes = Attributes.None;
 
         public RPCAttribute()
         {
@@ -22,7 +15,7 @@ namespace Reflection.RPC
 
         public RPCAttribute(Attributes attributes)
         {
-            this.attributes = this.attributes;
+            this.attributes = attributes;
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using CustomMath;
 using Input;
+using Network.Enums;
 using Reflection;
 using Reflection.RPC;
 using ReflectionTest;
@@ -12,7 +13,7 @@ namespace MidTerm2
     [Serializable]
     public class CastlesModel : IReflectiveModel
     {
-        [Sync] private float a = 0;
+        [Sync(Attributes.Important | Attributes.Critical )] private float a = 0;
         [Sync] public Vec3 position;
         private TestModel test = new TestModel();
 
@@ -28,7 +29,7 @@ namespace MidTerm2
             position += vec3;
         }
 
-        [RPC]
+        [RPC(Attributes.Important | Attributes.Critical)]
         public void Test()
         {
             Debug.Log("Some Method");
