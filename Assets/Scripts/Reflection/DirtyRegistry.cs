@@ -21,6 +21,9 @@ namespace Reflection
         {
             foreach (Node child in root.Children)
             {
+                if (!child.ShouldSync)
+                    continue;
+
                 if (child.CheckDirty())
                 {
                     Debug.Log($"Dirty: {Route.RouteString(child.GetRoute())}");

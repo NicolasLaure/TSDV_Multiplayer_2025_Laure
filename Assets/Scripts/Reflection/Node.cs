@@ -76,6 +76,12 @@ namespace Reflection
             children.Remove(child);
         }
 
+        public void RemoveAllChildren()
+        {
+            children.Clear();
+        }
+
+
         public void SetParent(Node parent)
         {
             _parent = parent;
@@ -108,7 +114,6 @@ namespace Reflection
             return indices.ToArray();
         }
 
-        
         public bool CheckDirty()
         {
             bool isDirty = currentHash != lastHash;

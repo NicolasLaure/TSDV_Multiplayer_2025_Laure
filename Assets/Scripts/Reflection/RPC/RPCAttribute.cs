@@ -7,6 +7,13 @@ namespace Reflection.RPC
     public class RPCAttribute : Attribute
     {
         public Attributes attributes;
+        private int[] route;
+
+        public int[] Route
+        {
+            get => route;
+            set => route = value;
+        }
 
         public RPCAttribute()
         {

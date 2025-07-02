@@ -81,8 +81,10 @@ namespace Reflection
                     PopulateTree(field.GetValue(obj), childNode);
                 }
 
-                if (childNode.ContainsSyncedNodes)
-                    childNode.SetParent(root);
+                if (!childNode.ContainsSyncedNodes)
+                    childNode.RemoveAllChildren();
+
+                childNode.SetParent(root);
             }
 
             return root;

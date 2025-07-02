@@ -50,8 +50,8 @@
     <Compile Include="Assets\Scripts\CustomMath\Self_Plane.cs" />
     <Compile Include="Assets\Scripts\ReflectionTest\ReflectionTest.cs" />
     <Compile Include="Assets\Scripts\Utils\Route.cs" />
-    <Compile Include="Assets\Code\TargetTestRPC.cs" />
     <Compile Include="Assets\Scripts\CustomMath\MY4X4.cs" />
+    <Compile Include="Assets\Scripts\Reflection\RPC\RemoteCall.cs" />
     <Compile Include="Assets\Scripts\Events\IntEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\CastlesModel.cs" />
     <Compile Include="Assets\Scripts\Cubes\MovingCubesServer.cs" />
