@@ -23,7 +23,7 @@ public class PrimitiveMessage : Message<PrimitiveData>
         messageType = MessageType.Primitive;
         attribs = Attributes.None;
         this.data = Deserialize(message);
-        
+
         clientId = BitConverter.ToInt32(message, MessageOffsets.ClientIdIndex);
         messageId = BitConverter.ToInt32(message, MessageOffsets.IdIndex);
     }
@@ -41,6 +41,8 @@ public class PrimitiveMessage : Message<PrimitiveData>
         switch (data.type)
         {
             case PrimitiveType.TypeSbyte:
+                bytes.Add(Convert.ToByte((sbyte)data.obj));
+                break;
             case PrimitiveType.TypeByte:
                 bytes.Add((byte)data.obj);
                 break;
@@ -71,7 +73,7 @@ public class PrimitiveMessage : Message<PrimitiveData>
             case PrimitiveType.TypeDecimal:
                 int[] bits = decimal.GetBits((decimal)data.obj);
                 for (int i = 0; i < bits.Length; i++)
-                    bytes.AddRange(BitConverter.GetBytes(bits[0]));
+                    bytes.AddRange(BitConverter.GetBytes(bits[i]));
                 break;
             case PrimitiveType.TypeBool:
                 bytes.AddRange(BitConverter.GetBytes((bool)data.obj));
@@ -80,13 +82,7 @@ public class PrimitiveMessage : Message<PrimitiveData>
                 bytes.AddRange(BitConverter.GetBytes((char)data.obj));
                 break;
             case PrimitiveType.TypeString:
-                string message = data.obj.ToString();
-                bytes.AddRange(BitConverter.GetBytes(message.Length));
-                for (int i = 0; i < message.Length; i++)
-                {
-                    bytes.AddRange(BitConverter.GetBytes(message[i]));
-                }
-
+                bytes.AddRange(Encoding.Unicode.GetBytes(data.obj.ToString()));
                 break;
         }
 
@@ -160,9 +156,7 @@ public class PrimitiveMessage : Message<PrimitiveData>
                 newData.obj = BitConverter.ToChar(payload, offset);
                 break;
             case PrimitiveType.TypeString:
-                int size = BitConverter.ToInt32(payload, offset);
-                offset += sizeof(int);
-                char[] text = Encoding.Unicode.GetChars(payload, offset, size);
+                char[] text = Encoding.Unicode.GetChars(payload, offset, payload.Length - offset);
                 newData.obj = new string(text);
                 break;
             default:

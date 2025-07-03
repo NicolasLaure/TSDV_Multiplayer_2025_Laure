@@ -26,7 +26,6 @@ namespace ReflectionTest
         [ContextMenu("Test")]
         private void Test()
         {
-            _model.Test();
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Reflection
             _model = model;
             root = PopulateTree(_model);
             rpcHooker = new RPCHooker<ModelType>(ref model);
-            rpcHooker.Hook();
+            //rpcHooker.Hook();
         }
 
         public ReflectionHandler(ref ModelType model, NetworkClient networkClient)
@@ -38,7 +38,7 @@ namespace Reflection
             _networkClient = networkClient;
             root = PopulateTree(_model);
             rpcHooker = new RPCHooker<ModelType>(ref model, _networkClient);
-            rpcHooker.Hook();
+            //rpcHooker.Hook();
         }
 
         public void Update()
