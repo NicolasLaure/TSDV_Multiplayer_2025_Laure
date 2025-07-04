@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
@@ -6,6 +7,8 @@ using Network_dll.Messages.ClientMessages;
 using Network_dll.Messages.Data;
 using Network.Enums;
 using UnityEngine;
+using Utils;
+using PrimitiveType = Network.Enums.PrimitiveType;
 
 namespace Reflection.RPC
 {
@@ -58,13 +61,13 @@ namespace Reflection.RPC
             }
         }
 
-        public void Hook(MethodInfo method)
+        private void Hook(MethodInfo method)
         {
             HarmonyMethod patch = new HarmonyMethod(typeof(RPCHooker<ModelType>).GetMethod(nameof(SendRPCMessage)));
             _harmony.Patch(method, postfix: patch);
         }
 
-        public void Unhook(MethodInfo method)
+        private void Unhook(MethodInfo method)
         {
             _harmony.Unpatch(method, HarmonyPatchType.Postfix, _harmony.Id);
         }
@@ -88,6 +91,40 @@ namespace Reflection.RPC
 
         private void GetMethods(Node rootNode, object obj, List<MethodInfo> methods)
         {
+            PopulateMethods(rootNode, obj, methods);
+            PopulateFields(rootNode, obj, methods);
+        }
+
+        private void PopulateFields(Node rootNode, object obj, List<MethodInfo> methods)
+        {
+            foreach (FieldInfo field in obj.GetType().GetFields(BindingFlags))
+            {
+                Node child = new Node(rootNode);
+
+                if (field.FieldType != typeof(string) && (field.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(field.FieldType)))
+                {
+                    foreach (object item in field.GetValue(obj) as ICollection)
+                    {
+                        if (PrimitiveUtils.GetObjectType(item) == PrimitiveType.NonPrimitive)
+                        {
+                            Node subChild = new Node(child);
+                            PopulateMethods(subChild, item, methods);
+                            PopulateFields(subChild, item, methods);
+                        }
+                    }
+                }
+                else if (field.FieldType.IsClass && field.FieldType != typeof(string))
+                {
+                    PopulateMethods(child, field.GetValue(obj), methods);
+                    PopulateFields(child, field.GetValue(obj), methods);
+                    if (!ContainsRPCMethod(child))
+                        rootNode.RemoveChild(child);
+                }
+            }
+        }
+
+        private void PopulateMethods(Node rootNode, object obj, List<MethodInfo> methods)
+        {
             foreach (MethodInfo method in obj.GetType().GetMethods(BindingFlags))
             {
                 Node methodNode = new Node(rootNode);
@@ -97,18 +134,6 @@ namespace Reflection.RPC
                     methodNode.ShouldSync = true;
                     methodNode.attributes = rpcAttribute.attributes;
                     methods.Add(method);
-                }
-            }
-
-            foreach (FieldInfo field in obj.GetType().GetFields(BindingFlags))
-            {
-                Node child = new Node(rootNode);
-
-                if (!field.FieldType.IsPrimitive)
-                {
-                    GetMethods(child, field.GetValue(obj), methods);
-                    if (!ContainsRPCMethod(child))
-                        rootNode.RemoveChild(child);
                 }
             }
         }

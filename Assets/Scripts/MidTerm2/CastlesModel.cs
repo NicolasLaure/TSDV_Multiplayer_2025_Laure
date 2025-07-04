@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CustomMath;
 using Input;
 using Network.Enums;
@@ -13,28 +14,31 @@ namespace MidTerm2
     [Serializable]
     public class CastlesModel : IReflectiveModel
     {
-        [Sync] private sbyte testSByte = 0;
-        [Sync] private byte testByte = 0;
-        [Sync] private short testShort = 0;
-        [Sync] private ushort testUShort = 0;
-        [Sync] private int testInt = 0;
-        [Sync] private uint testUInt = 0;
-        [Sync] private long testLong = 0;
-        [Sync] private ulong testULong = 0;
-        [Sync] private float testFloat = 0;
-        [Sync] private double testDouble = 0;
-        [Sync] private decimal testDecimal = 0;
-        [Sync] private bool testBool = false;
-        [Sync] private char testChar = ' ';
-        [Sync] private string testString = "";
+        private sbyte testSByte = 0;
+        private byte testByte = 0;
+        private short testShort = 0;
+        private ushort testUShort = 0;
+        private int testInt = 0;
+        private uint testUInt = 0;
+        private long testLong = 0;
+        private ulong testULong = 0;
+        private float testFloat = 0;
+        private double testDouble = 0;
+        private decimal testDecimal = 0;
+        private bool testBool = false;
+        private char testChar = ' ';
+        private string testString = "";
         public Vec3 position;
-        private TestModel test = new TestModel();
+        public TestModel test = new TestModel(2, 3);
+        public List<TestModel> tests = new List<TestModel>();
 
         public CastlesModel(InputReader input)
         {
             position = new Vec3(0.0f, 0.0f, 0.0f);
             input.onMove += Move;
             input.onShoot += Test;
+            tests.Add(new TestModel(2, 31.2f));
+            tests.Add(new TestModel());
         }
 
         private void Move(Vec3 vec3)
@@ -42,6 +46,7 @@ namespace MidTerm2
             position += vec3;
         }
 
+        [RPC]
         public void TestRpc()
         {
             Debug.Log("Some Method");

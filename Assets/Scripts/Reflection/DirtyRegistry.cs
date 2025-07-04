@@ -21,7 +21,7 @@ namespace Reflection
         {
             foreach (Node child in root.Children)
             {
-                if (!child.ShouldSync)
+                if (!child.ShouldSync && !child.ContainsSyncedNodes)
                     continue;
 
                 if (child.CheckDirty())

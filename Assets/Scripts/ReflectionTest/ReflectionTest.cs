@@ -26,6 +26,8 @@ namespace ReflectionTest
         [ContextMenu("Test")]
         private void Test()
         {
+            _model.test.a = 12;
+            _reflection.SetDataAt(new int[] { 16, 1, 0 }, 11, _reflection._model);
         }
     }
 }

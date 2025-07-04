@@ -76,6 +76,7 @@
     <Compile Include="Assets\Scripts\ReflectionTest\TestModel.cs" />
     <Compile Include="Assets\Scripts\CustomMath\MyQuaternion.cs" />
     <Compile Include="Assets\Scripts\Events\FloatEventChannel.cs" />
+    <Compile Include="Assets\Scripts\Utils\PrimitiveUtils.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\FpsServer.cs" />
     <Compile Include="Assets\Scripts\Cubes\Cube.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\FpsNonAuthClient.cs" />

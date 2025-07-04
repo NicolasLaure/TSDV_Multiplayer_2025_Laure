@@ -16,7 +16,7 @@ namespace Reflection
     public class ReflectionHandler<ModelType> where ModelType : class, IReflectiveModel
     {
         private Node root;
-        private object _model;
+        public object _model;
         private NetworkClient _networkClient;
         public RPCHooker<ModelType> rpcHooker;
         public Node Root => root;
@@ -29,7 +29,7 @@ namespace Reflection
             _model = model;
             root = PopulateTree(_model);
             rpcHooker = new RPCHooker<ModelType>(ref model);
-            //rpcHooker.Hook();
+            rpcHooker.Hook();
         }
 
         public ReflectionHandler(ref ModelType model, NetworkClient networkClient)
@@ -38,7 +38,7 @@ namespace Reflection
             _networkClient = networkClient;
             root = PopulateTree(_model);
             rpcHooker = new RPCHooker<ModelType>(ref model, _networkClient);
-            //rpcHooker.Hook();
+            rpcHooker.Hook();
         }
 
         public void Update()
@@ -73,7 +73,15 @@ namespace Reflection
                 {
                     foreach (object item in field.GetValue(obj) as ICollection)
                     {
-                        PopulateTree(item, childNode);
+                        if (PrimitiveUtils.GetObjectType(item) == PrimitiveType.NonPrimitive)
+                        {
+                            Node subChild = new Node(childNode);
+
+                            PopulateTree(item, subChild);
+
+                            if (!subChild.ContainsSyncedNodes)
+                                subChild.RemoveAllChildren();
+                        }
                     }
                 }
                 else if (!field.FieldType.IsPrimitive)
@@ -109,67 +117,11 @@ namespace Reflection
             }
 
             PrimitiveData data;
-            data.type = GetObjectType(GetObjectAt(route, _model));
+            data.type = PrimitiveUtils.GetObjectType(GetObjectAt(route, _model));
             data.routeLength = route.Length;
             data.route = route;
             data.obj = GetObjectAt(route, _model);
             return new PrimitiveMessage(data, target.attributes);
-        }
-
-        public PrimitiveType GetObjectType(object obj)
-        {
-            TypeCode objType = Convert.GetTypeCode(obj);
-            PrimitiveType primitiveType;
-            switch (objType)
-            {
-                case TypeCode.Boolean:
-                    primitiveType = PrimitiveType.TypeBool;
-                    break;
-                case TypeCode.Byte:
-                    primitiveType = PrimitiveType.TypeByte;
-                    break;
-                case TypeCode.SByte:
-                    primitiveType = PrimitiveType.TypeSbyte;
-                    break;
-                case TypeCode.Int16:
-                    primitiveType = PrimitiveType.TypeShort;
-                    break;
-                case TypeCode.UInt16:
-                    primitiveType = PrimitiveType.TypeUshort;
-                    break;
-                case TypeCode.Int32:
-                    primitiveType = PrimitiveType.TypeInt;
-                    break;
-                case TypeCode.UInt32:
-                    primitiveType = PrimitiveType.TypeUint;
-                    break;
-                case TypeCode.Int64:
-                    primitiveType = PrimitiveType.TypeLong;
-                    break;
-                case TypeCode.UInt64:
-                    primitiveType = PrimitiveType.TypeUlong;
-                    break;
-                case TypeCode.Single:
-                    primitiveType = PrimitiveType.TypeFloat;
-                    break;
-                case TypeCode.Double:
-                    primitiveType = PrimitiveType.TypeDouble;
-                    break;
-                case TypeCode.Decimal:
-                    primitiveType = PrimitiveType.TypeDecimal;
-                    break;
-                case TypeCode.Char:
-                    primitiveType = PrimitiveType.TypeChar;
-                    break;
-                case TypeCode.String:
-                    primitiveType = PrimitiveType.TypeString;
-                    break;
-                default:
-                    primitiveType = PrimitiveType.NonPrimitive;
-                    break;
-            }
-
-            return primitiveType;
         }
 
         public void SetData(int[] route, object value)
@@ -186,21 +138,52 @@ namespace Reflection
 
         public object SetDataAt(int[] route, object value, object obj, int startIndex = 0)
         {
-            FieldInfo info;
-            if (startIndex >= route.Length) return value;
+            if (startIndex >= route.Length)
+                return value;
 
-            info = obj.GetType().GetFields(_bindingFlags)[route[startIndex]];
+            FieldInfo info = obj.GetType().GetFields(_bindingFlags)[route[startIndex]];
+            if (info.FieldType != typeof(string) && (info.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(info.FieldType)))
+            {
+                int index = 0;
+                foreach (object item in info.GetValue(obj) as ICollection)
+                {
+                    if (index == route[startIndex + 1])
+                    {
+                        FieldInfo itemInfo = item.GetType().GetFields(_bindingFlags)[route[startIndex + 2]];
+                        itemInfo.SetValue(item, SetDataAt(route, value, itemInfo.GetValue(item), startIndex + 3));
+                        return item;
+                    }
+
+                    index++;
+                }
+
+                return null;
+            }
+
             obj.GetType().GetFields(_bindingFlags)[route[startIndex]].SetValue(obj, SetDataAt(route, value, info.GetValue(obj), startIndex + 1));
             return obj;
         }
 
         private object GetObjectAt(int[] route, object obj, int startIndex = 0)
         {
-            FieldInfo info;
             if (startIndex >= route.Length)
                 return obj;
 
-            info = obj.GetType().GetFields(_bindingFlags)[route[startIndex]];
+            FieldInfo info = obj.GetType().GetFields(_bindingFlags)[route[startIndex]];
+            if (info.FieldType != typeof(string) && (info.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(info.FieldType)))
+            {
+                int index = 0;
+                foreach (object item in info.GetValue(obj) as ICollection)
+                {
+                    if (index == route[startIndex + 1])
+                        return GetObjectAt(route, item, startIndex + 2);
+
+                    index++;
+                }
+
+                return null;
+            }
+
             return GetObjectAt(route, info.GetValue(obj), startIndex + 1);
         }
 
@@ -212,11 +195,14 @@ namespace Reflection
 
         private void UpdateHashes(Node rootNode)
         {
-            rootNode.currentHash = GetObjectAt(rootNode.GetRoute(), _model).GetHashCode();
-            foreach (Node child in rootNode.Children)
-            {
-                UpdateHashes(child);
-            }
+            if (rootNode.ShouldSync)
+                rootNode.currentHash = GetObjectAt(rootNode.GetRoute(), _model).GetHashCode();
+
+            if (rootNode.ContainsSyncedNodes)
+                foreach (Node child in rootNode.Children)
+                {
+                    UpdateHashes(child);
+                }
         }
 
         private void SendDirtyValues()
