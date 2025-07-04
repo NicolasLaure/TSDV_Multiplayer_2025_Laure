@@ -22,7 +22,9 @@ namespace MidTerm2
         [SerializeField] private ErrorMessagePanel errorPanel;
         [SerializeField] private GameObject winPanel;
         [SerializeField] private GameObject losePanel;
-        [SerializeField] private InputReader _inputReader;
+
+        [SerializeField] private GameObject castlesGame;
+
         public int clientId = -1;
 
         private NetworkClient _networkClient;
@@ -50,12 +52,6 @@ namespace MidTerm2
             InputReader.Instance.onQuit += HandleQuit;
         }
 
-        private void InitializeModel()
-        {
-            _model = new CastlesModel(_inputReader);
-            _reflection = new ReflectionHandler<CastlesModel>(ref _model, _networkClient);
-        }
-
         private void Update()
         {
             _reflection?.Update();
@@ -71,7 +67,7 @@ namespace MidTerm2
         private void OnClientStarted()
         {
             if (_networkClient.port != _networkClient.defaultPort)
-                InitializeModel();
+                Instantiate(castlesGame);
         }
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)

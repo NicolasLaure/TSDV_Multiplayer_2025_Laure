@@ -52,7 +52,6 @@
     <Compile Include="Assets\Scripts\Utils\Route.cs" />
     <Compile Include="Assets\Scripts\CustomMath\MY4X4.cs" />
     <Compile Include="Assets\Scripts\Events\IntEventChannelSO.cs" />
-    <Compile Include="Assets\Scripts\MidTerm2\CastlesModel.cs" />
     <Compile Include="Assets\Scripts\Cubes\MovingCubesServer.cs" />
     <Compile Include="Assets\Scripts\FPS\Health\ITakeDamage.cs" />
     <Compile Include="Assets\Scripts\Utils\LoggerHandler.cs" />
@@ -69,7 +68,9 @@
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\AuthSvPlayerSetter.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\CastlesClient.cs" />
     <Compile Include="Assets\Scripts\Reflection\IReflectiveModel.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\View\TilesManager.cs" />
     <Compile Include="Assets\Scripts\FPS\PlayerSetter.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\Model\Castle.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletSetter.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\Colors.cs" />
     <Compile Include="Assets\Scripts\Network\ClientManager.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="Assets\Scripts\UI\ErrorMessagePanel.cs" />
     <Compile Include="Assets\Scripts\CustomMath\Vec3.cs" />
     <Compile Include="Assets\Scripts\Input\PlayerInput.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\CastlesProgram.cs" />
     <Compile Include="Assets\Scripts\FPS\TransformHandler.cs" />
     <Compile Include="Assets\Scripts\FPS\PlayerController.cs" />
     <Compile Include="Assets\Scripts\UI\HealthDisplay.cs" />
@@ -100,7 +102,9 @@
     <Compile Include="Assets\Scripts\Input\InputReader.cs" />
     <Compile Include="Assets\Scripts\Network\NetworkClient.cs" />
     <Compile Include="Assets\Scripts\Events\VoidEventSO.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\Model\ITileObject.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\ColorHandler.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\Model\Tile.cs" />
     <Compile Include="Assets\Scripts\Events\GameObjectEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\CastlesView.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\ClientPlayerSetter.cs" />
@@ -108,6 +112,7 @@
     <Compile Include="Assets\Scripts\FPS\EntityToUpdate.cs" />
     <Compile Include="Assets\Scripts\Reflection\DirtyRegistry.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\AuthPlayerController.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\Model\CastlesModel.cs" />
     <Compile Include="Assets\Scripts\Events\BoolEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\Network\Messages\ClientMessages\AxisInput.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\HashHandler.cs" />
