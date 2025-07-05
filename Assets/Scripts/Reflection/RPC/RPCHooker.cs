@@ -9,6 +9,7 @@ using Network.Enums;
 using UnityEngine;
 using Utils;
 using PrimitiveType = Network.Enums.PrimitiveType;
+using Random = System.Random;
 
 namespace Reflection.RPC
 {
@@ -95,25 +96,18 @@ namespace Reflection.RPC
             PopulateFields(rootNode, obj, methods);
         }
 
-        private void PopulateFields(Node rootNode, object obj, List<MethodInfo> methods)
+        private static void PopulateFields(Node rootNode, object obj, List<MethodInfo> methods)
         {
+            if (obj == null)
+                return;
+
             foreach (FieldInfo field in obj.GetType().GetFields(BindingFlags))
             {
                 Node child = new Node(rootNode);
 
-                if (field.FieldType != typeof(string) && (field.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(field.FieldType)))
-                {
-                    foreach (object item in field.GetValue(obj) as ICollection)
-                    {
-                        if (PrimitiveUtils.GetObjectType(item) == PrimitiveType.NonPrimitive)
-                        {
-                            Node subChild = new Node(child);
-                            PopulateMethods(subChild, item, methods);
-                            PopulateFields(subChild, item, methods);
-                        }
-                    }
-                }
-                else if (field.FieldType.IsClass && field.FieldType != typeof(string))
+                if (ReflectionUtilities.IsCollection(field))
+                    PopulateCollection(child, field.GetValue(obj), methods);
+                else if (field.FieldType.IsClass && field.FieldType != typeof(string) && field.FieldType != typeof(Random))
                 {
                     PopulateMethods(child, field.GetValue(obj), methods);
                     PopulateFields(child, field.GetValue(obj), methods);
@@ -123,8 +117,11 @@ namespace Reflection.RPC
             }
         }
 
-        private void PopulateMethods(Node rootNode, object obj, List<MethodInfo> methods)
+        private static void PopulateMethods(Node rootNode, object obj, List<MethodInfo> methods)
         {
+            if (obj == null)
+                return;
+
             foreach (MethodInfo method in obj.GetType().GetMethods(BindingFlags))
             {
                 Node methodNode = new Node(rootNode);
@@ -138,7 +135,32 @@ namespace Reflection.RPC
             }
         }
 
-        private bool ContainsRPCMethod(Node rootNode)
+        public static void PopulateCollection(Node parent, object obj, List<MethodInfo> methods)
+        {
+            if (obj == null)
+                return;
+
+            foreach (object item in obj as ICollection)
+            {
+                if (ReflectionUtilities.IsCollection(item))
+                {
+                    Node subChild = new Node(parent);
+                    PopulateCollection(subChild, item, methods);
+                }
+                else if (PrimitiveUtils.GetObjectType(item) == PrimitiveType.NonPrimitive)
+                {
+                    Node subChild = new Node(parent);
+
+                    PopulateMethods(subChild, item, methods);
+                    PopulateFields(subChild, item, methods);
+
+                    if (!subChild.ContainsSyncedNodes)
+                        subChild.RemoveAllChildren();
+                }
+            }
+        }
+
+        private static bool ContainsRPCMethod(Node rootNode)
         {
             foreach (Node child in rootNode.Children)
             {

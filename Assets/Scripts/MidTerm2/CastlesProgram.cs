@@ -15,9 +15,9 @@ namespace MidTerm2
 
         public void Initialize(NetworkClient client = null)
         {
-            _model = new CastlesModel(_inputReader);
+            _model = new CastlesModel(_inputReader, 0);
             _reflection = new ReflectionHandler<CastlesModel>(ref _model, client);
-            _view.Initialize(_model);
+            _view.InitializeView(_model);
         }
 
         // Update is called once per frame

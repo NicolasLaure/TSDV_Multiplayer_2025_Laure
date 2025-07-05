@@ -68,15 +68,17 @@
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\AuthSvPlayerSetter.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\CastlesClient.cs" />
     <Compile Include="Assets\Scripts\Reflection\IReflectiveModel.cs" />
-    <Compile Include="Assets\Scripts\MidTerm2\View\TilesManager.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\Model\TileObject.cs" />
     <Compile Include="Assets\Scripts\FPS\PlayerSetter.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\Model\Castle.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletSetter.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\Colors.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\Model\Warrior.cs" />
     <Compile Include="Assets\Scripts\Network\ClientManager.cs" />
     <Compile Include="Assets\Scripts\ReflectionTest\TestModel.cs" />
     <Compile Include="Assets\Scripts\CustomMath\MyQuaternion.cs" />
     <Compile Include="Assets\Scripts\Events\FloatEventChannel.cs" />
+    <Compile Include="Assets\Scripts\Reflection\ReflectionUtilities.cs" />
     <Compile Include="Assets\Scripts\Utils\PrimitiveUtils.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\FpsServer.cs" />
     <Compile Include="Assets\Scripts\Cubes\Cube.cs" />
@@ -90,6 +92,7 @@
     <Compile Include="Assets\Scripts\UI\HealthDisplay.cs" />
     <Compile Include="Assets\Scripts\UI\ChatScreen.cs" />
     <Compile Include="Assets\Scripts\FPS\NonAuthoritative\FpsClient.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\View\TileObjectView.cs" />
     <Compile Include="Assets\Scripts\FPS\PlayerProperties.cs" />
     <Compile Include="Assets\Scripts\Events\StringEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\Reflection\RPC\RPCHooker.cs" />
@@ -102,7 +105,6 @@
     <Compile Include="Assets\Scripts\Input\InputReader.cs" />
     <Compile Include="Assets\Scripts\Network\NetworkClient.cs" />
     <Compile Include="Assets\Scripts\Events\VoidEventSO.cs" />
-    <Compile Include="Assets\Scripts\MidTerm2\Model\ITileObject.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\ColorHandler.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\Model\Tile.cs" />
     <Compile Include="Assets\Scripts\Events\GameObjectEventChannelSO.cs" />

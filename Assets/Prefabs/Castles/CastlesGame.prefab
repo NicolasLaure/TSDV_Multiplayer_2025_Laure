@@ -60,8 +60,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 707610097c4f17f44bc5251af1a4a057, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilesPrefab: {fileID: 5820041339638055259, guid: 678d6700dbb45284ca30cc3cd592f2ad,
+  tilePrefab: {fileID: 2590613355497776326, guid: 05c74f4310792d2458db6d8e6427f3dd,
     type: 3}
+  castlePrefab: {fileID: 202224262828551320, guid: 4c36ee7ac99302747a57dab26d549a9e,
+    type: 3}
+  warriorPrefab: {fileID: 7740715986206053294, guid: d0f35bfcf3b2dda4ea9beed03a7bfcf7,
+    type: 3}
+  tileOffset: 0.05
 --- !u!114 &5233709398728436325
 MonoBehaviour:
   m_ObjectHideFlags: 0

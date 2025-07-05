@@ -27,7 +27,7 @@ namespace Reflection
         public ReflectionHandler(ref ModelType model)
         {
             _model = model;
-            root = PopulateTree(_model);
+            root = ReflectionUtilities.PopulateTree(_model);
             rpcHooker = new RPCHooker<ModelType>(ref model);
             rpcHooker.Hook();
         }
@@ -36,7 +36,7 @@ namespace Reflection
         {
             _model = model;
             _networkClient = networkClient;
-            root = PopulateTree(_model);
+            root = ReflectionUtilities.PopulateTree(_model);
             rpcHooker = new RPCHooker<ModelType>(ref model, _networkClient);
             rpcHooker.Hook();
         }
@@ -46,66 +46,6 @@ namespace Reflection
             UpdateHashes(root);
             _dirtyRegistry.Update(root);
             SendDirtyValues();
-        }
-
-        public static Node PopulateTree(object obj, Node root = null)
-        {
-            root ??= new Node();
-
-            foreach (FieldInfo field in obj.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-            {
-                Node childNode = new Node();
-                if (ShouldSync(field))
-                {
-                    childNode.ShouldSync = true;
-                    childNode.attributes = GetAttribs(field);
-                }
-                else if (root.ShouldSync)
-                {
-                    childNode.ShouldSync = true;
-                    childNode.attributes = root.attributes;
-                }
-
-                if (childNode.ShouldSync)
-                    childNode.SetParent(root);
-
-                if (field.FieldType != typeof(string) && (field.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(field.FieldType)))
-                {
-                    foreach (object item in field.GetValue(obj) as ICollection)
-                    {
-                        if (PrimitiveUtils.GetObjectType(item) == PrimitiveType.NonPrimitive)
-                        {
-                            Node subChild = new Node(childNode);
-
-                            PopulateTree(item, subChild);
-
-                            if (!subChild.ContainsSyncedNodes)
-                                subChild.RemoveAllChildren();
-                        }
-                    }
-                }
-                else if (!field.FieldType.IsPrimitive)
-                {
-                    PopulateTree(field.GetValue(obj), childNode);
-                }
-
-                if (!childNode.ContainsSyncedNodes)
-                    childNode.RemoveAllChildren();
-
-                childNode.SetParent(root);
-            }
-
-            return root;
-        }
-
-        private static bool ShouldSync(FieldInfo info)
-        {
-            return info.GetCustomAttribute(typeof(Sync), false) != null;
-        }
-
-        private static Attributes GetAttribs(FieldInfo info)
-        {
-            return ((Sync)info.GetCustomAttribute(typeof(Sync), false)).attribs;
         }
 
         public PrimitiveMessage GetMessage(int[] route)
