@@ -41,13 +41,16 @@ namespace MidTerm2
             _client.onHandshakeOk += _model.Initialize;
             client.factory = new ReflectiveFactory<CastlesModel>(reflection, types, _colorHandler, prefabHashHandler);
             client.reflection = reflection;
+
             _view.InitializeView(_model);
+
             CastlesController.Instance.model = _model;
+            CastlesController.Instance.factory = client.factory;
+            CastlesController.Instance.reflection = reflection;
         }
 
         public void Update()
         {
-            Debug.Log($"IS ALIVEEE");
             reflection.Update();
         }
     }

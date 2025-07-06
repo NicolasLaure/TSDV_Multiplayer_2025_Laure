@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Cubes;
 using MidTerm2;
 using MidTerm2.Model;
 using MidTerm2.View;
 using Network.Factory.Reflection;
 using Network.Messages;
 using Reflection;
-using Unity.Mathematics;
 using UnityEngine;
 using Vector2 = System.Numerics.Vector2;
 
@@ -24,6 +21,7 @@ namespace Network.Factory
     {
         private readonly Dictionary<int, ObjectModel> instanceIdToObject = new Dictionary<int, ObjectModel>();
         private readonly Dictionary<ObjectModel, int> ObjectToId = new Dictionary<ObjectModel, int>();
+        private readonly Dictionary<GameObject, int> gameObjectToId = new Dictionary<GameObject, int>();
         public readonly ReflectiveHashHandler typeHashes;
         public HashHandler prefabHashes;
         private readonly ColorHandler _colorHandler;
@@ -103,6 +101,7 @@ namespace Network.Factory
 
             instanceIdToObject[instanceData.instanceID] = newObject;
             ObjectToId[newObject] = instanceData.instanceID;
+            gameObjectToId[gameObject] = instanceData.instanceID;
         }
 
         private void RemoveObject(int instanceId)
@@ -131,6 +130,20 @@ namespace Network.Factory
             return false;
         }
 
+        public bool TryGetInstanceId(GameObject entity, out int id, out int originalClientId)
+        {
+            if (gameObjectToId.ContainsKey(entity))
+            {
+                id = gameObjectToId[entity];
+                originalClientId = instanceIdToInstanceData[id].originalClientID;
+                return true;
+            }
+
+            id = -1;
+            originalClientId = -1;
+            return false;
+        }
+
         public bool TryGetGameObject(int id, out GameObject entity)
         {
             if (instanceIdToObject.ContainsKey(id))
@@ -140,6 +153,18 @@ namespace Network.Factory
             }
 
             entity = null;
+            return false;
+        }
+
+        public bool TryGetObjectRoute(int id, out int[] route)
+        {
+            if (instanceIdToObject.ContainsKey(id))
+            {
+                route = instanceIdToObject[id].route;
+                return true;
+            }
+
+            route = null;
             return false;
         }
 

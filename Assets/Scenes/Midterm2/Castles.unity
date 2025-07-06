@@ -592,7 +592,7 @@ GameObject:
   - component: {fileID: 258862296}
   - component: {fileID: 258862299}
   - component: {fileID: 258862298}
-  - component: {fileID: 258862297}
+  - component: {fileID: 258862300}
   m_Layer: 5
   m_Name: RemainingMoves
   m_TagString: Untagged
@@ -619,20 +619,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &258862297
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 258862295}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a3edbe92d6b8d245a54b6943840d782, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  onPlayerTakeDamage: {fileID: 11400000, guid: 5163e649bbaf5da4292b78af22b0af75, type: 2}
-  healthText: {fileID: 258862298}
 --- !u!114 &258862298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -732,6 +718,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 258862295}
   m_CullTransparentMesh: 1
+--- !u!114 &258862300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 258862295}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75e3da9831aeed649ad7de227396b225, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textObject: {fileID: 258862298}
 --- !u!1 &388691206
 GameObject:
   m_ObjectHideFlags: 0
@@ -1969,6 +1968,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3497242454017489952, guid: 2412e6f12e6d86d4983c40036426433d,
         type: 3}
+      propertyPath: movesText
+      value: 
+      objectReference: {fileID: 258862300}
+    - target: {fileID: 3497242454017489952, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
       propertyPath: passTurnButton
       value: 
       objectReference: {fileID: 1799047418}
@@ -2357,8 +2361,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model:
+    isPlayerTurn: 0
     _warriors: []
     _OtherWarriors: []
+    remainingMoves: 0
 --- !u!4 &1143509620
 Transform:
   m_ObjectHideFlags: 0

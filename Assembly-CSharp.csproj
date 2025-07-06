@@ -52,12 +52,14 @@
     <Compile Include="Assets\Scripts\Utils\Route.cs" />
     <Compile Include="Assets\Scripts\CustomMath\MY4X4.cs" />
     <Compile Include="Assets\Scripts\Events\IntEventChannelSO.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\View\RemainingMoves.cs" />
     <Compile Include="Assets\Scripts\Cubes\MovingCubesServer.cs" />
     <Compile Include="Assets\Scripts\FPS\Health\ITakeDamage.cs" />
     <Compile Include="Assets\Scripts\Utils\MatrixHandler.cs" />
     <Compile Include="Assets\Scripts\Utils\LoggerHandler.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\AuthServerFactory.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletProperties.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\View\WarriorView.cs" />
     <Compile Include="Assets\Scripts\CustomMath\MyTransform.cs" />
     <Compile Include="Assets\Scripts\UI\NetworkScreen.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\ClientFactory.cs" />

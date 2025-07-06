@@ -4,6 +4,7 @@ using Input;
 using MidTerm2.Model;
 using Network;
 using Reflection;
+using Reflection.RPC;
 using Utils;
 using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;
@@ -15,7 +16,7 @@ namespace MidTerm2
     {
         public Tile[][] board = new Tile[30][];
         private int mapSize = 30;
-        [Sync] private bool isPlayer1Turn = true;
+        public bool isPlayerTurn = false;
 
         [Sync] public Castle _castle = new Castle();
         [Sync] public Castle _OtherCastle = new Castle();
@@ -24,8 +25,11 @@ namespace MidTerm2
         public List<Warrior> _OtherWarriors = new List<Warrior>();
 
         private int initialWarriorQty = 15;
-
+        [Sync] public int remainingMoves = 10;
+        private const int maxMoves = 10;
         private Random _random;
+
+        public Warrior selectedWarrior = null;
 
         public CastlesModel(InputReader input, ReflectiveClient<CastlesModel> client)
         {
@@ -36,6 +40,7 @@ namespace MidTerm2
         {
             SetMap();
             SetArmy(ClientManager.Instance.networkClient.Id == 0);
+            isPlayerTurn = ClientManager.Instance.networkClient.Id == 0;
         }
 
         private void SetMap()
@@ -50,17 +55,11 @@ namespace MidTerm2
             }
         }
 
-        public bool IsPlayerTurn()
-        {
-            if (CastlesClient.Instance.clientId == 0)
-                return isPlayer1Turn;
-            else
-                return !isPlayer1Turn;
-        }
-
+        [RPC]
         public void ChangeTurn()
         {
-            isPlayer1Turn = !isPlayer1Turn;
+            isPlayerTurn = !isPlayerTurn;
+            remainingMoves = maxMoves;
         }
 
         public Vector2 GetWarriorPos(bool isPlayerOne)
@@ -73,8 +72,9 @@ namespace MidTerm2
             do
             {
                 warriorPos = new Vector2(_random.Next((int)xRandomRange.X, (int)xRandomRange.Y), _random.Next((int)yRandomRange.X, (int)yRandomRange.Y));
-            } while (board[(int)warriorPos.X][(int)warriorPos.Y].currentObject != null);
+            } while (board[(int)warriorPos.X][(int)warriorPos.Y].currentObject != null || board[(int)warriorPos.X][(int)warriorPos.Y].isTaken);
 
+            board[(int)warriorPos.X][(int)warriorPos.Y].isTaken = true;
             return warriorPos;
         }
 
