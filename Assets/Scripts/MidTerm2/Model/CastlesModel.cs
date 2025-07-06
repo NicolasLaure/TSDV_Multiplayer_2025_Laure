@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Input;
 using MidTerm2.Model;
 using Network;
@@ -19,8 +20,8 @@ namespace MidTerm2
         [Sync] public Castle _castle = new Castle();
         [Sync] public Castle _OtherCastle = new Castle();
 
-        // public List<Warrior> _warriors = new List<Warrior>();
-        // public List<Warrior> _OtherWarriors = new List<Warrior>();
+        public List<Warrior> _warriors = new List<Warrior>();
+        public List<Warrior> _OtherWarriors = new List<Warrior>();
 
         private int initialWarriorQty = 15;
 
@@ -49,8 +50,9 @@ namespace MidTerm2
             }
         }
 
-        public Vector2 GetWarriorPos(bool isPlayerOne, Vector2 cornerIndex)
+        public Vector2 GetWarriorPos(bool isPlayerOne)
         {
+            Vector2 cornerIndex = GetCastlePos(isPlayerOne);
             Vector2 xRandomRange = isPlayerOne ? new Vector2(cornerIndex.X, cornerIndex.X + 5) : new Vector2(cornerIndex.X - 5, cornerIndex.X);
             Vector2 yRandomRange = isPlayerOne ? new Vector2(cornerIndex.Y, cornerIndex.Y + 5) : new Vector2(cornerIndex.Y - 5, cornerIndex.Y);
 
@@ -71,21 +73,18 @@ namespace MidTerm2
             else
                 client.SendInstantiateRequest(_OtherCastle, MatrixHandler.Vector2To4X4(GetCastlePos(false)));
 
-            // _warriors = new List<Warrior>();
-            // for (int i = 0; i < initialWarriorQty; i++)
-            // {
-            //     
-            //
-            //
-            //     // warrior.SetTile(board[(int)warriorPos.X][(int)warriorPos.Y]);
-            //
-            //     //_warriors.Add(warrior);
-            // }
+            for (int i = 0; i < initialWarriorQty; i++)
+            {
+                if (isPlayerOne)
+                    client.SendInstantiateRequest(_warriors, MatrixHandler.Vector2To4X4(GetWarriorPos(true)));
+                else
+                    client.SendInstantiateRequest(_OtherWarriors, MatrixHandler.Vector2To4X4(GetWarriorPos(false)));
+            }
         }
 
-        public void SetCastle(Castle castle, Vector2 pos)
+        public void SetTileObject(TileObject tileObject, Vector2 pos)
         {
-            castle.SetTile(board[(int)pos.X][(int)pos.Y]);
+            tileObject.SetTile(board[(int)pos.X][(int)pos.Y]);
         }
 
         public Vector2 GetCastlePos(bool isPlayerOne)

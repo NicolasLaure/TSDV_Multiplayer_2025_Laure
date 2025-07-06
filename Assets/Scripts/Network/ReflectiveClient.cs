@@ -315,7 +315,11 @@ namespace Network
 
         public void SendInstantiateRequest(object obj, Matrix4x4 trs)
         {
-            if (!factory.typeHashes.typeToHash.ContainsKey(obj.GetType()))
+            Type objType = obj.GetType();
+            if (objType.IsArray || typeof(ICollection).IsAssignableFrom(objType))
+                objType = ReflectionUtilities.GetCollectionType(objType);
+
+            if (!factory.typeHashes.typeToHash.ContainsKey(objType))
             {
                 Debug.Log("Invalid Prefab");
                 return;
@@ -328,7 +332,7 @@ namespace Network
             InstanceData instanceData = new InstanceData
             {
                 originalClientID = id,
-                prefabHash = factory.typeHashes.typeToHash[obj.GetType()],
+                prefabHash = factory.typeHashes.typeToHash[objType],
                 instanceID = -1,
                 trs = ByteFormat.Get4X4Bytes(trs),
                 color = color

@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Network.Enums;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Utils;
@@ -76,6 +78,9 @@ namespace Reflection
 
         public static bool TryGetRoute(object model, object obj, List<int> route)
         {
+            if (model == null)
+                return false;
+
             int count = 0;
             foreach (FieldInfo field in model.GetType().GetFields(_bindingFlags))
             {
@@ -85,18 +90,73 @@ namespace Reflection
                     return true;
                 }
 
-                if (!field.FieldType.IsPrimitive)
+                if (IsCollection(field) && GetCollectionRoute(field.GetValue(model), obj, route))
                 {
-                    if (TryGetRoute(field.GetValue(model), obj, route))
-                    {
-                        route.Insert(0, count);
-                    }
+                    route.Insert(0, count);
+                    return true;
+                }
+
+                if (!IsCollection(field) && !field.FieldType.IsPrimitive && TryGetRoute(field.GetValue(model), obj, route))
+                {
+                    route.Insert(0, count);
+                    return true;
                 }
 
                 count++;
             }
 
             return false;
+        }
+
+        public static bool GetCollectionRoute(object model, object obj, List<int> route)
+        {
+            Debug.Log($"Object: {model}");
+
+            if (model == null || !IsCollection(model) || (model as ICollection<object>) == null)
+                return false;
+
+            int count = 0;
+            foreach (object item in model as ICollection<object>)
+            {
+                if (item == null)
+                    return false;
+
+                if (ReferenceEquals(item, obj))
+                {
+                    route.Insert(0, count);
+                    return true;
+                }
+
+                if (IsCollection(item) && GetCollectionRoute(item, obj, route))
+                {
+                    route.Insert(0, count);
+                    return true;
+                }
+
+                if (!item.GetType().IsPrimitive && item.GetType() == obj.GetType() && TryGetRoute(item, obj, route))
+                {
+                    route.Insert(0, count);
+                    return true;
+                }
+
+                count++;
+            }
+
+            return false;
+        }
+
+        public static Type GetCollectionType(Type obj)
+        {
+            Type elementType;
+            if (obj.IsGenericType)
+                elementType = obj.GetGenericArguments()[0];
+            else
+                elementType = obj.GetElementType();
+
+            if (elementType.IsArray || typeof(ICollection).IsAssignableFrom(elementType))
+                return GetCollectionType(elementType);
+
+            return elementType;
         }
 
         public static object SetDataAt(int[] route, object value, object obj, int startIndex = 0)

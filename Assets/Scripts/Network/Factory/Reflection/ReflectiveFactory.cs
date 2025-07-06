@@ -56,8 +56,8 @@ namespace Network.Factory
             Vector2 pos = new Vector2(trs.GetPosition().x, trs.GetPosition().y);
             if (instanceData.originalClientID == CastlesClient.Instance.clientId)
             {
-                if (instance.GetType() == typeof(Castle))
-                    ((CastlesModel)_reflection._model).SetCastle((Castle)instance, pos);
+                if (instance.GetType() == typeof(Castle) || instance.GetType() == typeof(Warrior))
+                    ((CastlesModel)_reflection._model).SetTileObject((TileObject)instance, pos);
             }
 
             SaveObject(instanceData, instance, instanceGO);
