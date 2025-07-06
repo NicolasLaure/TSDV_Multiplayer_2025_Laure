@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
 using Input;
+using MidTerm2.Model;
 using Network;
+using Network.Factory;
 using Reflection;
 using UnityEngine;
 
@@ -9,20 +13,32 @@ namespace MidTerm2
     {
         [SerializeField] private CastlesView _view;
         [SerializeField] private InputReader _inputReader;
+        [SerializeField] private ColorHandler _colorHandler;
+        [SerializeField] private HashHandler prefabHashHandler;
         private CastlesModel _model;
 
-        private ReflectionHandler<CastlesModel> _reflection;
+        public ReflectionHandler<CastlesModel> reflection;
+        private ReflectiveClient<CastlesModel> _client;
 
-        public void Initialize(NetworkClient client = null)
+        public void Initialize(ReflectiveClient<CastlesModel> client = null)
         {
-            _model = new CastlesModel(_inputReader, 0);
-            _reflection = new ReflectionHandler<CastlesModel>(ref _model, client);
+            prefabHashHandler.Initialize();
+            _model = new CastlesModel(_inputReader, client);
+            reflection = new ReflectionHandler<CastlesModel>(ref _model, client);
+            List<Type> types = new List<Type>();
+            types.Add(typeof(Castle));
+            types.Add(typeof(Warrior));
+
+            _client = client;
+            _client.onHandshakeOk += _model.Initialize;
+            client.factory = new ReflectiveFactory<CastlesModel>(reflection, types, _colorHandler, prefabHashHandler);
+            client.reflection = reflection;
             _view.InitializeView(_model);
         }
 
-        // Update is called once per frame
-        void Update()
+        private void Update()
         {
+            reflection.Update();
         }
     }
 }

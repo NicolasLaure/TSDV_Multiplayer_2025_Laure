@@ -1,10 +1,6 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
-using Network_dll.Messages.Data;
 using Network;
-using Network.Enums;
+using Network_dll.Messages.Data;
 using Network.Messages;
 using Reflection.RPC;
 using UnityEngine;
@@ -17,12 +13,10 @@ namespace Reflection
     {
         private Node root;
         public object _model;
-        private NetworkClient _networkClient;
+        private ReflectiveClient<ModelType> _networkClient;
         public RPCHooker<ModelType> rpcHooker;
         public Node Root => root;
         private DirtyRegistry<ModelType> _dirtyRegistry = new DirtyRegistry<ModelType>();
-
-        private BindingFlags _bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
 
         public ReflectionHandler(ref ModelType model)
         {
@@ -32,7 +26,7 @@ namespace Reflection
             rpcHooker.Hook();
         }
 
-        public ReflectionHandler(ref ModelType model, NetworkClient networkClient)
+        public ReflectionHandler(ref ModelType model, ReflectiveClient<ModelType> networkClient)
         {
             _model = model;
             _networkClient = networkClient;
@@ -57,16 +51,16 @@ namespace Reflection
             }
 
             PrimitiveData data;
-            data.type = PrimitiveUtils.GetObjectType(GetObjectAt(route, _model));
+            data.type = PrimitiveUtils.GetObjectType(ReflectionUtilities.GetObjectAt(route, _model));
             data.routeLength = route.Length;
             data.route = route;
-            data.obj = GetObjectAt(route, _model);
+            data.obj = ReflectionUtilities.GetObjectAt(route, _model);
             return new PrimitiveMessage(data, target.attributes);
         }
 
         public void SetData(int[] route, object value)
         {
-            SetDataAt(route, value, _model);
+            ReflectionUtilities.SetDataAt(route, value, _model);
             Node target = root;
             for (int i = 0; i < route.Length; i++)
             {
@@ -76,67 +70,21 @@ namespace Reflection
             target.lastHash = value.GetHashCode();
         }
 
-        public object SetDataAt(int[] route, object value, object obj, int startIndex = 0)
-        {
-            if (startIndex >= route.Length)
-                return value;
-
-            FieldInfo info = obj.GetType().GetFields(_bindingFlags)[route[startIndex]];
-            if (info.FieldType != typeof(string) && (info.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(info.FieldType)))
-            {
-                int index = 0;
-                foreach (object item in info.GetValue(obj) as ICollection)
-                {
-                    if (index == route[startIndex + 1])
-                    {
-                        FieldInfo itemInfo = item.GetType().GetFields(_bindingFlags)[route[startIndex + 2]];
-                        itemInfo.SetValue(item, SetDataAt(route, value, itemInfo.GetValue(item), startIndex + 3));
-                        return item;
-                    }
-
-                    index++;
-                }
-
-                return null;
-            }
-
-            obj.GetType().GetFields(_bindingFlags)[route[startIndex]].SetValue(obj, SetDataAt(route, value, info.GetValue(obj), startIndex + 1));
-            return obj;
-        }
-
-        private object GetObjectAt(int[] route, object obj, int startIndex = 0)
-        {
-            if (startIndex >= route.Length)
-                return obj;
-
-            FieldInfo info = obj.GetType().GetFields(_bindingFlags)[route[startIndex]];
-            if (info.FieldType != typeof(string) && (info.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(info.FieldType)))
-            {
-                int index = 0;
-                foreach (object item in info.GetValue(obj) as ICollection)
-                {
-                    if (index == route[startIndex + 1])
-                        return GetObjectAt(route, item, startIndex + 2);
-
-                    index++;
-                }
-
-                return null;
-            }
-
-            return GetObjectAt(route, info.GetValue(obj), startIndex + 1);
-        }
-
         public object GetDataAt(int[] route)
         {
-            return GetObjectAt(route, _model);
+            return ReflectionUtilities.GetObjectAt(route, _model);
         }
 
+        public Type GetObjectType(int[] route)
+        {
+            object obj = ReflectionUtilities.GetObjectAt(route, _model);
+            return obj.GetType();
+        }
 
         private void UpdateHashes(Node rootNode)
         {
             if (rootNode.ShouldSync)
-                rootNode.currentHash = GetObjectAt(rootNode.GetRoute(), _model).GetHashCode();
+                rootNode.currentHash = ReflectionUtilities.GetObjectAt(rootNode.GetRoute(), _model).GetHashCode();
 
             if (rootNode.ContainsSyncedNodes)
                 foreach (Node child in rootNode.Children)

@@ -5,7 +5,6 @@ using HarmonyLib;
 using Network;
 using Network_dll.Messages.ClientMessages;
 using Network_dll.Messages.Data;
-using Network.Enums;
 using UnityEngine;
 using Utils;
 using PrimitiveType = Network.Enums.PrimitiveType;
@@ -19,7 +18,7 @@ namespace Reflection.RPC
         private object _model;
         private Harmony _harmony;
         private Node _methodsTree;
-        private NetworkClient _network;
+        private ReflectiveClient<ModelType> _network;
 
         private static readonly BindingFlags BindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
@@ -35,7 +34,7 @@ namespace Reflection.RPC
             _methodsTree = new Node();
         }
 
-        public RPCHooker(ref ModelType model, NetworkClient networkClient)
+        public RPCHooker(ref ModelType model, ReflectiveClient<ModelType> networkClient)
         {
             if (Instance == null)
                 Instance = this;
@@ -142,12 +141,15 @@ namespace Reflection.RPC
 
             foreach (object item in obj as ICollection)
             {
+                if (item == null)
+                    continue;
+
                 if (ReflectionUtilities.IsCollection(item))
                 {
                     Node subChild = new Node(parent);
                     PopulateCollection(subChild, item, methods);
                 }
-                else if (PrimitiveUtils.GetObjectType(item) == PrimitiveType.NonPrimitive)
+                else if (PrimitiveUtils.GetObjectType(item) == PrimitiveType.NonPrimitive && item.GetType() != typeof(string) && item.GetType() != typeof(Random))
                 {
                     Node subChild = new Node(parent);
 

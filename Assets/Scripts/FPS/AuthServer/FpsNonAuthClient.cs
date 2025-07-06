@@ -42,7 +42,7 @@ namespace FPS.AuthServer
             prefabsData.Initialize();
             _clientFactory = new ClientFactory(prefabsData, colorHandler);
 
-            _networkClient = ClientManager.Instance.networkClient;
+            //_networkClient = ClientManager.Instance.networkClient;
             _networkClient.SetAuthServer();
             _networkClient.onClientStart += Initialize;
         }

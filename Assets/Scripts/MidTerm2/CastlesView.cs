@@ -25,17 +25,17 @@ namespace MidTerm2
             Instantiate(tilePrefab);
             SetTiles(_model.board);
 
-            GameObject castleGO = Instantiate(castlePrefab);
-            TileObjectView castleView = castleGO.GetComponent<TileObjectView>();
-            castleView.SetPosition(_model.board[(int)_model._castle.position.X][(int)_model._castle.position.Y]);
+            //GameObject castleGO = Instantiate(castlePrefab);
+            //TileObjectView castleView = castleGO.GetComponent<TileObjectView>();
+            //castleView.SetPosition(_model.board[(int)_model._castle.position.X][(int)_model._castle.position.Y]);
 
-            foreach (Warrior warrior in _model._warriors)
-            {
-                GameObject warriorGO = Instantiate(warriorPrefab);
-                TileObjectView view = warriorGO.GetComponent<TileObjectView>();
-                view.SetPosition(_model.board[(int)warrior.position.X][(int)warrior.position.Y]);
-                warrior.onMove += view.SetPosition;
-            }
+            // foreach (Warrior warrior in _model._warriors)
+            // {
+            //     GameObject warriorGO = Instantiate(warriorPrefab);
+            //     TileObjectView view = warriorGO.GetComponent<TileObjectView>();
+            //     view.SetPosition(_model.board[(int)warrior.position.X][(int)warrior.position.Y]);
+            //     warrior.onMove += view.SetPosition;
+            // }
         }
 
 

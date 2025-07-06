@@ -1,4 +1,5 @@
 using Cubes;
+using MidTerm2;
 using Network;
 using Network_dll.Messages.Data;
 using TMPro;
@@ -25,7 +26,7 @@ namespace UI
             text.text = "";
             for (int i = 0; i < pings.Length; i++)
             {
-                string username = FpsClient.Instance.GetUsername(pings[i].id);
+                string username = CastlesClient.Instance.GetUsername(pings[i].id);
                 text.text += $"{username}: {pings[i].ms}ms" + System.Environment.NewLine;
             }
         }

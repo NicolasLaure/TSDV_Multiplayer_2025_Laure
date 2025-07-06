@@ -1,16 +1,16 @@
-using System;
+using MidTerm2;
 
 namespace Network
 {
     public class ClientManager : MonoBehaviourSingleton<ClientManager>
     {
-        public NetworkClient networkClient;
+        public ReflectiveClient<CastlesModel> networkClient;
 
         public bool isServerActive = false;
 
         protected override void Initialize()
         {
-            networkClient = new NetworkClient();
+            networkClient = new ReflectiveClient<CastlesModel>();
         }
 
         private void Update()

@@ -54,6 +54,7 @@
     <Compile Include="Assets\Scripts\Events\IntEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\Cubes\MovingCubesServer.cs" />
     <Compile Include="Assets\Scripts\FPS\Health\ITakeDamage.cs" />
+    <Compile Include="Assets\Scripts\Utils\MatrixHandler.cs" />
     <Compile Include="Assets\Scripts\Utils\LoggerHandler.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\AuthServerFactory.cs" />
     <Compile Include="Assets\Scripts\FPS\Bullet\BulletProperties.cs" />
@@ -84,6 +85,7 @@
     <Compile Include="Assets\Scripts\Cubes\Cube.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\FpsNonAuthClient.cs" />
     <Compile Include="Assets\Scripts\UI\ErrorMessagePanel.cs" />
+    <Compile Include="Assets\Scripts\Network\Factory\Reflection\ReflectiveFactory.cs" />
     <Compile Include="Assets\Scripts\CustomMath\Vec3.cs" />
     <Compile Include="Assets\Scripts\Input\PlayerInput.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\CastlesProgram.cs" />
@@ -113,10 +115,12 @@
     <Compile Include="Assets\Scripts\Reflection\Node.cs" />
     <Compile Include="Assets\Scripts\FPS\EntityToUpdate.cs" />
     <Compile Include="Assets\Scripts\Reflection\DirtyRegistry.cs" />
+    <Compile Include="Assets\Scripts\Network\ReflectiveClient.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\AuthPlayerController.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\Model\CastlesModel.cs" />
     <Compile Include="Assets\Scripts\Events\BoolEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\Network\Messages\ClientMessages\AxisInput.cs" />
+    <Compile Include="Assets\Scripts\Network\Factory\Reflection\ReflectiveHashHandler.cs" />
     <Compile Include="Assets\Scripts\Network\Factory\HashHandler.cs" />
     <Compile Include="Assets\Scripts\Reflection\ReflectionHandler.cs" />
     <Compile Include="Assets\Scripts\Events\EventChannelSO.cs" />

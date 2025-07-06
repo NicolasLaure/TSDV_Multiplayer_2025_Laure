@@ -45,7 +45,7 @@ namespace Cubes
             onEntityUpdated.AddListener(OnEntityUpdate);
             onCrouch.AddListener(OnCrouch);
 
-            _networkClient = ClientManager.Instance.networkClient;
+           // _networkClient = ClientManager.Instance.networkClient;
 
             _networkClient.OnReceiveEvent += OnReceiveDataEvent;
             _networkClient.onDisconnection += HandleAbruptDisconnection;

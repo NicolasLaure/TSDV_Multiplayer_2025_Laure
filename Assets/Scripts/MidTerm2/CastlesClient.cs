@@ -5,10 +5,8 @@ using Network;
 using Network_dll.Messages.ClientMessages;
 using Network_dll.Messages.Data;
 using Network.Enums;
-using Network.Factory;
 using Network.Messages;
 using Network.Messages.Server;
-using Reflection;
 using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,44 +15,28 @@ namespace MidTerm2
 {
     public class CastlesClient : MonoBehaviourSingleton<CastlesClient>
     {
-        [SerializeField] private HashHandler prefabsData;
-
         [SerializeField] private ErrorMessagePanel errorPanel;
         [SerializeField] private GameObject winPanel;
         [SerializeField] private GameObject losePanel;
 
-        [SerializeField] private GameObject castlesGame;
+        [SerializeField] private GameObject castlesGameGO;
 
         public int clientId = -1;
 
-        private NetworkClient _networkClient;
-        private ClientFactory _clientFactory;
-
-        private CastlesModel _model;
-        private CastlesView _view;
-        private ReflectionHandler<CastlesModel> _reflection;
-        //[SerializeField] private CastlesController input;
+        public ReflectiveClient<CastlesModel> networkClient;
+        private CastlesProgram castlesProgram;
 
         private void Start()
         {
-            prefabsData.Initialize();
-            //_clientFactory = new ClientFactory(prefabsData, colorHandler);
-            //onEntityUpdated.AddListener(OnEntityUpdate);
+            networkClient = ClientManager.Instance.networkClient;
 
-            _networkClient = ClientManager.Instance.networkClient;
-
-            _networkClient.onClientStart += OnClientStarted;
-            _networkClient.OnReceiveEvent += OnReceiveDataEvent;
-            _networkClient.onDisconnection += HandleAbruptDisconnection;
-            _networkClient.onClientDisconnect += HandleDisconnectedUser;
-            _networkClient.onError += HandleError;
+            networkClient.onClientStart += OnClientStarted;
+            networkClient.OnReceiveEvent += OnReceiveDataEvent;
+            networkClient.onDisconnection += HandleAbruptDisconnection;
+            networkClient.onClientDisconnect += HandleDisconnectedUser;
+            networkClient.onError += HandleError;
 
             InputReader.Instance.onQuit += HandleQuit;
-        }
-
-        private void Update()
-        {
-            _reflection?.Update();
         }
 
         private void OnDestroy()
@@ -66,8 +48,12 @@ namespace MidTerm2
 
         private void OnClientStarted()
         {
-            if (_networkClient.port != _networkClient.defaultPort)
-                Instantiate(castlesGame);
+            if (networkClient.port != networkClient.defaultPort)
+            {
+                GameObject castles = Instantiate(castlesGameGO);
+                castlesProgram = castles.GetComponent<CastlesProgram>();
+                castlesProgram.Initialize(networkClient);
+            }
         }
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
@@ -82,22 +68,24 @@ namespace MidTerm2
                     HandlePrivateHsResponseData(new PrivateServerHsResponse(data));
                     break;
                 case MessageType.InstantiateRequest:
-                    _clientFactory.Instantiate(new InstantiateRequest(data).instanceData);
+                    InstantiateRequest instanceRequest = new InstantiateRequest(data);
+                    InstanceData instancedData = networkClient.factory.Instantiate(instanceRequest.instanceData);
+                    networkClient.SendIntegrityCheck(instancedData);
                     break;
                 case MessageType.DeInstantiateRequest:
                     DeInstantiateRequest request = new DeInstantiateRequest(data);
-                    _clientFactory.DeInstantiate(request.instanceId);
+                    networkClient.factory.DeInstantiate(request.instanceId);
                     break;
                 case MessageType.Primitive:
                     PrimitiveData primitive = new PrimitiveMessage(data).data;
-                    _reflection.ReceiveValues(primitive);
+                    castlesProgram.reflection.ReceiveValues(primitive);
                     break;
                 case MessageType.Rpc:
                     RPCMessage rpcMessage = new RPCMessage(data);
-                    if (rpcMessage.clientId != _networkClient.Id)
+                    if (rpcMessage.clientId != networkClient.Id)
                     {
                         RpcData rpc = rpcMessage.data;
-                        _reflection.rpcHooker.ReceiveRPCMessage(rpc);
+                        castlesProgram.reflection.rpcHooker.ReceiveRPCMessage(rpc);
                     }
 
                     break;
@@ -116,12 +104,13 @@ namespace MidTerm2
 
         private void HandlePrivateHsResponseData(PrivateServerHsResponse response)
         {
+            networkClient.factory.InstantiateMultiple(response.objectsToInstantiate);
         }
 
         private void HandleQuit()
         {
             //_clientFactory.DeInstantiateAll();
-            _networkClient.EndClient();
+            networkClient.EndClient();
         }
 
         private void HandleAbruptDisconnection()
@@ -135,40 +124,9 @@ namespace MidTerm2
             throw new NotImplementedException();
         }
 
-        public void SendInstantiateRequest(GameObject prefab, Matrix4x4 trs, short instanceColor)
-        {
-            if (!prefabsData.prefabToHash.ContainsKey(prefab))
-            {
-                Debug.Log("Invalid Prefab");
-                return;
-            }
-
-            InstanceData instanceData = new InstanceData
-            {
-                originalClientID = clientId,
-                prefabHash = prefabsData.prefabToHash[prefab],
-                instanceID = -1,
-                trs = ByteFormat.Get4X4Bytes(trs),
-                color = instanceColor
-            };
-
-            _networkClient.SendToServer(new InstantiateRequest(instanceData).Serialize());
-        }
-
-        public void SendDeInstantiateRequest(GameObject gameObject)
-        {
-            _clientFactory.TryGetInstanceId(gameObject, out int instanceId, out int originalClientId);
-            _networkClient.SendToServer(new DeInstantiateRequest(instanceId).Serialize());
-        }
-
-        public void SendIntegrityCheck(InstanceData instanceData)
-        {
-            _networkClient.SendToServer(new InstanceIntegrityCheck(instanceData).Serialize());
-        }
-
         public string GetUsername(int id)
         {
-            return _networkClient.GetUsername(id);
+            return networkClient.GetUsername(id);
         }
 
         private void HandleError(string error)

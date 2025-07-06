@@ -31,6 +31,9 @@ public class InstanceIntegrityCheck : Message<InstanceData>
         data.AddRange(BitConverter.GetBytes(instanceData.prefabHash));
         data.AddRange(instanceData.trs);
         data.AddRange(BitConverter.GetBytes(instanceData.color));
+        data.AddRange(BitConverter.GetBytes(instanceData.routeLength));
+        for (int i = 0; i < instanceData.routeLength; i++)
+            data.AddRange(BitConverter.GetBytes(instanceData.route[i]));
 
         return GetFormattedData(data.ToArray());
     }
@@ -49,6 +52,18 @@ public class InstanceIntegrityCheck : Message<InstanceData>
         receivedInstanceData.trs = payload[offset..(offset + Constants.MatrixSize)];
         offset += Constants.MatrixSize;
         receivedInstanceData.color = BitConverter.ToInt16(payload, offset);
+        offset += sizeof(short);
+        receivedInstanceData.routeLength = BitConverter.ToInt32(payload, offset);
+        offset += sizeof(int);
+        List<int> routeList = new List<int>();
+        for (int i = 0; i < receivedInstanceData.routeLength; i++)
+        {
+            routeList.Add(BitConverter.ToInt32(payload, offset));
+            offset += sizeof(int);
+        }
+
+        receivedInstanceData.route = routeList.ToArray();
+
         return receivedInstanceData;
     }
 }

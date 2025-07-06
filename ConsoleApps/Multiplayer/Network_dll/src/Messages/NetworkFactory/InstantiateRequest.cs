@@ -22,6 +22,7 @@ namespace Network.Messages
             messageType = MessageType.InstantiateRequest;
             attribs = Attributes.Important;
             instanceData = Deserialize(data);
+            clientId = BitConverter.ToInt32(data, MessageOffsets.ClientIdIndex);
         }
 
         public override byte[] Serialize()
@@ -32,6 +33,9 @@ namespace Network.Messages
             data.AddRange(BitConverter.GetBytes(instanceData.prefabHash));
             data.AddRange(instanceData.trs);
             data.AddRange(BitConverter.GetBytes(instanceData.color));
+            data.AddRange(BitConverter.GetBytes(instanceData.routeLength));
+            for (int i = 0; i < instanceData.routeLength; i++)
+                data.AddRange(BitConverter.GetBytes(instanceData.route[i]));
 
             return GetFormattedData(data.ToArray());
         }
@@ -50,6 +54,18 @@ namespace Network.Messages
             instanceData.trs = payload[offset..(offset + Constants.MatrixSize)];
             offset += Constants.MatrixSize;
             instanceData.color = BitConverter.ToInt16(payload, offset);
+            offset += sizeof(short);
+            instanceData.routeLength = BitConverter.ToInt32(payload, offset);
+            offset += sizeof(int);
+            List<int> routeList = new List<int>();
+            for (int i = 0; i < instanceData.routeLength; i++)
+            {
+                routeList.Add(BitConverter.ToInt32(payload, offset));
+                offset += sizeof(int);
+            }
+
+            instanceData.route = routeList.ToArray();
+
             return instanceData;
         }
     }

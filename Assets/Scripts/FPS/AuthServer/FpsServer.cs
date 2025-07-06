@@ -85,6 +85,8 @@ namespace FPS.AuthServer
             instanceData.color = privateHandshake.color;
             instanceData.prefabHash = prefabsData.prefabToHash[playerPrefab];
             instanceData.trs = ByteFormat.Get4X4Bytes(spawnPos.localToWorldMatrix);
+            instanceData.route = new int[] { };
+            instanceData.routeLength = 0;
             GameObject newPlayer = _serverFactory.Instantiate(instanceData);
             newPlayer.GetComponent<AuthPlayerController>().id = privateHandshake.clientId;
         }

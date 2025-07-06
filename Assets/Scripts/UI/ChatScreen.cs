@@ -1,4 +1,5 @@
 ﻿using Cubes;
+using MidTerm2;
 using Network;
 using Network_dll.Messages.ClientMessages;
 using UnityEngine;
@@ -28,7 +29,7 @@ namespace UI
             if (inputMessage.text != "")
             {
                 Chat message = new Chat(inputMessage.text);
-                message.clientId = FpsClient.Instance.clientId;
+                message.clientId = CastlesClient.Instance.clientId;
                 ClientManager.Instance.networkClient.SendToServer(message.Serialize());
 
                 inputMessage.ActivateInputField();

@@ -48,6 +48,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _view: {fileID: 3497242454017489952}
   _inputReader: {fileID: 5233709398728436325}
+  _colorHandler: {fileID: 11400000, guid: 52184fc5f8af67a418860a811870f43a, type: 2}
+  prefabHashHandler: {fileID: 11400000, guid: c38fbe6a2d90f0d40ba94ff93a7bd748, type: 2}
 --- !u!114 &3497242454017489952
 MonoBehaviour:
   m_ObjectHideFlags: 0
