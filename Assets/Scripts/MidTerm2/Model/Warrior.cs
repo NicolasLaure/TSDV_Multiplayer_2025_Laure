@@ -5,7 +5,7 @@ namespace MidTerm2.Model
     [Serializable]
     public class Warrior : TileObject
     {
-        public Warrior() : base(0)
+        public Warrior() : base(50)
         {
         }
 
