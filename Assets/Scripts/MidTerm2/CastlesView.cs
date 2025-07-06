@@ -1,3 +1,4 @@
+using System;
 using MidTerm2.Model;
 using MidTerm2.View;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace MidTerm2
         [SerializeField] private GameObject tilePrefab;
         [SerializeField] private GameObject castlePrefab;
         [SerializeField] private GameObject warriorPrefab;
+        [SerializeField] private GameObject passTurnButton;
 
         [SerializeField] private float tileOffset;
 
@@ -24,18 +26,15 @@ namespace MidTerm2
         {
             Instantiate(tilePrefab);
             SetTiles(_model.board);
+        }
 
-            //GameObject castleGO = Instantiate(castlePrefab);
-            //TileObjectView castleView = castleGO.GetComponent<TileObjectView>();
-            //castleView.SetPosition(_model.board[(int)_model._castle.position.X][(int)_model._castle.position.Y]);
+        private void Update()
+        {
+            if (_model == null)
+                return;
 
-            // foreach (Warrior warrior in _model._warriors)
-            // {
-            //     GameObject warriorGO = Instantiate(warriorPrefab);
-            //     TileObjectView view = warriorGO.GetComponent<TileObjectView>();
-            //     view.SetPosition(_model.board[(int)warrior.position.X][(int)warrior.position.Y]);
-            //     warrior.onMove += view.SetPosition;
-            // }
+            if (passTurnButton.activeInHierarchy != _model.IsPlayerTurn())
+                passTurnButton.SetActive(_model.IsPlayerTurn());
         }
 
         public void SetTileObjectPosition(GameObject tileObject, Vector2 position)

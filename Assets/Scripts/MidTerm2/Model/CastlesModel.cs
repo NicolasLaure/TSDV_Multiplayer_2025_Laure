@@ -50,6 +50,19 @@ namespace MidTerm2
             }
         }
 
+        public bool IsPlayerTurn()
+        {
+            if (CastlesClient.Instance.clientId == 0)
+                return isPlayer1Turn;
+            else
+                return !isPlayer1Turn;
+        }
+
+        public void ChangeTurn()
+        {
+            isPlayer1Turn = !isPlayer1Turn;
+        }
+
         public Vector2 GetWarriorPos(bool isPlayerOne)
         {
             Vector2 cornerIndex = GetCastlePos(isPlayerOne);
