@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
 using Input;
 using MidTerm2.Model;
 using Network;
 using Reflection;
-using ReflectionTest;
-using UnityEditor.Rendering;
-using UnityEngine;
 using Utils;
 using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;
@@ -38,7 +34,7 @@ namespace MidTerm2
         public void Initialize()
         {
             SetMap();
-            SetCastle(ClientManager.Instance.networkClient.Id == 0);
+            SetArmy(ClientManager.Instance.networkClient.Id == 0);
         }
 
         private void SetMap()
@@ -67,7 +63,7 @@ namespace MidTerm2
             return warriorPos;
         }
 
-        private void SetCastle(bool isPlayerOne)
+        private void SetArmy(bool isPlayerOne)
         {
             ReflectiveClient<CastlesModel> client = ClientManager.Instance.networkClient;
             if (isPlayerOne)
@@ -85,6 +81,11 @@ namespace MidTerm2
             //
             //     //_warriors.Add(warrior);
             // }
+        }
+
+        public void SetCastle(Castle castle, Vector2 pos)
+        {
+            castle.SetTile(board[(int)pos.X][(int)pos.Y]);
         }
 
         public Vector2 GetCastlePos(bool isPlayerOne)

@@ -5,9 +5,11 @@ using Network;
 using Network_dll.Messages.ClientMessages;
 using Network_dll.Messages.Data;
 using Network.Enums;
+using Network.Factory;
 using Network.Messages;
 using Network.Messages.Server;
 using UI;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -19,12 +21,13 @@ namespace MidTerm2
         [SerializeField] private GameObject winPanel;
         [SerializeField] private GameObject losePanel;
 
-        [SerializeField] private GameObject castlesGameGO;
+        [SerializeField] private ColorHandler color;
+        [SerializeField] private HashHandler hashHandler;
 
         public int clientId = -1;
 
         public ReflectiveClient<CastlesModel> networkClient;
-        private CastlesProgram castlesProgram;
+        private CastlesProgram _castlesProgram;
 
         private void Start()
         {
@@ -50,10 +53,15 @@ namespace MidTerm2
         {
             if (networkClient.port != networkClient.defaultPort)
             {
-                GameObject castles = Instantiate(castlesGameGO);
-                castlesProgram = castles.GetComponent<CastlesProgram>();
-                castlesProgram.Initialize(networkClient);
+                _castlesProgram = new CastlesProgram(color, hashHandler);
+                _castlesProgram.Initialize(networkClient);
             }
+        }
+
+        private void Update()
+        {
+            if (_castlesProgram != null)
+                _castlesProgram.Update();
         }
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
@@ -78,14 +86,14 @@ namespace MidTerm2
                     break;
                 case MessageType.Primitive:
                     PrimitiveData primitive = new PrimitiveMessage(data).data;
-                    castlesProgram.reflection.ReceiveValues(primitive);
+                    _castlesProgram.reflection.ReceiveValues(primitive);
                     break;
                 case MessageType.Rpc:
                     RPCMessage rpcMessage = new RPCMessage(data);
                     if (rpcMessage.clientId != networkClient.Id)
                     {
                         RpcData rpc = rpcMessage.data;
-                        castlesProgram.reflection.rpcHooker.ReceiveRPCMessage(rpc);
+                        _castlesProgram.reflection.rpcHooker.ReceiveRPCMessage(rpc);
                     }
 
                     break;

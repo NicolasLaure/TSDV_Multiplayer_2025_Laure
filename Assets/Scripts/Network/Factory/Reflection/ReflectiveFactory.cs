@@ -1,11 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Cubes;
 using MidTerm2;
+using MidTerm2.Model;
+using MidTerm2.View;
 using Network.Factory.Reflection;
 using Network.Messages;
 using Reflection;
+using Unity.Mathematics;
 using UnityEngine;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Network.Factory
 {
@@ -44,11 +49,21 @@ namespace Network.Factory
             object instance = Activator.CreateInstance(typeHashes.hashToType[instanceData.prefabHash]);
             GameObject prefab = prefabHashes.hashToPrefab[instanceData.prefabHash];
             Matrix4x4 trs = ByteFormat.Get4X4FromBytes(instanceData.trs, 0);
-            GameObject instanceGO = GameObject.Instantiate(prefab, trs.GetPosition(), trs.rotation);
+            GameObject instanceGO = GameObject.Instantiate(prefab, Vector3.zero, Quaternion.identity);
             if (instanceGO.TryGetComponent<SpriteRenderer>(out SpriteRenderer meshRenderer))
                 meshRenderer.color = _colorHandler.GetFromColor(instanceData.color).color;
 
+            Vector2 pos = new Vector2(trs.GetPosition().x, trs.GetPosition().y);
+            if (instanceData.originalClientID == CastlesClient.Instance.clientId)
+            {
+                if (instance.GetType() == typeof(Castle))
+                    ((CastlesModel)_reflection._model).SetCastle((Castle)instance, pos);
+            }
+
             SaveObject(instanceData, instance, instanceGO);
+
+            if (instanceGO.TryGetComponent(out TileObjectView viewObject))
+                CastlesView.Instance.SetTileObjectPosition(instanceGO, trs.GetPosition());
 
             return instanceData;
         }
@@ -64,11 +79,7 @@ namespace Network.Factory
         {
             for (int i = 0; i < objectsToInstantiate.count; i++)
             {
-                object instance = Activator.CreateInstance(typeHashes.hashToType[objectsToInstantiate.instancesData[i].prefabHash]);
-                GameObject prefab = prefabHashes.hashToPrefab[objectsToInstantiate.instancesData[i].prefabHash];
-                Matrix4x4 trs = ByteFormat.Get4X4FromBytes(objectsToInstantiate.instancesData[i].trs, 0);
-                GameObject instanceGO = GameObject.Instantiate(prefab, trs.GetPosition(), trs.rotation);
-                SaveObject(objectsToInstantiate.instancesData[i], instance, instanceGO);
+                Instantiate(objectsToInstantiate.instancesData[i]);
             }
         }
 

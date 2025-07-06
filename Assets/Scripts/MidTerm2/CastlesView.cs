@@ -38,6 +38,11 @@ namespace MidTerm2
             // }
         }
 
+        public void SetTileObjectPosition(GameObject tileObject, Vector2 position)
+        {
+            TileObjectView objectView = tileObject.GetComponent<TileObjectView>();
+            objectView.SetPosition(_model.board[(int)position.x][(int)position.y]);
+        }
 
         public void SetTiles(Tile[][] board)
         {

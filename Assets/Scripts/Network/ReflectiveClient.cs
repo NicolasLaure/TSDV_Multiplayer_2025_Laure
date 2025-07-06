@@ -201,10 +201,10 @@ namespace Network
                     privateHandshake.clientId = id;
                     SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), privateHandshake.Serialize()));
                     OnReceiveEvent?.Invoke(data, ip);
+                    onHandshakeOk?.Invoke();
                     break;
                 case MessageType.PrivateHsResponse:
                     OnReceiveEvent?.Invoke(data, ip);
-                    onHandshakeOk?.Invoke();
                     break;
 
                 case MessageType.MatchMakerHsResponse:

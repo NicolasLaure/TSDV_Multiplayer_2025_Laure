@@ -9,16 +9,24 @@ using UnityEngine;
 
 namespace MidTerm2
 {
-    public class CastlesProgram : MonoBehaviour
+    public class CastlesProgram
     {
-        [SerializeField] private CastlesView _view;
-        [SerializeField] private InputReader _inputReader;
-        [SerializeField] private ColorHandler _colorHandler;
-        [SerializeField] private HashHandler prefabHashHandler;
+        private CastlesView _view;
+        private InputReader _inputReader;
+        private ColorHandler _colorHandler;
+        private HashHandler prefabHashHandler;
         private CastlesModel _model;
 
         public ReflectionHandler<CastlesModel> reflection;
         private ReflectiveClient<CastlesModel> _client;
+
+        public CastlesProgram(ColorHandler color, HashHandler hash)
+        {
+            _view = CastlesView.Instance;
+            _inputReader = InputReader.Instance;
+            _colorHandler = color;
+            prefabHashHandler = hash;
+        }
 
         public void Initialize(ReflectiveClient<CastlesModel> client = null)
         {
@@ -36,8 +44,9 @@ namespace MidTerm2
             _view.InitializeView(_model);
         }
 
-        private void Update()
+        public void Update()
         {
+            Debug.Log($"IS ALIVEEE");
             reflection.Update();
         }
     }

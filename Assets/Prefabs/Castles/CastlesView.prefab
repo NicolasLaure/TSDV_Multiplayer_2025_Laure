@@ -9,11 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3045277866962941006}
-  - component: {fileID: 2899944671859525769}
   - component: {fileID: 3497242454017489952}
-  - component: {fileID: 5233709398728436325}
   m_Layer: 0
-  m_Name: CastlesGame
+  m_Name: CastlesView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34,22 +32,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2899944671859525769
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5802004593387478226}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b4db6d82133472499e16fea78598423, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _view: {fileID: 3497242454017489952}
-  _inputReader: {fileID: 5233709398728436325}
-  _colorHandler: {fileID: 11400000, guid: 52184fc5f8af67a418860a811870f43a, type: 2}
-  prefabHashHandler: {fileID: 11400000, guid: c38fbe6a2d90f0d40ba94ff93a7bd748, type: 2}
 --- !u!114 &3497242454017489952
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69,15 +51,3 @@ MonoBehaviour:
   warriorPrefab: {fileID: 7740715986206053294, guid: d0f35bfcf3b2dda4ea9beed03a7bfcf7,
     type: 3}
   tileOffset: 0.05
---- !u!114 &5233709398728436325
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5802004593387478226}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c193638e701e94248831de3bb5eecfc1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
