@@ -52,6 +52,7 @@
     <Compile Include="Assets\Scripts\Utils\Route.cs" />
     <Compile Include="Assets\Scripts\CustomMath\MY4X4.cs" />
     <Compile Include="Assets\Scripts\Events\IntEventChannelSO.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\View\TileView.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\View\RemainingMoves.cs" />
     <Compile Include="Assets\Scripts\Cubes\MovingCubesServer.cs" />
     <Compile Include="Assets\Scripts\FPS\Health\ITakeDamage.cs" />

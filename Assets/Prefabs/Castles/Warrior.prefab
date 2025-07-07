@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 6969022949462522985}
   - component: {fileID: -5803685139106290465}
   - component: {fileID: -4146201114417383622}
-  - component: {fileID: 525890823374975149}
   m_Layer: 0
   m_Name: Warrior
   m_TagString: Untagged
@@ -116,24 +115,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dada7c0568a4ab847a6757d14a137315, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!65 &525890823374975149
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7740715986206053294}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.25, y: 1.25, z: 0.2}
-  m_Center: {x: 0, y: 0.2, z: 0}

@@ -28,7 +28,6 @@ namespace MidTerm2.Model
         {
             onMove?.Invoke(newTile);
             position = newTile.position;
-            newTile.currentObject = this;
         }
     }
 }

@@ -3,9 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Network.Enums;
-using UnityEditor.Rendering;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Utils;
 using PrimitiveType = Network.Enums.PrimitiveType;
 
@@ -13,7 +11,7 @@ namespace Reflection
 {
     public static class ReflectionUtilities
     {
-        private static BindingFlags _bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+        public static BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
 
         public static Node PopulateTree(object obj, Node root = null)
         {
@@ -21,7 +19,7 @@ namespace Reflection
             if (obj == null)
                 return root;
 
-            foreach (FieldInfo field in obj.GetType().GetFields(_bindingFlags))
+            foreach (FieldInfo field in obj.GetType().GetFields(bindingFlags))
             {
                 Debug.Log($"fieldName: {field.Name}");
                 Node childNode = new Node();
@@ -55,10 +53,10 @@ namespace Reflection
 
         public static object GetObjectAt(int[] route, object obj, int startIndex = 0)
         {
-            if (startIndex >= route.Length)
+            if (startIndex >= route.Length - 1)
                 return obj;
 
-            FieldInfo info = obj.GetType().GetFields(_bindingFlags)[route[startIndex]];
+            FieldInfo info = obj.GetType().GetFields(bindingFlags)[route[startIndex]];
             if (info.FieldType != typeof(string) && (info.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(info.FieldType)))
             {
                 int index = 0;
@@ -82,7 +80,7 @@ namespace Reflection
                 return false;
 
             int count = 0;
-            foreach (FieldInfo field in model.GetType().GetFields(_bindingFlags))
+            foreach (FieldInfo field in model.GetType().GetFields(bindingFlags))
             {
                 if (ReferenceEquals(field.GetValue(model), obj))
                 {
@@ -90,13 +88,15 @@ namespace Reflection
                     return true;
                 }
 
-                if (IsCollection(field) && GetCollectionRoute(field.GetValue(model), obj, route))
+                if (IsCollection(field))
                 {
-                    route.Insert(0, count);
-                    return true;
+                    if (GetCollectionRoute(field.GetValue(model), obj, route))
+                    {
+                        route.Insert(0, count);
+                        return true;
+                    }
                 }
-
-                if (!IsCollection(field) && !field.FieldType.IsPrimitive && TryGetRoute(field.GetValue(model), obj, route))
+                else if (!field.FieldType.IsPrimitive && TryGetRoute(field.GetValue(model), obj, route))
                 {
                     route.Insert(0, count);
                     return true;
@@ -110,16 +110,14 @@ namespace Reflection
 
         public static bool GetCollectionRoute(object model, object obj, List<int> route)
         {
-            Debug.Log($"Object: {model}");
-
-            if (model == null || !IsCollection(model) || (model as ICollection<object>) == null)
+            if (model == null || !IsCollection(model) || (model as ICollection) == null)
                 return false;
 
             int count = 0;
-            foreach (object item in model as ICollection<object>)
+            foreach (object item in model as ICollection)
             {
                 if (item == null)
-                    return false;
+                    continue;
 
                 if (ReferenceEquals(item, obj))
                 {
@@ -127,13 +125,15 @@ namespace Reflection
                     return true;
                 }
 
-                if (IsCollection(item) && GetCollectionRoute(item, obj, route))
+                if (IsCollection(item))
                 {
-                    route.Insert(0, count);
-                    return true;
+                    if (GetCollectionRoute(item, obj, route))
+                    {
+                        route.Insert(0, count);
+                        return true;
+                    }
                 }
-
-                if (!item.GetType().IsPrimitive && item.GetType() == obj.GetType() && TryGetRoute(item, obj, route))
+                else if (!item.GetType().IsPrimitive && item.GetType() == obj.GetType() && TryGetRoute(item, obj, route))
                 {
                     route.Insert(0, count);
                     return true;
@@ -157,19 +157,6 @@ namespace Reflection
                 return GetCollectionType(elementType);
 
             return elementType;
-        }
-
-        public static object SetDataAt(int[] route, object value, object obj, int startIndex = 0)
-        {
-            if (startIndex >= route.Length)
-                return value;
-
-            FieldInfo info = obj.GetType().GetFields(_bindingFlags)[route[startIndex]];
-            if (IsCollection(info))
-                return SetCollectionData(info.GetValue(obj), route, value, startIndex + 1);
-
-            obj.GetType().GetFields(_bindingFlags)[route[startIndex]].SetValue(obj, SetDataAt(route, value, info.GetValue(obj), startIndex + 1));
-            return obj;
         }
 
         public static bool ShouldSync(FieldInfo info)
@@ -239,36 +226,6 @@ namespace Reflection
                 return GetCollectionData(list[route[startIndex]], route, startIndex + 1);
 
             return GetObjectAt(route, list[route[startIndex]], startIndex + 1);
-        }
-
-        public static object SetCollectionData(object obj, int[] route, object value, int startIndex = 0)
-        {
-            if (!IsCollection(obj))
-                return null;
-
-            ICollection<object> collection = obj as ICollection<object>;
-            List<object> list = new List<object>();
-            using (IEnumerator<object> iterator = collection.GetEnumerator())
-            {
-                while (iterator.MoveNext())
-                    list.Add(iterator.Current);
-            }
-
-
-            if (startIndex == route.Length - 1)
-            {
-                if (route[startIndex] >= list.Count)
-                    list.Add(value);
-                else
-                    list[route[startIndex]] = value;
-            }
-            else if (IsCollection(list[route[startIndex]]))
-                list[route[startIndex]] = SetCollectionData(list[route[startIndex]], route, value, startIndex + 1);
-            else
-                return SetDataAt(route, value, list[route[startIndex]], startIndex + 1);
-
-            collection = list;
-            return collection;
         }
     }
 }

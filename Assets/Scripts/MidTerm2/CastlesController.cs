@@ -3,6 +3,8 @@ using MidTerm2.View;
 using Network.Factory;
 using Reflection;
 using UnityEngine;
+using Utils;
+using Vector2 = System.Numerics.Vector2;
 
 namespace MidTerm2
 {
@@ -17,21 +19,23 @@ namespace MidTerm2
             model?.ChangeTurn();
         }
 
-        public void SelectWarrior(GameObject warriorObject)
+        public void SelectTile(GameObject tileObject)
         {
             if (factory == null || model == null || !model.isPlayerTurn)
                 return;
 
-            Debug.Log("WarriorClicked");
-            factory.TryGetInstanceId(warriorObject, out int instanceId, out int originalClientId);
-            if (originalClientId == CastlesClient.Instance.clientId && factory.TryGetObjectRoute(instanceId, out int[] route))
+            TileView tileView = tileObject.GetComponent<TileView>();
+            if (tileView.tileObject != null && tileView.tileObject.TryGetComponent<TileObjectView>(out TileObjectView tileObjView))
             {
-                if (reflection.GetDataAt(route).GetType() == typeof(Warrior))
+                if (!factory.TryGetInstanceId(tileView.tileObject, out int instanceId, out int originalClientId)) return;
+
+                if (originalClientId == CastlesClient.Instance.clientId && tileObjView != null)
                 {
-                    model.selectedWarrior = reflection.GetDataAt(route) as Warrior;
-                    Debug.Log($"Selected Warrior At {model.selectedWarrior.position}");
+                    model.SelectTileObject(tileView.position);
                 }
             }
+            else
+                model.SelectTile(tileView.position);
         }
     }
 }

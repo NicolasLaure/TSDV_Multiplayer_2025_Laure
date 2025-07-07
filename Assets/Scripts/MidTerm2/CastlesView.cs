@@ -1,5 +1,6 @@
 using MidTerm2.Model;
 using MidTerm2.View;
+using Network.Factory;
 using UnityEngine;
 
 namespace MidTerm2
@@ -17,6 +18,8 @@ namespace MidTerm2
         [Header("UI")]
         [SerializeField] private GameObject passTurnButton;
         [SerializeField] private RemainingMoves movesText;
+
+        public TileView[][] boardView;
 
         public void InitializeView(CastlesModel model)
         {
@@ -39,20 +42,24 @@ namespace MidTerm2
                 OnTurnChanged();
         }
 
-        public void SetTileObjectPosition(GameObject tileObject, Vector2 position)
+        public void SetTileObjectPosition(ObjectModel tileObject)
         {
-            TileObjectView objectView = tileObject.GetComponent<TileObjectView>();
-            objectView.SetPosition(_model.board[(int)position.x][(int)position.y]);
+            TileObjectView objectView = tileObject.view.GetComponent<TileObjectView>();
+            ((TileObject)tileObject.obj).onMove += objectView.SetPosition;
         }
 
         public void SetTiles(Tile[][] board)
         {
+            boardView = new TileView[board.Length][];
             for (int i = 0; i < board.Length; i++)
             {
+                boardView[i] = new TileView[board.Length];
                 for (int j = 0; j < board.Length; j++)
                 {
                     GameObject tile = Instantiate(tilePrefab);
                     tile.transform.position = IndexToPosition(new Vector2(i, j), 0.1f);
+                    boardView[i][j] = tile.GetComponent<TileView>();
+                    boardView[i][j].position = new System.Numerics.Vector2(i, j);
                 }
             }
         }

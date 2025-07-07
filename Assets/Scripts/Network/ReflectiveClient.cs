@@ -335,7 +335,9 @@ namespace Network
                 prefabHash = factory.typeHashes.typeToHash[objType],
                 instanceID = -1,
                 trs = ByteFormat.Get4X4Bytes(trs),
-                color = color
+                color = color,
+                routeLength = route.Count,
+                route = route.ToArray()
             };
 
             SendToServer(new InstantiateRequest(instanceData).Serialize());

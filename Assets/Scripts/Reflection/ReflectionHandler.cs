@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Network;
 using Network_dll.Messages.Data;
 using Network.Messages;
@@ -21,17 +23,21 @@ namespace Reflection
         public ReflectionHandler(ref ModelType model)
         {
             _model = model;
-            root = ReflectionUtilities.PopulateTree(_model);
             rpcHooker = new RPCHooker<ModelType>(ref model);
-            rpcHooker.Hook();
+            Initialize();
         }
 
         public ReflectionHandler(ref ModelType model, ReflectiveClient<ModelType> networkClient)
         {
             _model = model;
             _networkClient = networkClient;
-            root = ReflectionUtilities.PopulateTree(_model);
             rpcHooker = new RPCHooker<ModelType>(ref model, _networkClient);
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            root = ReflectionUtilities.PopulateTree(_model);
             rpcHooker.Hook();
         }
 
@@ -60,8 +66,9 @@ namespace Reflection
 
         public void SetData(int[] route, object value)
         {
-            ReflectionUtilities.SetDataAt(route, value, _model);
+            SetDataAt(route, value, _model);
             Node target = root;
+
             for (int i = 0; i < route.Length; i++)
             {
                 target = target[route[i]];
@@ -113,6 +120,57 @@ namespace Reflection
         {
             Debug.Log($"Received primitive: {data.obj}");
             SetData(data.route, data.obj);
+        }
+
+        public object SetDataAt(int[] route, object value, object obj, int startIndex = 0)
+        {
+            if (startIndex >= route.Length)
+                return value;
+
+            FieldInfo info = obj.GetType().GetFields(ReflectionUtilities.bindingFlags)[route[startIndex]];
+            if (ReflectionUtilities.IsCollection(info))
+            {
+                info.SetValue(obj, SetCollectionData(info.GetValue(obj), route, value, startIndex + 1));
+            }
+            else
+                info.SetValue(obj, SetDataAt(route, value, info.GetValue(obj), startIndex + 1));
+
+            return info.GetValue(obj);
+        }
+
+        public IList<T> SetCollectionData<T>(object obj, int[] route, T value, int startIndex = 0)
+        {
+            if (obj is not ICollection<T> collection)
+                return null;
+
+            List<T> list = new List<T>();
+            foreach (T item in collection)
+            {
+                list.Add(item);
+            }
+
+            if (startIndex >= route.Length - 1)
+            {
+                if (obj is IList<T>)
+                {
+                    IList<T> iList = (obj as IList<T>);
+                    iList.Add(value);
+                    Node target = root;
+                    for (int i = 0; i < route.Length - 1; i++)
+                    {
+                        target = target[route[i]];
+                    }
+
+                    new Node(target);
+                    Debug.Log($"Add List Member");
+                    rpcHooker.AddHook(route, value);
+                    return iList;
+                }
+            }
+            else if (list[route[startIndex]] != null && ReflectionUtilities.IsCollection(list[route[startIndex]]))
+                return SetCollectionData(list[route[startIndex]], route, value, startIndex + 1);
+
+            return list;
         }
     }
 }

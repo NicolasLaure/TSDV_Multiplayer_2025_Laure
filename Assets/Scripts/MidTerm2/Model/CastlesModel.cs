@@ -5,6 +5,7 @@ using MidTerm2.Model;
 using Network;
 using Reflection;
 using Reflection.RPC;
+using UnityEngine;
 using Utils;
 using Random = System.Random;
 using Vector2 = System.Numerics.Vector2;
@@ -29,6 +30,7 @@ namespace MidTerm2
         private const int maxMoves = 10;
         private Random _random;
 
+        public Tile selectedTile = null;
         public Warrior selectedWarrior = null;
 
         public CastlesModel(InputReader input, ReflectiveClient<CastlesModel> client)
@@ -81,10 +83,19 @@ namespace MidTerm2
         private void SetArmy(bool isPlayerOne)
         {
             ReflectiveClient<CastlesModel> client = ClientManager.Instance.networkClient;
+            Tile castleTile;
             if (isPlayerOne)
-                client.SendInstantiateRequest(_castle, MatrixHandler.Vector2To4X4(GetCastlePos(true)));
+            {
+                castleTile = GetTile(GetCastlePos(true));
+                client.SendInstantiateRequest(_castle, MatrixHandler.Vector2To4X4(castleTile.position));
+            }
             else
-                client.SendInstantiateRequest(_OtherCastle, MatrixHandler.Vector2To4X4(GetCastlePos(false)));
+            {
+                castleTile = GetTile(GetCastlePos(false));
+                client.SendInstantiateRequest(_OtherCastle, MatrixHandler.Vector2To4X4(castleTile.position));
+            }
+
+            castleTile.isTaken = true;
 
             for (int i = 0; i < initialWarriorQty; i++)
             {
@@ -98,11 +109,35 @@ namespace MidTerm2
         public void SetTileObject(TileObject tileObject, Vector2 pos)
         {
             tileObject.SetTile(board[(int)pos.X][(int)pos.Y]);
+            board[(int)pos.X][(int)pos.Y].currentObject = tileObject;
         }
 
         public Vector2 GetCastlePos(bool isPlayerOne)
         {
             return isPlayerOne ? new Vector2(0, 0) : new Vector2(mapSize - 1, mapSize - 1);
+        }
+
+        public Tile GetTile(Vector2 pos)
+        {
+            return board[(int)pos.X][(int)pos.Y];
+        }
+
+        public void SelectTile(Vector2 pos)
+        {
+            selectedTile = board[(int)pos.X][(int)pos.Y];
+            Debug.Log($"Selected Tile Position {selectedTile.position}");
+            if (selectedWarrior != null)
+            {
+                selectedWarrior.Move(selectedTile, ref remainingMoves);
+                selectedWarrior = null;
+            }
+        }
+
+        public void SelectTileObject(Vector2 pos)
+        {
+            selectedTile = board[(int)pos.X][(int)pos.Y];
+            if (selectedTile.currentObject as Warrior != null)
+                selectedWarrior = (Warrior)board[(int)pos.X][(int)pos.Y].currentObject;
         }
     }
 }

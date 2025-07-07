@@ -19,7 +19,6 @@ namespace Reflection.RPC
         private Harmony _harmony;
         private Node _methodsTree;
         private ReflectiveClient<ModelType> _network;
-
         private static readonly BindingFlags BindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
         #region Constructors
@@ -56,7 +55,22 @@ namespace Reflection.RPC
             Debug.Log($"Methods Count: {methods.Count}");
 
             foreach (MethodInfo method in methods)
+                Hook(method);
+        }
+
+        public void AddHook(int[] route, object obj)
+        {
+            Node target = _methodsTree;
+            for (int i = 0; i < route.Length - 1; i++)
             {
+                target = target[route[i]];
+            }
+
+            List<MethodInfo> methods = new List<MethodInfo>();
+            PopulateMethods(target, obj, methods);
+            foreach (MethodInfo method in methods)
+            {
+                Debug.Log($"Hooked Method {method.Name}");
                 Hook(method);
             }
         }

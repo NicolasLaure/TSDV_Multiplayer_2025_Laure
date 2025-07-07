@@ -7,6 +7,7 @@ using Network.Factory.Reflection;
 using Network.Messages;
 using Reflection;
 using UnityEngine;
+using Utils;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Network.Factory
@@ -14,6 +15,7 @@ namespace Network.Factory
     public struct ObjectModel
     {
         public int[] route;
+        public object obj;
         public GameObject view;
     }
 
@@ -51,17 +53,20 @@ namespace Network.Factory
             if (instanceGO.TryGetComponent<SpriteRenderer>(out SpriteRenderer meshRenderer))
                 meshRenderer.color = _colorHandler.GetFromColor(instanceData.color).color;
 
-            Vector2 pos = new Vector2(trs.GetPosition().x, trs.GetPosition().y);
-            if (instanceData.originalClientID == CastlesClient.Instance.clientId)
-            {
-                if (instance.GetType() == typeof(Castle) || instance.GetType() == typeof(Warrior))
-                    ((CastlesModel)_reflection._model).SetTileObject((TileObject)instance, pos);
-            }
-
-            SaveObject(instanceData, instance, instanceGO);
+            ObjectModel newObject;
+            newObject.route = instanceData.route;
+            newObject.view = instanceGO;
+            newObject.obj = instance;
+            SaveObject(instanceData, newObject);
 
             if (instanceGO.TryGetComponent(out TileObjectView viewObject))
-                CastlesView.Instance.SetTileObjectPosition(instanceGO, trs.GetPosition());
+            {
+                CastlesView.Instance.SetTileObjectPosition(newObject);
+            }
+
+            Vector2 pos = new Vector2(trs.GetPosition().x, trs.GetPosition().y);
+            if (instance is TileObject tileObject)
+                ((CastlesModel)_reflection._model).SetTileObject(tileObject, pos);
 
             return instanceData;
         }
@@ -91,17 +96,15 @@ namespace Network.Factory
             }
         }
 
-        private void SaveObject(InstanceData instanceData, object obj, GameObject gameObject)
+        private void SaveObject(InstanceData instanceData, ObjectModel objectModel)
         {
+            Debug.Log($"Instance Route is: {Route.RouteString(instanceData.route)}");
+            _reflection.SetData(instanceData.route, objectModel.obj);
             instanceIdToInstanceData[instanceData.instanceID] = instanceData;
-            ObjectModel newObject;
-            newObject.route = instanceData.route;
-            newObject.view = gameObject;
-            _reflection.SetData(instanceData.route, obj);
 
-            instanceIdToObject[instanceData.instanceID] = newObject;
-            ObjectToId[newObject] = instanceData.instanceID;
-            gameObjectToId[gameObject] = instanceData.instanceID;
+            instanceIdToObject[instanceData.instanceID] = objectModel;
+            ObjectToId[objectModel] = instanceData.instanceID;
+            gameObjectToId[objectModel.view] = instanceData.instanceID;
         }
 
         private void RemoveObject(int instanceId)
