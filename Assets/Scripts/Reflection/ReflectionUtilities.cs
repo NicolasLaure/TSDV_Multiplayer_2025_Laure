@@ -145,7 +145,7 @@ namespace Reflection
             return false;
         }
 
-        public static Type GetCollectionType(Type obj)
+        public static Type GetCollectionType(this Type obj)
         {
             Type elementType;
             if (obj.IsGenericType)
@@ -169,12 +169,12 @@ namespace Reflection
             return ((Sync)info.GetCustomAttribute(typeof(Sync), false)).attribs;
         }
 
-        public static bool IsCollection(object obj)
+        public static bool IsCollection(this object obj)
         {
             return obj.GetType() != typeof(string) && (obj.GetType().IsArray || obj is ICollection);
         }
 
-        public static bool IsCollection(FieldInfo field)
+        public static bool IsCollection(this FieldInfo field)
         {
             return field.FieldType != typeof(string) && (field.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(field.FieldType));
         }

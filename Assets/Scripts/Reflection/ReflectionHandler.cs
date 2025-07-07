@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Network;
@@ -128,7 +129,7 @@ namespace Reflection
                 return value;
 
             FieldInfo info = obj.GetType().GetFields(ReflectionUtilities.bindingFlags)[route[startIndex]];
-            if (ReflectionUtilities.IsCollection(info))
+            if (info.IsCollection())
             {
                 info.SetValue(obj, SetCollectionData(info.GetValue(obj), route, value, startIndex + 1));
             }
@@ -138,7 +139,7 @@ namespace Reflection
             return info.GetValue(obj);
         }
 
-        public IList<T> SetCollectionData<T>(object obj, int[] route, T value, int startIndex = 0)
+        public object SetCollectionData<T>(object obj, int[] route, T value, int startIndex = 0)
         {
             if (obj is not ICollection<T> collection)
                 return null;
@@ -151,26 +152,27 @@ namespace Reflection
 
             if (startIndex >= route.Length - 1)
             {
-                if (obj is IList<T>)
-                {
-                    IList<T> iList = (obj as IList<T>);
-                    iList.Add(value);
-                    Node target = root;
-                    for (int i = 0; i < route.Length - 1; i++)
-                    {
-                        target = target[route[i]];
-                    }
-
-                    new Node(target);
-                    Debug.Log($"Add List Member");
-                    rpcHooker.AddHook(route, value);
-                    return iList;
-                }
+                list.Add(value);
+                return list;
             }
-            else if (list[route[startIndex]] != null && ReflectionUtilities.IsCollection(list[route[startIndex]]))
+
+            if (list[route[startIndex]] != null && list[route[startIndex]].IsCollection())
                 return SetCollectionData(list[route[startIndex]], route, value, startIndex + 1);
 
             return list;
+        }
+
+        private void AddNode(int[] route, object value)
+        {
+            Node target = root;
+            for (int i = 0; i < route.Length - 1; i++)
+            {
+                target = target[route[i]];
+            }
+
+            new Node(target);
+            Debug.Log($"Add List Member");
+            rpcHooker.AddHook(route, value);
         }
     }
 }

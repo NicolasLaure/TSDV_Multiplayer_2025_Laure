@@ -37,7 +37,7 @@ namespace MidTerm2
         {
             _random = new Random();
         }
-
+        
         public void Initialize()
         {
             SetMap();

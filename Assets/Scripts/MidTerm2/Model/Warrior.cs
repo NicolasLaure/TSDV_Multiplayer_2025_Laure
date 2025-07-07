@@ -16,7 +16,6 @@ namespace MidTerm2.Model
         {
         }
 
-        [RPC]
         public void Move(Tile targetTile, ref int remainingMoves)
         {
             if (targetTile.currentObject != null)
@@ -32,7 +31,6 @@ namespace MidTerm2.Model
             }
         }
 
-        [RPC]
         public void Attack(TileObject target)
         {
             Random random = new Random((int)ServerTime.time);
