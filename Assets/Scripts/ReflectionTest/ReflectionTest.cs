@@ -1,16 +1,24 @@
 using MidTerm2;
+using Reflection;
 using UnityEngine;
 
 namespace ReflectionTest
 {
     public class ReflectionTest : MonoBehaviour
     {
-        [SerializeField] private GameObject castlesGame;
+        private TestModel model;
+
+        ReflectionHandler<TestModel> reflectionHandler;
 
         void Start()
         {
-            GameObject castles = Instantiate(castlesGame);
-            castles.GetComponent<CastlesProgram>().Initialize();
+            reflectionHandler = new ReflectionHandler<TestModel>(ref model);
+        }
+
+        [ContextMenu("Add smsh")]
+        void AddSmsh()
+        {
+            reflectionHandler.SetData(new int[] { 2 }, new TestClass());
         }
     }
 }

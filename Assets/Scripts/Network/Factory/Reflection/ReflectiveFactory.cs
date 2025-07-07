@@ -113,7 +113,7 @@ namespace Network.Factory
             {
                 instanceIdToObject.Remove(instanceId);
 
-                _reflection.SetData(instanceIdToObject[instanceId].route, null);
+               // _reflection.SetData(instanceIdToObject[instanceId].route, null);
                 if (ObjectToId.ContainsKey(instanceIdToObject[instanceId]))
                     ObjectToId.Remove(instanceIdToObject[instanceId]);
             }
