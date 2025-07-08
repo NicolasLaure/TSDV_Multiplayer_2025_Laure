@@ -28,7 +28,7 @@ namespace FPS.AuthServer
 
         private void Start()
         {
-            _networkServer = ServerMono.Instance.networkServer;
+           // _networkServer = ServerMono.Instance.networkServer;
             _serverFactory = ServerMono.Instance.serverFactory;
 
             string[] args = Environment.GetCommandLineArgs();

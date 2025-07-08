@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MidTerm2.Model;
 using Reflection;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ namespace ReflectionTest
     {
         [Sync] public int a;
         private float b;
-        List<TestClass> c = new List<TestClass>();
+        List<Warrior> warriors = new List<Warrior>();
 
         public TestModel(int a, float b)
         {

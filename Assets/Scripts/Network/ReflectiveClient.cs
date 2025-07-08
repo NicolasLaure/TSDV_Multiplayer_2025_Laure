@@ -12,7 +12,6 @@ using Network.Messages.MatchMaker;
 using Network.Messages.Server;
 using Network.Utilities;
 using Reflection;
-using UnityEditor.Rendering;
 using UnityEngine;
 using Utils;
 using Ping = Network.Messages.Ping;

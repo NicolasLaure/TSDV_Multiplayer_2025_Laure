@@ -8,7 +8,6 @@ using System.Threading;
 using Network_dll.Messages.ErrorMessages;
 using Network.Encryption;
 using Network.Enums;
-using Network.FileManagement;
 using Network.Matchmaker;
 using Network.Messages;
 using Network.Messages.MatchMaker;
@@ -270,9 +269,9 @@ namespace Network
             serverInfo.UseShellExecute = true;
             Process newServerProcess = Process.Start(serverInfo);
 
-            int sleepMs = 1000;
+            int sleepMs = 2000;
             if (isAuthServer)
-                sleepMs = 3000;
+                sleepMs = 10000;
 
             Thread.Sleep(sleepMs);
             byte[] newSvDirection1 = new ServerDirection(ipAddress, newSvPort).Serialize();

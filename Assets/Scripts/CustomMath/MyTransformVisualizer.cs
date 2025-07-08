@@ -1,10 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Runtime.CompilerServices;
 using CustomMath;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 [ExecuteInEditMode]

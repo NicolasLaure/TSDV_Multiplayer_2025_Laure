@@ -1,4 +1,5 @@
 using MidTerm2;
+using MidTerm2.Model;
 using Reflection;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace ReflectionTest
         [ContextMenu("Add smsh")]
         void AddSmsh()
         {
-            reflectionHandler.SetData(new int[] { 2 }, new TestClass());
+            reflectionHandler.SetData(new int[] { 2 }, new Warrior());
         }
     }
 }

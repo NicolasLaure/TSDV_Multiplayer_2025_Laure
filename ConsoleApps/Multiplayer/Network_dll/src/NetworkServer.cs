@@ -29,7 +29,7 @@ namespace Network
         protected SavedClientHandler _savedClientHandler = new SavedClientHandler("SavedClients.txt");
 
         public int targetFPS = 60;
-        public int afkDisconnectTime = 1500;
+        public int afkDisconnectTime = 12500;
         private bool shouldStop = false;
 
         public void StartServer(int port)

@@ -9,11 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7333139467472402989}
-  - component: {fileID: -3657045653674383030}
-  - component: {fileID: 3598177305874348220}
-  - component: {fileID: 4507904852966558499}
+  - component: {fileID: -8837064057039649173}
+  - component: {fileID: -1200338751391360590}
+  - component: {fileID: -2927456212037763574}
   m_Layer: 0
-  m_Name: CastlesClient
+  m_Name: CastlesNAClient
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34,7 +34,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-3657045653674383030
+--- !u!114 &-8837064057039649173
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isServerActive: 0
---- !u!114 &3598177305874348220
+--- !u!114 &-1200338751391360590
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -56,16 +56,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1941017542367559973}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 607210e5ab7c77b47a44c8c0546120c8, type: 3}
+  m_Script: {fileID: 11500000, guid: 4279cf0e3fb042042b5cbbca5f34c209, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   errorPanel: {fileID: 0}
   winPanel: {fileID: 0}
   losePanel: {fileID: 0}
-  color: {fileID: 11400000, guid: 52184fc5f8af67a418860a811870f43a, type: 2}
-  hashHandler: {fileID: 11400000, guid: c38fbe6a2d90f0d40ba94ff93a7bd748, type: 2}
+  color: {fileID: 0}
+  hashHandler: {fileID: 0}
   clientId: -1
---- !u!114 &4507904852966558499
+--- !u!114 &-2927456212037763574
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

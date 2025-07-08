@@ -14,7 +14,7 @@ using UnityEngine.SceneManagement;
 
 namespace MidTerm2
 {
-    public class CastlesClient : MonoBehaviourSingleton<CastlesClient>
+    public class CastlesNaClient : MonoBehaviourSingleton<CastlesNaClient>
     {
         [SerializeField] private ErrorMessagePanel errorPanel;
         [SerializeField] private GameObject winPanel;
@@ -32,6 +32,7 @@ namespace MidTerm2
         {
             networkClient = ClientManager.Instance.networkClient;
 
+            networkClient.SetAuthServer();
             networkClient.onClientStart += OnClientStarted;
             networkClient.OnReceiveEvent += OnReceiveDataEvent;
             networkClient.onDisconnection += HandleAbruptDisconnection;
