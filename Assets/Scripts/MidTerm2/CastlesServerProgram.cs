@@ -8,7 +8,7 @@ using Reflection;
 
 namespace MidTerm2
 {
-    public class CastlesProgram
+    public class CastlesServerProgram
     {
         private CastlesView _view;
         private InputReader _inputReader;
@@ -19,7 +19,7 @@ namespace MidTerm2
         public ReflectionHandler<CastlesModel> reflection;
         private ReflectiveClient<CastlesModel> _client;
 
-        public CastlesProgram(ColorHandler color, HashHandler hash)
+        public CastlesServerProgram(ColorHandler color, HashHandler hash)
         {
             _view = CastlesView.Instance;
             _inputReader = InputReader.Instance;
@@ -30,7 +30,7 @@ namespace MidTerm2
         public void Initialize(ReflectiveClient<CastlesModel> client = null)
         {
             prefabHashHandler.Initialize();
-            _model = new CastlesModel(_inputReader, client);
+            _model = new CastlesModel(_inputReader, client, true);
             reflection = new ReflectionHandler<CastlesModel>(ref _model, client);
             List<Type> types = new List<Type>();
             types.Add(typeof(Castle));

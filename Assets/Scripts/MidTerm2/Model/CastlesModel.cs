@@ -32,12 +32,14 @@ namespace MidTerm2
 
         public Tile selectedTile = null;
         public Warrior selectedWarrior = null;
+        private bool isServer = false;
 
-        public CastlesModel(InputReader input, ReflectiveClient<CastlesModel> client)
+        public CastlesModel(InputReader input, ReflectiveClient<CastlesModel> client, bool isServer = false)
         {
+            this.isServer = isServer;
             _random = new Random();
         }
-        
+
         public void Initialize()
         {
             SetMap();

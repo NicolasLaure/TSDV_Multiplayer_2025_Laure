@@ -1,7 +1,6 @@
 using System;
 using System.Net;
 using CustomMath;
-using FPS;
 using FPS.AuthServer;
 using Network;
 using Network.Enums;

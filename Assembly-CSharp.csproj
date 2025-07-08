@@ -119,6 +119,7 @@
     <Compile Include="Assets\Scripts\Events\GameObjectEventChannelSO.cs" />
     <Compile Include="Assets\Scripts\ReflectionTest\testClass.cs" />
     <Compile Include="Assets\Scripts\MidTerm2\CastlesView.cs" />
+    <Compile Include="Assets\Scripts\MidTerm2\CastlesServerProgram.cs" />
     <Compile Include="Assets\Scripts\FPS\AuthServer\Player\ClientPlayerSetter.cs" />
     <Compile Include="Assets\Scripts\Reflection\Node.cs" />
     <Compile Include="Assets\Scripts\FPS\EntityToUpdate.cs" />
