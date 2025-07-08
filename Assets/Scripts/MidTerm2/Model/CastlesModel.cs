@@ -102,9 +102,9 @@ namespace MidTerm2
             for (int i = 0; i < initialWarriorQty; i++)
             {
                 if (isPlayerOne)
-                    client.SendInstantiateRequest(_warriors, MatrixHandler.Vector2To4X4(GetWarriorPos(true)));
+                    client.SendInstantiateRequest(_warriors, MatrixHandler.Vector2To4X4(GetWarriorPos(true)), i);
                 else
-                    client.SendInstantiateRequest(_OtherWarriors, MatrixHandler.Vector2To4X4(GetWarriorPos(false)));
+                    client.SendInstantiateRequest(_OtherWarriors, MatrixHandler.Vector2To4X4(GetWarriorPos(false)), i);
             }
         }
 

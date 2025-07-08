@@ -13,6 +13,7 @@ using PrimitiveType = Network.Enums.PrimitiveType;
 
 namespace Reflection
 {
+    [Serializable]
     public class ReflectionHandler<ModelType> where ModelType : class, IReflectiveModel
     {
         private Node root;
@@ -69,8 +70,8 @@ namespace Reflection
         public void SetData<T>(int[] route, T value)
         {
             SetDataAt(route, value, _model);
-            Node target = root;
 
+            Node target = root;
             for (int i = 0; i < route.Length; i++)
             {
                 target = target[route[i]];
@@ -135,8 +136,7 @@ namespace Reflection
                 if (info.IsCollection())
                 {
                     Debug.Log("SET Collection");
-                    info.SetValue(obj, SetCollectionData(info.GetValue(obj), route, value, startIndex + 1));
-                    AddNode(route, value);
+                    info.SetValue(obj, SetCollectionData(info.GetValue(obj), route, value));
 
                     return info.GetValue(obj);
                 }
@@ -146,7 +146,7 @@ namespace Reflection
 
             if (info.IsCollection())
             {
-                info.SetValue(obj, SetCollectionData(info.GetValue(obj), route, value, startIndex + 1));
+                info.SetValue(obj, SetCollectionsData(info.GetValue(obj), route, value, startIndex + 1));
             }
             else
                 info.SetValue(obj, SetDataAt(route, value, info.GetValue(obj), startIndex + 1));
@@ -154,56 +154,78 @@ namespace Reflection
             return info.GetValue(obj);
         }
 
-        public object SetCollectionData<T>(object obj, int[] route, T value, int startIndex = 0)
+        public object SetCollectionData<T>(object obj, int[] route, T value, int index = 0)
         {
             object[] objectRef;
             if (obj is not ICollection<T> collection)
             {
-                Debug.Log($"T: {typeof(T)}: Collection Type: {obj.GetType().GetCollectionType()}");
                 return null;
             }
 
-            objectRef = new object[collection.Count + 1];
+            objectRef = new object[collection.Count];
+
+            if (index >= collection.Count)
+                objectRef = new object[index + 1];
 
             for (int i = 0; i < objectRef.Length; i++)
             {
                 if (i < collection.Count)
                 {
-                    objectRef[i] = (obj as ICollection).Cast<object>().ElementAt(i);
+                    if (i == index)
+                        objectRef[i] = value;
+                    else
+                        objectRef[i] = (obj as ICollection).Cast<object>().ElementAt(i);
                 }
                 else
                 {
                     objectRef[i] = Activator.CreateInstance(value.GetType());
                     objectRef[i] = value;
+                    AddNode(route, value);
                 }
             }
 
-            Debug.Log($"New list count: {objectRef.Length}");
+            return Activator.CreateInstance(obj.GetType(), TranslatorICollection<T>(objectRef) as ICollection);
+        }
 
-            // if (startIndex >= route.Length - 1)
-            // {
-            //     return list;
-            // }
+        public object SetCollectionsData<T>(object obj, int[] route, T value, int startIndex = 0)
+        {
+            if (!obj.IsCollection())
+                return obj;
 
-            // if (list[route[startIndex]] != null && list[route[startIndex]].IsCollection())
-            //     return SetCollectionData(list[route[startIndex]], route, value, startIndex + 1);
-            return Activator.CreateInstance(obj.GetType(), TransaltorICollection<T>(objectRef) as ICollection);
+            if (startIndex >= route.Length - 1)
+                return SetCollectionData(obj, route, value, route[^1]);
+
+            int index = 0;
+            foreach (object item in obj as ICollection)
+            {
+                if (index == route[startIndex])
+                {
+                    if (item.IsCollection())
+                        return SetCollectionsData(item, route, value, startIndex + 1);
+
+                    return SetCollectionData(obj, route, SetDataAt(route, value, item, startIndex + 1), route[startIndex]);
+                }
+
+                index++;
+            }
+
+            return null;
         }
 
         private void AddNode(int[] route, object value)
         {
             Node target = root;
-            for (int i = 0; i < route.Length - 1; i++)
+            for (int i = 0; i < route.Length; i++)
             {
-                target = target[route[i]];
+                if (route[i] < target.Children.Length)
+                    target = target[route[i]];
             }
 
-            new Node(target);
-            Debug.Log($"Add List Member");
-            //rpcHooker.AddHook(route, value);
+            Node child = new Node(target);
+            ReflectionUtilities.PopulateTree(value, child);
         }
 
-        private object TransaltorICollection<T>(object[] objs)
+        private object TranslatorICollection<T>(object[] objs)
         {
             List<T> listToTranslate = new List<T>();
             foreach (object elementsOfObjets in objs)

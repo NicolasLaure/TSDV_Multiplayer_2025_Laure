@@ -53,7 +53,7 @@ namespace Reflection
 
         public static object GetObjectAt(int[] route, object obj, int startIndex = 0)
         {
-            if (startIndex >= route.Length - 1)
+            if (startIndex >= route.Length)
                 return obj;
 
             FieldInfo info = obj.GetType().GetFields(bindingFlags)[route[startIndex]];

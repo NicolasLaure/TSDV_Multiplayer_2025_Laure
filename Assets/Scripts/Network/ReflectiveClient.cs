@@ -312,7 +312,7 @@ namespace Network
             idToUsername[usernamesMessage.id] = usernamesMessage.username;
         }
 
-        public void SendInstantiateRequest(object obj, Matrix4x4 trs)
+        public void SendInstantiateRequest(object obj, Matrix4x4 trs, int index = -1)
         {
             Type objType = obj.GetType();
             if (objType.IsArray || typeof(ICollection).IsAssignableFrom(objType))
@@ -327,6 +327,9 @@ namespace Network
             List<int> route = new List<int>();
             if (ReflectionUtilities.TryGetRoute(reflection._model, obj, route))
                 Debug.Log($"Object Path: {Route.RouteString(route.ToArray())}");
+
+            if (index != -1)
+                route.Add(index);
 
             InstanceData instanceData = new InstanceData
             {

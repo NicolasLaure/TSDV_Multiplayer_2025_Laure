@@ -57,7 +57,6 @@ namespace Network.Factory
             newObject.route = instanceData.route;
             newObject.view = instanceGO;
             newObject.obj = instance;
-            SaveObject(instanceData, newObject);
 
             if (instanceGO.TryGetComponent(out TileObjectView viewObject))
             {
@@ -66,7 +65,14 @@ namespace Network.Factory
 
             Vector2 pos = new Vector2(trs.GetPosition().x, trs.GetPosition().y);
             if (instance is TileObject tileObject)
-                ((CastlesModel)_reflection._model).SetTileObject(tileObject, pos);
+            {
+                if (instance is Warrior)
+                    SaveObject(instanceData, (Warrior)instance, newObject);
+                else if (instance is Castle)
+                    SaveObject(instanceData, (Castle)instance, newObject);
+                
+                ((CastlesModel)_reflection._model).SetTileObject((TileObject)_reflection.GetDataAt(instanceData.route), pos);
+            }
 
             return instanceData;
         }
@@ -96,12 +102,13 @@ namespace Network.Factory
             }
         }
 
-        private void SaveObject(InstanceData instanceData, ObjectModel objectModel)
+        private void SaveObject<T>(InstanceData instanceData, T obj, ObjectModel objectModel)
         {
+            Debug.Log($"T Type <{typeof(T)}>: obj Type: {obj.GetType()}");
             Debug.Log($"Instance Route is: {Route.RouteString(instanceData.route)}");
-            _reflection.SetData(instanceData.route, objectModel.obj);
-            instanceIdToInstanceData[instanceData.instanceID] = instanceData;
+            _reflection.SetData(instanceData.route, obj);
 
+            instanceIdToInstanceData[instanceData.instanceID] = instanceData;
             instanceIdToObject[instanceData.instanceID] = objectModel;
             ObjectToId[objectModel] = instanceData.instanceID;
             gameObjectToId[objectModel.view] = instanceData.instanceID;
@@ -113,7 +120,7 @@ namespace Network.Factory
             {
                 instanceIdToObject.Remove(instanceId);
 
-               // _reflection.SetData(instanceIdToObject[instanceId].route, null);
+                // _reflection.SetData(instanceIdToObject[instanceId].route, null);
                 if (ObjectToId.ContainsKey(instanceIdToObject[instanceId]))
                     ObjectToId.Remove(instanceIdToObject[instanceId]);
             }
