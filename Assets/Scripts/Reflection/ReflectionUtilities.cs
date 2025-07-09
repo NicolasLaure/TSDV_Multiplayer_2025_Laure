@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Network.Enums;
 using UnityEngine;
 using Utils;
@@ -13,6 +14,8 @@ namespace Reflection
     {
         public static BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
 
+        private static BindingFlags genericStaticFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
+
         public static Node PopulateTree(object obj, Node root = null)
         {
             root ??= new Node();
@@ -21,7 +24,8 @@ namespace Reflection
 
             if (!obj.GetType().BaseType.IsInterface && obj.GetType().BaseType != typeof(object))
             {
-                PopulateParents(obj.GetType().BaseType, obj, root);
+                typeof(ReflectionUtilities).GetMethod(nameof(PopulateParents), genericStaticFlags).MakeGenericMethod(
+                obj.GetType().BaseType).Invoke(null, new[] { obj, root });
             }
 
             foreach (FieldInfo field in obj.GetType().GetFields(bindingFlags))
@@ -56,12 +60,43 @@ namespace Reflection
             return root;
         }
 
-        public static void PopulateParents(Type type, object obj, Node root)
+        public static void PopulateParents<T>(object obj, Node root) where T : class
         {
-            if (!type.BaseType.IsInterface && type.BaseType != typeof(object))
+            if (!typeof(T).BaseType.IsInterface && typeof(T).BaseType != typeof(object))
             {
-                Type baseType = type.BaseType;
-                PopulateTree(baseType, root);
+                Type baseType = typeof(T).BaseType;
+                Debug.Log($"Base baseType: {baseType}");
+                typeof(ReflectionUtilities).GetMethod(nameof(PopulateParents), genericStaticFlags).MakeGenericMethod(
+                baseType).Invoke(null, new[] { obj, root });
+            }
+            
+            foreach (FieldInfo field in typeof(T).GetFields(bindingFlags))
+            {
+                Debug.Log($"fieldName: {field.Name}");
+                Node childNode = new Node();
+                if (ShouldSync(field))
+                {
+                    childNode.ShouldSync = true;
+                    childNode.attributes = GetAttribs(field);
+                }
+                else if (root.ShouldSync)
+                {
+                    childNode.ShouldSync = true;
+                    childNode.attributes = root.attributes;
+                }
+
+                if (childNode.ShouldSync)
+                    childNode.SetParent(root);
+
+                if (IsCollection(field) && field.GetValue(obj) != null)
+                    PopulateCollection(childNode, field.GetValue(obj));
+                else if (!field.FieldType.IsPrimitive)
+                    PopulateTree(field.GetValue(obj), childNode);
+
+                if (!childNode.ContainsSyncedNodes)
+                    childNode.RemoveAllChildren();
+
+                childNode.SetParent(root);
             }
         }
 
@@ -73,7 +108,7 @@ namespace Reflection
             FieldInfo info = obj.GetType().GetFields(bindingFlags)[route[startIndex]];
             if (route.Length == 1)
                 return GetObjectAt(route, info.GetValue(obj), startIndex + 1);
-            
+
             if (info.FieldType != typeof(string) && (info.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(info.FieldType)))
             {
                 int index = 0;

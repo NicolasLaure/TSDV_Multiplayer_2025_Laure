@@ -8,8 +8,6 @@ namespace MidTerm2.Model
     [Serializable]
     public class Warrior : TileObject
     {
-        [Sync] private float health = 15;
-
         public Warrior() : base(50)
         {
         }

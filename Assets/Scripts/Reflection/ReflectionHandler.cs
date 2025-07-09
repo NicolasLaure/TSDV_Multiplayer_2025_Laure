@@ -123,7 +123,7 @@ namespace Reflection
 
         public void ReceiveValues<T>(PrimitiveData data)
         {
-            Debug.Log($"Received primitive: {data.obj}");
+            Debug.Log($"Received primitive: {data.obj}: Route: {Route.RouteString(data.route)}");
             SetData<T>(data.route, data.obj);
         }
 
