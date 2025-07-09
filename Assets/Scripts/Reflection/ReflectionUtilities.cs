@@ -19,6 +19,11 @@ namespace Reflection
             if (obj == null)
                 return root;
 
+            if (!obj.GetType().BaseType.IsInterface && obj.GetType().BaseType != typeof(object))
+            {
+                PopulateParents(obj.GetType().BaseType, obj, root);
+            }
+
             foreach (FieldInfo field in obj.GetType().GetFields(bindingFlags))
             {
                 Debug.Log($"fieldName: {field.Name}");
@@ -49,6 +54,15 @@ namespace Reflection
             }
 
             return root;
+        }
+
+        public static void PopulateParents(Type type, object obj, Node root)
+        {
+            if (!type.BaseType.IsInterface && type.BaseType != typeof(object))
+            {
+                Type baseType = type.BaseType;
+                PopulateTree(baseType, root);
+            }
         }
 
         public static object GetObjectAt(int[] route, object obj, int startIndex = 0)

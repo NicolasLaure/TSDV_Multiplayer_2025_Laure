@@ -156,13 +156,12 @@ namespace Reflection
 
         public object SetCollectionData<T>(object obj, int[] route, T value, int index = 0)
         {
-            object[] objectRef;
             if (obj is not ICollection<T> collection)
             {
                 return null;
             }
 
-            objectRef = new object[collection.Count];
+            object[] objectRef = new object[collection.Count];
 
             if (index >= collection.Count)
                 objectRef = new object[index + 1];
@@ -215,10 +214,9 @@ namespace Reflection
         private void AddNode(int[] route, object value)
         {
             Node target = root;
-            for (int i = 0; i < route.Length; i++)
+            for (int i = 0; i < route.Length - 1; i++)
             {
-                if (route[i] < target.Children.Length)
-                    target = target[route[i]];
+                target = target[route[i]];
             }
 
             Node child = new Node(target);

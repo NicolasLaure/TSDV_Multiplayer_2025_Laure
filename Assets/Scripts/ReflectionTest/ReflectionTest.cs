@@ -16,10 +16,19 @@ namespace ReflectionTest
             reflectionHandler = new ReflectionHandler<TestModel>(ref model);
         }
 
+        private int index = 0;
+
         [ContextMenu("Add smsh")]
         void AddSmsh()
         {
-            reflectionHandler.SetData(new int[] { 2 }, new Warrior());
+            reflectionHandler.SetData(new int[] { 2, index }, new Warrior());
+            index++;
+        }
+
+        [ContextMenu("Modify")]
+        void Modify()
+        {
+            reflectionHandler.SetData(new int[] { 2, 1, 0 }, 30);
         }
     }
 }
