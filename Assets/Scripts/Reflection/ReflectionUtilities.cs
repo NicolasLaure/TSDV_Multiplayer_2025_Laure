@@ -67,15 +67,19 @@ namespace Reflection
 
         public static object GetObjectAt(int[] route, object obj, int startIndex = 0)
         {
-            if (startIndex >= route.Length)
+            if (startIndex != 0 && startIndex >= route.Length - 1)
                 return obj;
 
             FieldInfo info = obj.GetType().GetFields(bindingFlags)[route[startIndex]];
+            if (route.Length == 1)
+                return GetObjectAt(route, info.GetValue(obj), startIndex + 1);
+            
             if (info.FieldType != typeof(string) && (info.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(info.FieldType)))
             {
                 int index = 0;
                 foreach (object item in info.GetValue(obj) as ICollection)
                 {
+                    Debug.Log($"Route:{Route.RouteString(route)}, Length: {route.Length}, index: {startIndex + 1}");
                     if (index == route[startIndex + 1])
                         return GetObjectAt(route, item, startIndex + 2);
 

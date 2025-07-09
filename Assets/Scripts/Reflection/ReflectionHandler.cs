@@ -6,7 +6,9 @@ using System.Reflection;
 using Network;
 using Network_dll.Messages.Data;
 using Network.Messages;
+using NUnit.Framework.Internal.Filters;
 using Reflection.RPC;
+using UnityEditor.UIElements;
 using UnityEngine;
 using Utils;
 using PrimitiveType = Network.Enums.PrimitiveType;
@@ -189,7 +191,15 @@ namespace Reflection
                     if (item.IsCollection())
                         return SetCollectionsData<T>(item, route, value, startIndex + 1);
 
-                    return SetCollectionData<T>(obj, route, SetDataAt<T>(route, value, item, startIndex + 1), route[startIndex]);
+                    if (item.GetType().IsClass)
+                    {
+                        object valueSetted = SetDataAt<T>(route, value, item, startIndex + 1);
+                        return typeof(ReflectionHandler<ModelType>).GetMethod(nameof(SetCollectionData),
+                        BindingFlags.Instance | BindingFlags.NonPublic).MakeGenericMethod(obj.GetType()).Invoke(
+                        this, new[] { obj, route, valueSetted, route[startIndex] });
+                    }
+
+                    return SetCollectionData<T>(obj, route, value, route[startIndex]);
                 }
 
                 index++;

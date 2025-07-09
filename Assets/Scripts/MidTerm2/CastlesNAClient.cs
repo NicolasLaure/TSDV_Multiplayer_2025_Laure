@@ -11,6 +11,7 @@ using Network.Messages.Server;
 using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using PrimitiveType = Network.Enums.PrimitiveType;
 
 namespace MidTerm2
 {
@@ -86,7 +87,52 @@ namespace MidTerm2
                     break;
                 case MessageType.Primitive:
                     PrimitiveData primitive = new PrimitiveMessage(data).data;
-                    //_castlesProgram.reflection.ReceiveValues(primitive);
+                    switch (primitive.type)
+                    {
+                        case PrimitiveType.TypeSbyte:
+                            _castlesProgram.reflection.ReceiveValues<sbyte>(primitive);
+                            break;
+                        case PrimitiveType.TypeByte:
+                            _castlesProgram.reflection.ReceiveValues<byte>(primitive);
+                            break;
+                        case PrimitiveType.TypeShort:
+                            _castlesProgram.reflection.ReceiveValues<short>(primitive);
+                            break;
+                        case PrimitiveType.TypeUshort:
+                            _castlesProgram.reflection.ReceiveValues<ushort>(primitive);
+                            break;
+                        case PrimitiveType.TypeInt:
+                            _castlesProgram.reflection.ReceiveValues<int>(primitive);
+                            break;
+                        case PrimitiveType.TypeUint:
+                            _castlesProgram.reflection.ReceiveValues<uint>(primitive);
+                            break;
+                        case PrimitiveType.TypeLong:
+                            _castlesProgram.reflection.ReceiveValues<long>(primitive);
+                            break;
+                        case PrimitiveType.TypeUlong:
+                            _castlesProgram.reflection.ReceiveValues<ulong>(primitive);
+                            break;
+                        case PrimitiveType.TypeFloat:
+                            _castlesProgram.reflection.ReceiveValues<float>(primitive);
+                            break;
+                        case PrimitiveType.TypeDouble:
+                            _castlesProgram.reflection.ReceiveValues<double>(primitive);
+                            break;
+                        case PrimitiveType.TypeDecimal:
+                            _castlesProgram.reflection.ReceiveValues<decimal>(primitive);
+                            break;
+                        case PrimitiveType.TypeBool:
+                            _castlesProgram.reflection.ReceiveValues<bool>(primitive);
+                            break;
+                        case PrimitiveType.TypeChar:
+                            _castlesProgram.reflection.ReceiveValues<char>(primitive);
+                            break;
+                        case PrimitiveType.TypeString:
+                            _castlesProgram.reflection.ReceiveValues<string>(primitive);
+                            break;
+                    }
+
                     break;
                 case MessageType.Rpc:
                     RPCMessage rpcMessage = new RPCMessage(data);

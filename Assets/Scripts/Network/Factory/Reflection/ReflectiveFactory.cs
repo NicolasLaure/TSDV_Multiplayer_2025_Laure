@@ -70,8 +70,11 @@ namespace Network.Factory
                     SaveObject(instanceData, (Warrior)instance, newObject);
                 else if (instance is Castle)
                     SaveObject(instanceData, (Castle)instance, newObject);
-                
-                ((CastlesModel)_reflection._model).SetTileObject((TileObject)_reflection.GetDataAt(instanceData.route), pos);
+
+                Debug.Log($"Route: {Route.RouteString(instanceData.route)}");
+                object obj = _reflection.GetDataAt(instanceData.route);
+                Debug.Log($"ObjectType is: {obj.GetType()}, Route: {Route.RouteString(instanceData.route)}");
+                ((CastlesModel)_reflection._model).SetTileObject((TileObject)obj, pos);
             }
 
             return instanceData;
@@ -106,7 +109,7 @@ namespace Network.Factory
         {
             Debug.Log($"T Type <{typeof(T)}>: obj Type: {obj.GetType()}");
             Debug.Log($"Instance Route is: {Route.RouteString(instanceData.route)}");
-           // _reflection.SetData(instanceData.route, obj);
+            _reflection.SetData<T>(instanceData.route, obj);
 
             instanceIdToInstanceData[instanceData.instanceID] = instanceData;
             instanceIdToObject[instanceData.instanceID] = objectModel;
