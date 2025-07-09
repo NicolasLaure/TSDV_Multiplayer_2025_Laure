@@ -21,14 +21,14 @@ namespace ReflectionTest
         [ContextMenu("Add smsh")]
         void AddSmsh()
         {
-            reflectionHandler.SetData(new int[] { 2, index }, new Warrior());
+            reflectionHandler.SetData<Warrior>(new int[] { 2, index }, new Warrior());
             index++;
         }
 
         [ContextMenu("Modify")]
         void Modify()
         {
-            reflectionHandler.SetData(new int[] { 2, 1, 0 }, 30);
+            reflectionHandler.SetData<Warrior>(new int[] { 2, 1, 0 }, 30);
         }
     }
 }

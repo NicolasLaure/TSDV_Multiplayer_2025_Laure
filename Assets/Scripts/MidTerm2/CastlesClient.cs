@@ -85,7 +85,7 @@ namespace MidTerm2
                     break;
                 case MessageType.Primitive:
                     PrimitiveData primitive = new PrimitiveMessage(data).data;
-                    _castlesProgram.reflection.ReceiveValues(primitive);
+                    //_castlesProgram.reflection.ReceiveValues(primitive);
                     break;
                 case MessageType.Rpc:
                     RPCMessage rpcMessage = new RPCMessage(data);

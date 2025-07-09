@@ -106,7 +106,7 @@ namespace Network.Factory
         {
             Debug.Log($"T Type <{typeof(T)}>: obj Type: {obj.GetType()}");
             Debug.Log($"Instance Route is: {Route.RouteString(instanceData.route)}");
-            _reflection.SetData(instanceData.route, obj);
+           // _reflection.SetData(instanceData.route, obj);
 
             instanceIdToInstanceData[instanceData.instanceID] = instanceData;
             instanceIdToObject[instanceData.instanceID] = objectModel;
