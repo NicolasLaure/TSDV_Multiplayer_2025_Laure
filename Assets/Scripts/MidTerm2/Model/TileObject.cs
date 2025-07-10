@@ -11,7 +11,7 @@ namespace MidTerm2.Model
         public event Action<Tile> onMove;
         [Sync] protected int currentHealth;
         [Sync] public Vector2 position;
-
+        
         public TileObject(int maxHealth)
         {
             currentHealth = maxHealth;

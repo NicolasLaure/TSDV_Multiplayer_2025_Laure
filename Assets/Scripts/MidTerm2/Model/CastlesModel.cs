@@ -19,8 +19,8 @@ namespace MidTerm2
         private int mapSize = 30;
         public bool isPlayerTurn = false;
 
-        [Sync] public Castle _castle = new Castle();
-        [Sync] public Castle _OtherCastle = new Castle();
+        public Castle _castle = new Castle();
+        public Castle _OtherCastle = new Castle();
 
         public List<Warrior> _warriors = new List<Warrior>();
         public List<Warrior> _OtherWarriors = new List<Warrior>();

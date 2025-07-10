@@ -260,6 +260,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9328f44457caf0e44ada0dcc2f51371d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  color: {fileID: 11400000, guid: 52184fc5f8af67a418860a811870f43a, type: 2}
+  hashHandler: {fileID: 11400000, guid: c38fbe6a2d90f0d40ba94ff93a7bd748, type: 2}
 --- !u!1 &871494196
 GameObject:
   m_ObjectHideFlags: 0

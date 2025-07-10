@@ -6,9 +6,7 @@ using System.Reflection;
 using Network;
 using Network_dll.Messages.Data;
 using Network.Messages;
-using NUnit.Framework.Internal.Filters;
 using Reflection.RPC;
-using UnityEditor.UIElements;
 using UnityEngine;
 using Utils;
 using PrimitiveType = Network.Enums.PrimitiveType;
@@ -96,7 +94,10 @@ namespace Reflection
         private void UpdateHashes(Node rootNode)
         {
             if (rootNode.ShouldSync)
+            {
+                Debug.Log($"RootNode route: {Route.RouteString(rootNode.GetRoute())}");
                 rootNode.currentHash = ReflectionUtilities.GetObjectAt(rootNode.GetRoute(), _model).GetHashCode();
+            }
 
             if (rootNode.ContainsSyncedNodes)
                 foreach (Node child in rootNode.Children)
@@ -132,6 +133,13 @@ namespace Reflection
             if (startIndex >= route.Length)
                 return value;
 
+            if (obj != null && obj.HasBaseClass() && obj.GetType().GetBaseMaxIndex() < route[startIndex])
+            {
+                object baseObj = typeof(ReflectionHandler<ModelType>).GetMethod(nameof(SetParentData), ReflectionUtilities.genericStaticFlags).MakeGenericMethod(
+                obj.GetType().BaseType).Invoke(this, new[] { route, value, obj, startIndex });
+                return baseObj;
+            }
+
             FieldInfo info = obj.GetType().GetFields(ReflectionUtilities.bindingFlags)[route[startIndex]];
 
             if (info.IsCollection())
@@ -140,7 +148,29 @@ namespace Reflection
                 info.SetValue(obj, SetCollectionsData<T>(info.GetValue(obj), route, value, startIndex + 1));
             }
             else
+            {
                 info.SetValue(obj, SetDataAt<T>(route, value, info.GetValue(obj), startIndex + 1));
+            }
+
+            return obj;
+        }
+
+        public object SetParentData<T>(int[] route, object value, object obj, int startIndex = 0)
+        {
+            if (startIndex >= route.Length)
+                return value;
+
+            FieldInfo info = typeof(T).GetFields(ReflectionUtilities.bindingFlags)[route[startIndex]];
+
+            if (info.IsCollection())
+            {
+                Debug.Log("Set CollectionData");
+                info.SetValue(obj, SetCollectionsData<T>(info.GetValue(obj), route, value, startIndex + 1));
+            }
+            else
+            {
+                info.SetValue(obj, SetDataAt<T>(route, value, info.GetValue(obj), startIndex + 1));
+            }
 
             return obj;
         }
@@ -193,10 +223,19 @@ namespace Reflection
 
                     if (item.GetType().IsClass)
                     {
-                        object valueSetted = SetDataAt<T>(route, value, item, startIndex + 1);
-                        return typeof(ReflectionHandler<ModelType>).GetMethod(nameof(SetCollectionData),
-                        BindingFlags.Instance | BindingFlags.NonPublic).MakeGenericMethod(obj.GetType()).Invoke(
-                        this, new[] { obj, route, valueSetted, route[startIndex] });
+                        object valueSet = null;
+                        if (item.HasBaseClass())
+                        {
+                            MethodInfo setParentDataMethod = typeof(ReflectionHandler<ModelType>).GetMethod(nameof(SetParentData), ReflectionUtilities.genericStaticFlags);
+                            Type baseType = item.GetType().BaseType;
+                            valueSet = setParentDataMethod.MakeGenericMethod(baseType).Invoke(this, new[] { route, value, item, startIndex + 1 });
+                        }
+                        else
+                            valueSet = SetDataAt<T>(route, value, item, startIndex + 1);
+
+                        MethodInfo setCollectionMethod = typeof(ReflectionHandler<ModelType>).GetMethod(nameof(SetCollectionData), ReflectionUtilities.genericStaticFlags);
+                        return setCollectionMethod.MakeGenericMethod(item.GetType()).Invoke(
+                        this, new[] { obj, route, valueSet, route[startIndex] });
                     }
 
                     return SetCollectionData<T>(obj, route, value, route[startIndex]);
@@ -218,6 +257,7 @@ namespace Reflection
 
             Node child = ReflectionUtilities.PopulateTree(value);
             child.SetParent(target);
+            Debug.Log($"New Child with Route: {child.GetRoute()}");
         }
 
         private object TranslatorICollection<T>(object[] objs)

@@ -12,6 +12,7 @@ namespace ReflectionTest
         [Sync] public int a;
         private float b;
         Warrior warrior = new Warrior();
+        private Castle _castle = new Castle();
         List<Warrior> warriors = new List<Warrior>();
 
         public TestModel(int a, float b)

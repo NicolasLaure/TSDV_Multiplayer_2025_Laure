@@ -71,7 +71,6 @@ namespace Network.Factory
                 else if (instance is Castle)
                     SaveObject(instanceData, (Castle)instance, newObject);
 
-                Debug.Log($"Route: {Route.RouteString(instanceData.route)}");
                 object obj = _reflection.GetDataAt(instanceData.route);
                 Debug.Log($"ObjectType is: {obj.GetType()}, Route: {Route.RouteString(instanceData.route)}");
                 ((CastlesModel)_reflection._model).SetTileObject((TileObject)obj, pos);
