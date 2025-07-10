@@ -316,7 +316,7 @@ namespace Network
         {
             Type objType = obj.GetType();
             if (objType.IsArray || typeof(ICollection).IsAssignableFrom(objType))
-                objType = ReflectionUtilities.GetCollectionType(objType);
+                objType = objType.GetCollectionType();
 
             if (!factory.typeHashes.typeToHash.ContainsKey(objType))
             {

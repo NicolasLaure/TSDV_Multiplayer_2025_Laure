@@ -60,7 +60,7 @@ namespace Network.Factory
 
             if (instanceGO.TryGetComponent(out TileObjectView viewObject))
             {
-                CastlesView.Instance.SetTileObjectPosition(newObject);
+                //                CastlesView.Instance.SetTileObjectPosition(newObject);
             }
 
             Vector2 pos = new Vector2(trs.GetPosition().x, trs.GetPosition().y);
@@ -73,7 +73,7 @@ namespace Network.Factory
 
                 object obj = _reflection.GetDataAt(instanceData.route);
                 Debug.Log($"ObjectType is: {obj.GetType()}, Route: {Route.RouteString(instanceData.route)}");
-                ((CastlesModel)_reflection._model).SetTileObject((TileObject)obj, pos);
+                //          ((CastlesModel)_reflection._model).SetTileObject((TileObject)obj, pos);
             }
 
             return instanceData;

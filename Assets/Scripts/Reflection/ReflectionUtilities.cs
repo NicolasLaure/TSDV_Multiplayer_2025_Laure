@@ -50,7 +50,7 @@ namespace Reflection
 
                 if (IsCollection(field) && field.GetValue(obj) != null)
                     PopulateCollection(childNode, field.GetValue(obj));
-                else if (!field.FieldType.IsPrimitive && field.FieldType != typeof(Action))
+                else if (!field.FieldType.IsPrimitive && !field.IsDelegate())
                     PopulateTree(field.GetValue(obj), childNode);
 
                 if (!childNode.ContainsSyncedNodes)
@@ -67,8 +67,6 @@ namespace Reflection
             if (!typeof(T).BaseType.IsInterface && typeof(T).BaseType != typeof(object))
             {
                 Type baseType = typeof(T).BaseType;
-                typeof(ReflectionUtilities).GetMethod(nameof(PopulateParents), genericStaticFlags).MakeGenericMethod(
-                baseType).Invoke(null, new[] { obj, root });
             }
 
             foreach (FieldInfo field in typeof(T).GetFields(bindingFlags))
@@ -90,7 +88,7 @@ namespace Reflection
 
                 if (IsCollection(field) && field.GetValue(obj) != null)
                     PopulateCollection(childNode, field.GetValue(obj));
-                else if (!field.FieldType.IsPrimitive && field.FieldType != typeof(Action))
+                else if (!field.FieldType.IsPrimitive && !field.IsDelegate())
                     PopulateTree(field.GetValue(obj), childNode);
 
                 if (!childNode.ContainsSyncedNodes)
@@ -241,7 +239,7 @@ namespace Reflection
                         return true;
                     }
                 }
-                else if (!field.FieldType.IsPrimitive && TryGetRoute(field.GetValue(model), obj, route))
+                else if (!field.FieldType.IsPrimitive && !field.IsDelegate() && TryGetRoute(field.GetValue(model), obj, route))
                 {
                     route.Insert(0, count);
                     return true;
@@ -278,7 +276,7 @@ namespace Reflection
                         return true;
                     }
                 }
-                else if (!item.GetType().IsPrimitive && item.GetType() == obj.GetType() && TryGetRoute(item, obj, route))
+                else if (!item.GetType().IsPrimitive && !item.IsDelegate() && item.GetType() == obj.GetType() && TryGetRoute(item, obj, route))
                 {
                     route.Insert(0, count);
                     return true;
@@ -309,6 +307,7 @@ namespace Reflection
             return info.GetCustomAttribute(typeof(Sync), false) != null;
         }
 
+
         public static Attributes GetAttribs(FieldInfo info)
         {
             return ((Sync)info.GetCustomAttribute(typeof(Sync), false)).attribs;
@@ -322,6 +321,16 @@ namespace Reflection
         public static bool IsCollection(this FieldInfo field)
         {
             return field.FieldType != typeof(string) && (field.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(field.FieldType));
+        }
+
+        public static bool IsDelegate(this FieldInfo field)
+        {
+            return field.FieldType == typeof(Action) || field.FieldType == typeof(Action<>);
+        }
+
+        public static bool IsDelegate(this object obj)
+        {
+            return obj.GetType() == typeof(Action) || obj.GetType() == typeof(Action<>);
         }
 
         public static bool HasBaseClass(this object obj)

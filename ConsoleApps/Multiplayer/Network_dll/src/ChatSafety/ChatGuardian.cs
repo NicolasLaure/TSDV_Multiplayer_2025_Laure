@@ -33,6 +33,9 @@ public class ChatGuardian
     private List<string> TryGetWords()
     {
         List<string> forbidden = JsonConvert.DeserializeObject<List<string>>(_fileHandler.ReadFile());
+        if (forbidden == null)
+            forbidden = new List<string>();
+        
         return forbidden;
     }
 }
