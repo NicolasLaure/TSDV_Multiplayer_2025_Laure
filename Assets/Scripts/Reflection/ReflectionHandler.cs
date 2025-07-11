@@ -23,10 +23,13 @@ namespace Reflection
         public Node Root => root;
         private DirtyRegistry<ModelType> _dirtyRegistry = new DirtyRegistry<ModelType>();
 
+        private int _clientId;
+
         public ReflectionHandler(ref ModelType model)
         {
             _model = model;
             rpcHooker = new RPCHooker<ModelType>(ref model);
+            _clientId = 0;
             Initialize();
         }
 
@@ -34,6 +37,7 @@ namespace Reflection
         {
             _model = model;
             _networkClient = networkClient;
+            _clientId = _networkClient.Id;
             rpcHooker = new RPCHooker<ModelType>(ref model, _networkClient);
             Initialize();
         }
@@ -47,7 +51,7 @@ namespace Reflection
         public void Update()
         {
             UpdateHashes(root);
-            _dirtyRegistry.Update(root);
+            _dirtyRegistry.Update(root, _clientId);
             SendDirtyValues();
         }
 
@@ -95,7 +99,6 @@ namespace Reflection
         {
             if (rootNode.ShouldSync)
             {
-                Debug.Log($"RootNode route: {Route.RouteString(rootNode.GetRoute())}");
                 rootNode.currentHash = ReflectionUtilities.GetObjectAt(rootNode.GetRoute(), _model).GetHashCode();
             }
 

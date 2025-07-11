@@ -401,5 +401,16 @@ namespace Reflection
             startIndex++;
             return GetObjectAt(route, list[route[startIndex]], startIndex);
         }
+
+        public static Node GetNodeAt(Node root, int[] route)
+        {
+            Node target = root;
+            for (int i = 0; i < route.Length; i++)
+            {
+                target = root[route[i]];
+            }
+
+            return target;
+        }
     }
 }

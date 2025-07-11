@@ -325,9 +325,9 @@ namespace Network
             }
 
             List<int> route = new List<int>();
-            if (ReflectionUtilities.TryGetRoute(reflection._model, obj, route))
-                Debug.Log($"Object Path: {Route.RouteString(route.ToArray())}");
-
+            if (!ReflectionUtilities.TryGetRoute(reflection._model, obj, route))
+                return;
+            
             if (index != -1)
                 route.Add(index);
 

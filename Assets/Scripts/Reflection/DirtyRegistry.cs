@@ -11,26 +11,26 @@ namespace Reflection
 
         public List<int[]> DirtyRoutes => dirtyRoutes;
 
-        public void Update(Node root)
+        public void Update(Node root, int clientId)
         {
             dirtyRoutes.Clear();
-            GetDirtyNodes(root, ref dirtyRoutes);
+            GetDirtyNodes(root, clientId, ref dirtyRoutes);
         }
 
-        public void GetDirtyNodes(Node root, ref List<int[]> dirtyNodesPaths)
+        public void GetDirtyNodes(Node root, int clientId, ref List<int[]> dirtyNodesPaths)
         {
             foreach (Node child in root.Children)
             {
                 if (!child.ShouldSync && !child.ContainsSyncedNodes)
                     continue;
 
-                if (child.CheckDirty())
+                if (child.CheckDirty(clientId))
                 {
                     Debug.Log($"Dirty: {Route.RouteString(child.GetRoute())}");
                     dirtyNodesPaths.Add(child.GetRoute());
                 }
 
-                GetDirtyNodes(child, ref dirtyNodesPaths);
+                GetDirtyNodes(child, clientId, ref dirtyNodesPaths);
             }
         }
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using MidTerm2;
 using MidTerm2.Model;
 using MidTerm2.View;
@@ -8,6 +9,7 @@ using Network.Messages;
 using Reflection;
 using UnityEngine;
 using Utils;
+using Debug = UnityEngine.Debug;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Network.Factory
@@ -60,7 +62,7 @@ namespace Network.Factory
 
             if (instanceGO.TryGetComponent(out TileObjectView viewObject))
             {
-                //                CastlesView.Instance.SetTileObjectPosition(newObject);
+                CastlesView.Instance.SetTileObjectPosition(newObject);
             }
 
             Vector2 pos = new Vector2(trs.GetPosition().x, trs.GetPosition().y);
@@ -73,7 +75,7 @@ namespace Network.Factory
 
                 object obj = _reflection.GetDataAt(instanceData.route);
                 Debug.Log($"ObjectType is: {obj.GetType()}, Route: {Route.RouteString(instanceData.route)}");
-                //          ((CastlesModel)_reflection._model).SetTileObject((TileObject)obj, pos);
+                ((CastlesModel)_reflection._model).SetTileObject((TileObject)obj, pos);
             }
 
             return instanceData;
@@ -106,9 +108,8 @@ namespace Network.Factory
 
         private void SaveObject<T>(InstanceData instanceData, T obj, ObjectModel objectModel)
         {
-            Debug.Log($"T Type <{typeof(T)}>: obj Type: {obj.GetType()}");
-            Debug.Log($"Instance Route is: {Route.RouteString(instanceData.route)}");
             _reflection.SetData<T>(instanceData.route, obj);
+            ReflectionUtilities.GetNodeAt(_reflection.Root, instanceData.route).ownerId = instanceData.originalClientID;
 
             instanceIdToInstanceData[instanceData.instanceID] = instanceData;
             instanceIdToObject[instanceData.instanceID] = objectModel;

@@ -10,7 +10,6 @@ namespace Network.Factory
 
         public Material GetFromColor(short color)
         {
-            Debug.Log($"RECEIVED COLOR {color}");
             return materials[color];
         }
     }

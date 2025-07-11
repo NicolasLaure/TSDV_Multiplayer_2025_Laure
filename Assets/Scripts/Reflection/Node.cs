@@ -12,6 +12,7 @@ namespace Reflection
         private Node _parent;
         private bool _shouldSync;
         public Attributes attributes = Attributes.None;
+        public int ownerId;
         public int lastHash = -1;
         public int currentHash;
         public Node Parent => _parent;
@@ -114,8 +115,11 @@ namespace Reflection
             return indices.ToArray();
         }
 
-        public bool CheckDirty()
+        public bool CheckDirty(int clientId)
         {
+            if (clientId != ownerId)
+                return false;
+            
             bool isDirty = currentHash != lastHash;
             lastHash = currentHash;
             return isDirty;

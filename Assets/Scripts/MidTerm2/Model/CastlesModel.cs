@@ -25,7 +25,7 @@ namespace MidTerm2
         public List<Warrior> _warriors = new List<Warrior>();
         public List<Warrior> _OtherWarriors = new List<Warrior>();
 
-        private int initialWarriorQty = 15;
+        private int initialWarriorQty = 1;
         [Sync] public int remainingMoves = 10;
         private const int maxMoves = 10;
         private Random _random;
