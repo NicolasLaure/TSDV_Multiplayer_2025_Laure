@@ -100,34 +100,34 @@ namespace Reflection
 
         public static object GetObjectAt(int[] route, object obj, int startIndex = 0)
         {
+            if (startIndex > route.Length - 1)
+                return obj;
+
             if (startIndex != 0 && startIndex >= route.Length - 1)
             {
-                if (obj.HasBaseClass())
+                if (obj != null && obj.HasBaseClass() && obj.GetType().GetBaseMaxIndex() < route[startIndex])
                 {
                     return typeof(ReflectionUtilities).GetMethod(nameof(GetParentObjectAt), genericStaticFlags).MakeGenericMethod(
                     obj.GetType().BaseType).Invoke(null, new[] { route, obj, startIndex });
                 }
             }
 
-            if (obj.HasBaseClass())
+            if (obj != null && obj.HasBaseClass() && obj.GetType().GetBaseMaxIndex() < route[startIndex])
             {
                 return typeof(ReflectionUtilities).GetMethod(nameof(GetParentObjectAt), genericStaticFlags).MakeGenericMethod(
                 obj.GetType().BaseType).Invoke(null, new[] { route, obj, startIndex });
             }
 
             FieldInfo info = obj.GetType().GetFields(bindingFlags)[route[startIndex]];
+
             if (route.Length == 1)
-            {
-                startIndex++;
-                return GetObjectAt(route, info.GetValue(obj), startIndex);
-            }
+                return GetObjectAt(route, info.GetValue(obj), startIndex + 1);
 
             if (info.FieldType != typeof(string) && (info.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(info.FieldType)))
             {
                 int index = 0;
                 foreach (object item in info.GetValue(obj) as ICollection)
                 {
-                    Debug.Log($"Route:{Route.RouteString(route)}, Length: {route.Length}, index: {startIndex + 1}");
                     if (index == route[startIndex + 1])
                     {
                         return GetObjectAt(route, item, startIndex + 2);
@@ -144,15 +144,22 @@ namespace Reflection
 
         public static object GetObjectAt<T>(int[] route, object obj, int startIndex = 0)
         {
-            if (startIndex != 0 && startIndex >= route.Length - 1)
+            FieldInfo info;
+            if (startIndex > route.Length - 1)
                 return obj;
 
-            FieldInfo info = obj.GetType().GetFields(bindingFlags)[route[startIndex]];
-            if (route.Length == 1)
+            if (startIndex != 0 && startIndex >= route.Length - 1)
             {
-                startIndex++;
-                return GetObjectAt<T>(route, info.GetValue(obj), startIndex);
+                if (obj != null && obj.HasBaseClass() && obj.GetType().GetBaseMaxIndex() < route[startIndex])
+                {
+                    return typeof(ReflectionUtilities).GetMethod(nameof(GetParentObjectAt), genericStaticFlags).MakeGenericMethod(
+                    obj.GetType().BaseType).Invoke(null, new[] { route, obj, startIndex });
+                }
             }
+
+            info = obj.GetType().GetFields(bindingFlags)[route[startIndex]];
+            if (route.Length == 1)
+                return GetObjectAt<T>(route, info.GetValue(obj), startIndex + 1);
 
             if (info.FieldType != typeof(string) && (info.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(info.FieldType)))
             {
@@ -180,7 +187,6 @@ namespace Reflection
             if (startIndex > route.Length - 1)
                 return obj;
 
-            info = typeof(T).GetFields(bindingFlags)[route[startIndex]];
             if (startIndex != 0 && startIndex == route.Length - 1)
             {
                 if (typeof(T).HasBaseClass())
@@ -188,15 +194,12 @@ namespace Reflection
                     return typeof(ReflectionUtilities).GetMethod(nameof(GetParentObjectAt), genericStaticFlags).MakeGenericMethod(
                     typeof(T).BaseType).Invoke(null, new[] { route, obj, startIndex });
                 }
-
-                return info.GetValue(obj);
             }
+
+            info = typeof(T).GetFields(bindingFlags)[route[startIndex]];
 
             if (route.Length == 1)
-            {
-                startIndex++;
-                return GetObjectAt<T>(route, info.GetValue(obj), startIndex);
-            }
+                return GetObjectAt<T>(route, info.GetValue(obj), startIndex + 1);
 
             if (info.FieldType != typeof(string) && (info.FieldType.IsArray || typeof(ICollection).IsAssignableFrom(info.FieldType)))
             {
@@ -335,7 +338,7 @@ namespace Reflection
 
         public static bool HasBaseClass(this object obj)
         {
-            return !obj.GetType().BaseType.IsInterface && obj.GetType().BaseType != typeof(object);
+            return !obj.GetType().IsInterface && !obj.GetType().BaseType.IsGenericType && obj.GetType().BaseType != typeof(object);
         }
 
         public static bool HasBaseClass(this Type type)
@@ -407,7 +410,7 @@ namespace Reflection
             Node target = root;
             for (int i = 0; i < route.Length; i++)
             {
-                target = root[route[i]];
+                target = target[route[i]];
             }
 
             return target;

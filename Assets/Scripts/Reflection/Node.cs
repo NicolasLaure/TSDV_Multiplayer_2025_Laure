@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Network.Enums;
 using UnityEngine;
+using Utils;
 
 namespace Reflection
 {
@@ -12,7 +13,7 @@ namespace Reflection
         private Node _parent;
         private bool _shouldSync;
         public Attributes attributes = Attributes.None;
-        public int ownerId;
+        private int ownerId = -1;
         public int lastHash = -1;
         public int currentHash;
         public Node Parent => _parent;
@@ -40,6 +41,19 @@ namespace Reflection
                 foreach (Node child in children)
                 {
                     child.ShouldSync = value;
+                }
+            }
+        }
+
+        public int OwnerId
+        {
+            get => ownerId;
+            set
+            {
+                ownerId = value;
+                foreach (Node child in children)
+                {
+                    child.OwnerId = value;
                 }
             }
         }
@@ -119,7 +133,7 @@ namespace Reflection
         {
             if (clientId != ownerId)
                 return false;
-            
+
             bool isDirty = currentHash != lastHash;
             lastHash = currentHash;
             return isDirty;

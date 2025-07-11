@@ -59,7 +59,7 @@ namespace MidTerm2
                     GameObject tile = Instantiate(tilePrefab);
                     tile.transform.position = IndexToPosition(new Vector2(i, j), 0.1f);
                     boardView[i][j] = tile.GetComponent<TileView>();
-                    boardView[i][j].position = new System.Numerics.Vector2(i, j);
+                    boardView[i][j].position = new Vector2(i, j);
                 }
             }
         }

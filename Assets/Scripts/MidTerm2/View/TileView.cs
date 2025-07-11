@@ -1,5 +1,4 @@
 using UnityEngine;
-using Vector2 = System.Numerics.Vector2;
 
 namespace MidTerm2.View
 {

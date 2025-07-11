@@ -1,7 +1,7 @@
 using System;
-using System.Numerics;
 using Network.Utilities;
-using Reflection;
+using UnityEngine;
+using Random = System.Random;
 
 namespace MidTerm2.Model
 {
@@ -22,7 +22,7 @@ namespace MidTerm2.Model
                 return;
 
             Vector2 offset = targetTile.position - position;
-            int moves = (int)MathF.Abs(offset.X) + (int)MathF.Abs(offset.Y);
+            int moves = (int)MathF.Abs(offset.x) + (int)MathF.Abs(offset.y);
 
             if (moves <= remainingMoves)
             {

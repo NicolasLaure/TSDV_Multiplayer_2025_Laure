@@ -38,6 +38,7 @@ namespace Reflection
             _model = model;
             _networkClient = networkClient;
             _clientId = _networkClient.Id;
+            Debug.Log($"Client id: {_clientId}");
             rpcHooker = new RPCHooker<ModelType>(ref model, _networkClient);
             Initialize();
         }
@@ -117,6 +118,7 @@ namespace Reflection
             foreach (int[] route in _dirtyRegistry.DirtyRoutes)
             {
                 PrimitiveMessage message = GetMessage(route);
+                Debug.Log($"MessageType:{message.data.type}: , {GetDataAt(route).GetType()}");
                 if (message.data.type != PrimitiveType.NonPrimitive)
                 {
                     Debug.Log($"Sent PrimitiveData: {message.data.obj}");
@@ -224,7 +226,7 @@ namespace Reflection
                     if (item.IsCollection())
                         return SetCollectionsData<T>(item, route, value, startIndex + 1);
 
-                    if (item.GetType().IsClass)
+                    if (!item.GetType().IsPrimitive && !item.IsDelegate())
                     {
                         object valueSet = null;
                         if (item.HasBaseClass())

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using MidTerm2;
 using MidTerm2.Model;
 using MidTerm2.View;
@@ -10,7 +9,6 @@ using Reflection;
 using UnityEngine;
 using Utils;
 using Debug = UnityEngine.Debug;
-using Vector2 = System.Numerics.Vector2;
 
 namespace Network.Factory
 {
@@ -74,7 +72,6 @@ namespace Network.Factory
                     SaveObject(instanceData, (Castle)instance, newObject);
 
                 object obj = _reflection.GetDataAt(instanceData.route);
-                Debug.Log($"ObjectType is: {obj.GetType()}, Route: {Route.RouteString(instanceData.route)}");
                 ((CastlesModel)_reflection._model).SetTileObject((TileObject)obj, pos);
             }
 
@@ -109,7 +106,8 @@ namespace Network.Factory
         private void SaveObject<T>(InstanceData instanceData, T obj, ObjectModel objectModel)
         {
             _reflection.SetData<T>(instanceData.route, obj);
-            ReflectionUtilities.GetNodeAt(_reflection.Root, instanceData.route).ownerId = instanceData.originalClientID;
+            Debug.Log($"Instantiated Route: {Route.RouteString(instanceData.route)}");
+            ReflectionUtilities.GetNodeAt(_reflection.Root, instanceData.route).OwnerId = instanceData.originalClientID;
 
             instanceIdToInstanceData[instanceData.instanceID] = instanceData;
             instanceIdToObject[instanceData.instanceID] = objectModel;

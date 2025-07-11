@@ -13,7 +13,6 @@ using Network.Messages.Server;
 using Network.Utilities;
 using Reflection;
 using UnityEngine;
-using Utils;
 using Ping = Network.Messages.Ping;
 using Random = System.Random;
 
@@ -61,7 +60,6 @@ namespace Network
 
             connection = new UdpConnection(ip, port, this);
             clientStartTime = Time.time;
-            onClientStart?.Invoke();
 
             HandshakeData handshakeData;
             handshakeData.usernameLength = this.username.Length;
@@ -196,6 +194,7 @@ namespace Network
                 // Moving Cubes message
                 case MessageType.HandShakeResponse:
                     HandleHandshakeResponse(new ServerHsResponse(data));
+                    onClientStart?.Invoke();
                     PrivateHandshake privateHandshake = new PrivateHandshake(_elo, color);
                     privateHandshake.clientId = id;
                     SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), privateHandshake.Serialize()));
@@ -208,6 +207,7 @@ namespace Network
 
                 case MessageType.MatchMakerHsResponse:
                     HandleMatchMakerHandshakeResponse(new MatchMakerHsResponse(data));
+                    onClientStart?.Invoke();
                     SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), new PrivateMatchMakerHandshake(_elo).Serialize()));
                     break;
                 case MessageType.PrivateMatchmakerHsResponse:
@@ -327,7 +327,7 @@ namespace Network
             List<int> route = new List<int>();
             if (!ReflectionUtilities.TryGetRoute(reflection._model, obj, route))
                 return;
-            
+
             if (index != -1)
                 route.Add(index);
 

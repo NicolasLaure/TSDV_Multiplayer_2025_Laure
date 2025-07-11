@@ -80,7 +80,7 @@ namespace ReflectionTest
         [ContextMenu("GetBaseItem")]
         void GetBaseItem()
         {
-            Debug.Log($"Object recovered: {reflectionHandler.GetDataAt(new int[] { 2, 2 })}");
+            Debug.Log($"Object recovered: {reflectionHandler.GetDataAt(new int[] { 4, 0, 3, 0 })}");
         }
     }
 }

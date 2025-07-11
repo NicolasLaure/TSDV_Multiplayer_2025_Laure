@@ -10,9 +10,9 @@ namespace MidTerm2.View
 
         public void SetPosition(Tile newTile)
         {
-            pos = new Vector2(newTile.position.X, newTile.position.Y);
+            pos = new Vector2(newTile.position.x, newTile.position.y);
             transform.position = CastlesView.Instance.IndexToPosition(pos, 0);
-            CastlesView.Instance.boardView[(int)newTile.position.X][(int)newTile.position.Y].tileObject = gameObject;
+            CastlesView.Instance.boardView[(int)newTile.position.x][(int)newTile.position.y].tileObject = gameObject;
         }
     }
 }

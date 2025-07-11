@@ -30,7 +30,6 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
         string username = usernameInputField.text;
         short color = (short)colorDropdown.value;
-        Debug.Log($"Color Number {color}");
 
         Debug.Log(ClientManager.Instance.networkClient.defaultPort);
         ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, username, color);

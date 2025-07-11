@@ -1,6 +1,6 @@
 using System;
-using System.Numerics;
 using Reflection;
+using UnityEngine;
 
 namespace MidTerm2.Model
 {
@@ -11,7 +11,7 @@ namespace MidTerm2.Model
         public event Action<Tile> onMove;
         [Sync] protected int currentHealth;
         [Sync] public Vector2 position;
-        
+
         public TileObject(int maxHealth)
         {
             currentHealth = maxHealth;
@@ -27,7 +27,8 @@ namespace MidTerm2.Model
         public void SetTile(Tile newTile)
         {
             onMove?.Invoke(newTile);
-            position = newTile.position;
+            position.x = newTile.position.x;
+            position.y = newTile.position.y;
         }
     }
 }

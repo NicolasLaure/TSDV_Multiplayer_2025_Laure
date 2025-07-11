@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using Input;
 using MidTerm2.Model;
 using Network;
-using Reflection;
 using Reflection.RPC;
 using UnityEngine;
 using Utils;
 using Random = System.Random;
-using Vector2 = System.Numerics.Vector2;
 
 namespace MidTerm2
 {
@@ -26,12 +24,12 @@ namespace MidTerm2
         public List<Warrior> _OtherWarriors = new List<Warrior>();
 
         private int initialWarriorQty = 1;
-        [Sync] public int remainingMoves = 10;
+        public int remainingMoves = 10;
         private const int maxMoves = 10;
         private Random _random;
 
         public Tile selectedTile = null;
-        public Warrior selectedWarrior = null;
+        public int selectedWarriorIndex = -1;
         private bool isServer = false;
 
         public CastlesModel(InputReader input, ReflectiveClient<CastlesModel> client, bool isServer = false)
@@ -45,6 +43,12 @@ namespace MidTerm2
             SetMap();
             SetArmy(ClientManager.Instance.networkClient.Id == 0);
             isPlayerTurn = ClientManager.Instance.networkClient.Id == 0;
+        }
+
+        public void Update()
+        {
+            UpdateWarriors(_warriors);
+            UpdateWarriors(_OtherWarriors);
         }
 
         private void SetMap()
@@ -66,19 +70,28 @@ namespace MidTerm2
             remainingMoves = maxMoves;
         }
 
+        private void UpdateWarriors(List<Warrior> warriors)
+        {
+            foreach (Warrior warrior in warriors)
+            {
+                if (board[(int)warrior.position.x][(int)warrior.position.y].currentObject != warrior)
+                    SetTileObject(warrior, warrior.position);
+            }
+        }
+
         public Vector2 GetWarriorPos(bool isPlayerOne)
         {
             Vector2 cornerIndex = GetCastlePos(isPlayerOne);
-            Vector2 xRandomRange = isPlayerOne ? new Vector2(cornerIndex.X, cornerIndex.X + 5) : new Vector2(cornerIndex.X - 5, cornerIndex.X);
-            Vector2 yRandomRange = isPlayerOne ? new Vector2(cornerIndex.Y, cornerIndex.Y + 5) : new Vector2(cornerIndex.Y - 5, cornerIndex.Y);
+            Vector2 xRandomRange = isPlayerOne ? new Vector2(cornerIndex.x, cornerIndex.x + 5) : new Vector2(cornerIndex.x - 5, cornerIndex.x);
+            Vector2 yRandomRange = isPlayerOne ? new Vector2(cornerIndex.y, cornerIndex.y + 5) : new Vector2(cornerIndex.y - 5, cornerIndex.y);
 
             Vector2 warriorPos;
             do
             {
-                warriorPos = new Vector2(_random.Next((int)xRandomRange.X, (int)xRandomRange.Y), _random.Next((int)yRandomRange.X, (int)yRandomRange.Y));
-            } while (board[(int)warriorPos.X][(int)warriorPos.Y].currentObject != null || board[(int)warriorPos.X][(int)warriorPos.Y].isTaken);
+                warriorPos = new Vector2(_random.Next((int)xRandomRange.x, (int)xRandomRange.y), _random.Next((int)yRandomRange.x, (int)yRandomRange.y));
+            } while (board[(int)warriorPos.x][(int)warriorPos.y].currentObject != null || board[(int)warriorPos.x][(int)warriorPos.y].isTaken);
 
-            board[(int)warriorPos.X][(int)warriorPos.Y].isTaken = true;
+            board[(int)warriorPos.x][(int)warriorPos.y].isTaken = true;
             return warriorPos;
         }
 
@@ -110,8 +123,9 @@ namespace MidTerm2
 
         public void SetTileObject(TileObject tileObject, Vector2 pos)
         {
-            tileObject.SetTile(board[(int)pos.X][(int)pos.Y]);
-            board[(int)pos.X][(int)pos.Y].currentObject = tileObject;
+            board[(int)tileObject.position.x][(int)tileObject.position.y].currentObject = null;
+            tileObject.SetTile(board[(int)pos.x][(int)pos.y]);
+            board[(int)pos.x][(int)pos.y].currentObject = tileObject;
         }
 
         public Vector2 GetCastlePos(bool isPlayerOne)
@@ -121,25 +135,45 @@ namespace MidTerm2
 
         public Tile GetTile(Vector2 pos)
         {
-            return board[(int)pos.X][(int)pos.Y];
+            return board[(int)pos.x][(int)pos.y];
         }
 
         public void SelectTile(Vector2 pos)
         {
-            selectedTile = board[(int)pos.X][(int)pos.Y];
+            selectedTile = board[(int)pos.x][(int)pos.y];
             Debug.Log($"Selected Tile Position {selectedTile.position}");
-            if (selectedWarrior != null)
+            if (selectedWarriorIndex != -1)
             {
-                selectedWarrior.Move(selectedTile, ref remainingMoves);
-                selectedWarrior = null;
+                if (ClientManager.Instance.networkClient.Id == 0)
+                {
+                    Debug.Log(_warriors[selectedWarriorIndex].position);
+                    _warriors[selectedWarriorIndex].Move(selectedTile, ref remainingMoves);
+                    Debug.Log(_warriors[selectedWarriorIndex].position);
+                }
+                else
+                    _OtherWarriors[selectedWarriorIndex].Move(selectedTile, ref remainingMoves);
+
+                selectedWarriorIndex = -1;
             }
         }
 
         public void SelectTileObject(Vector2 pos)
         {
-            selectedTile = board[(int)pos.X][(int)pos.Y];
+            selectedTile = board[(int)pos.x][(int)pos.y];
             if (selectedTile.currentObject as Warrior != null)
-                selectedWarrior = (Warrior)board[(int)pos.X][(int)pos.Y].currentObject;
+            {
+                List<Warrior> warriors = _warriors;
+                if (ClientManager.Instance.networkClient.Id != 0)
+                    warriors = _OtherWarriors;
+                for (int i = 0; i < warriors.Count; i++)
+                {
+                    if (warriors[i].position == pos)
+                    {
+                        selectedWarriorIndex = i;
+                        return;
+                    }
+                }
+            }
         }
     }
 }

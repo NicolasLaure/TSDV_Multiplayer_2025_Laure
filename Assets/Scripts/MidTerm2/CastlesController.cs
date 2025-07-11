@@ -1,10 +1,7 @@
-using MidTerm2.Model;
 using MidTerm2.View;
 using Network.Factory;
 using Reflection;
 using UnityEngine;
-using Utils;
-using Vector2 = System.Numerics.Vector2;
 
 namespace MidTerm2
 {

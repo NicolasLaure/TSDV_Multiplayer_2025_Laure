@@ -51,6 +51,7 @@ namespace MidTerm2
         public void Update()
         {
             reflection.Update();
+            _model.Update();
         }
     }
 }
