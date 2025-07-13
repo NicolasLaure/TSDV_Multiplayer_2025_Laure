@@ -25,6 +25,7 @@ namespace Cubes
         [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
         [SerializeField] private HashHandler prefabsData;
         [SerializeField] private ColorHandler colorHandler;
+        [SerializeField] private InputReader input;
 
         [SerializeField] private ErrorMessagePanel errorPanel;
         [SerializeField] private GameObject winPanel;
@@ -52,7 +53,7 @@ namespace Cubes
             _networkClient.onClientDisconnect += HandleDisconnectedUser;
             _networkClient.onError += HandleError;
 
-            InputReader.Instance.onQuit += HandleQuit;
+            input.onQuit += HandleQuit;
         }
 
         private void OnDestroy()

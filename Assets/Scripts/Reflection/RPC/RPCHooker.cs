@@ -25,7 +25,7 @@ namespace Reflection.RPC
 
         #region Constructors
 
-        public RPCHooker(ref ModelType model)
+        public RPCHooker(ref ModelType model, ReflectiveAuthoritativeServer<ModelType> server)
         {
             if (Instance == null)
                 Instance = this;

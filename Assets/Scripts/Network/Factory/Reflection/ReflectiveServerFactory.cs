@@ -12,7 +12,7 @@ using Debug = UnityEngine.Debug;
 
 namespace Network.Factory
 {
-    public class ReflectiveFactory<ModelType> : NetworkFactory where ModelType : class, IReflectiveModel
+    public class ReflectiveServerFactory<ModelType> : NetworkFactory where ModelType : class, IReflectiveModel
     {
         private readonly Dictionary<int, ObjectModel> instanceIdToObject = new Dictionary<int, ObjectModel>();
         private readonly Dictionary<ObjectModel, int> ObjectToId = new Dictionary<ObjectModel, int>();
@@ -24,9 +24,7 @@ namespace Network.Factory
 
         private ReflectionHandler<ModelType> _reflection;
 
-        private readonly Dictionary<int, InstanceData> heldInstanceIdToData = new Dictionary<int, InstanceData>();
-
-        public ReflectiveFactory(ReflectionHandler<ModelType> reflection, List<Type> instantiableTypes, ColorHandler colorHandler, HashHandler prefabHash)
+        public ReflectiveServerFactory(ReflectionHandler<ModelType> reflection, List<Type> instantiableTypes, ColorHandler colorHandler, HashHandler prefabHash)
         {
             _reflection = reflection;
             typeHashes = new ReflectiveHashHandler(instantiableTypes);
@@ -42,7 +40,8 @@ namespace Network.Factory
                 return new InstanceData();
             }
 
-            heldInstanceIdToData.Add(instanceData.instanceID, instanceData);
+            SaveInstance(ref instanceData);
+
             object instance = Activator.CreateInstance(typeHashes.hashToType[instanceData.prefabHash]);
             GameObject prefab = prefabHashes.hashToPrefab[instanceData.prefabHash];
             Matrix4x4 trs = ByteFormat.Get4X4FromBytes(instanceData.trs, 0);
@@ -74,7 +73,7 @@ namespace Network.Factory
 
             return instanceData;
         }
-
+        
         public void DeInstantiate(int instanceId)
         {
             GameObject gameObjectToDestroy = instanceIdToObject[instanceId].view;

@@ -20,7 +20,7 @@ namespace Network
         public Action<byte[], IPEndPoint> OnReceiveEvent;
         protected UdpConnection connection;
         protected float maxResponseWait = 0.2f;
-        protected int TimeOutTime = 10;
+        protected int TimeOutTime = 15;
 
         protected int seed;
         protected Random rngGenerator;

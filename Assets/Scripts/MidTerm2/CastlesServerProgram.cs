@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FPS.AuthServer;
 using Input;
 using MidTerm2.Model;
 using Network;
@@ -11,46 +12,45 @@ namespace MidTerm2
     public class CastlesServerProgram
     {
         private CastlesView _view;
-        private InputReader _inputReader;
         private ColorHandler _colorHandler;
         private HashHandler prefabHashHandler;
-        private CastlesModel _model;
+        public CastlesModel _model;
 
         public ReflectionHandler<CastlesModel> reflection;
-        private ReflectiveClient<CastlesModel> _client;
+        private ReflectiveAuthoritativeServer<CastlesModel> _server;
 
-        public CastlesServerProgram(ColorHandler color, HashHandler hash)
+        public CastlesServerProgram(ColorHandler colorHandler, HashHandler hash)
         {
             _view = CastlesView.Instance;
-            _inputReader = InputReader.Instance;
-            _colorHandler = color;
+            _colorHandler = colorHandler;
             prefabHashHandler = hash;
         }
 
-        public void Initialize(ReflectiveClient<CastlesModel> client = null)
+        public void Initialize(ReflectiveAuthoritativeServer<CastlesModel> server = null)
         {
             prefabHashHandler.Initialize();
-            _model = new CastlesModel(_inputReader, client, true);
-            reflection = new ReflectionHandler<CastlesModel>(ref _model, client);
+            _model = new CastlesModel();
+            reflection = new ReflectionHandler<CastlesModel>(ref _model, server);
+            _model.Initialize();
             List<Type> types = new List<Type>();
             types.Add(typeof(Castle));
             types.Add(typeof(Warrior));
 
-            _client = client;
-            _client.onHandshakeOk += _model.Initialize;
-            client.factory = new ReflectiveFactory<CastlesModel>(reflection, types, _colorHandler, prefabHashHandler);
-            client.reflection = reflection;
+            _server = server;
+            _server.factory = new ReflectiveServerFactory<CastlesModel>(reflection, types, _colorHandler, prefabHashHandler);
+            _server.reflection = reflection;
 
             _view.InitializeView(_model);
 
-            CastlesController.Instance.model = _model;
-            CastlesController.Instance.factory = client.factory;
-            CastlesController.Instance.reflection = reflection;
+            AuthServerController.Instance.model = _model;
+            AuthServerController.Instance.factory = server.factory;
+            AuthServerController.Instance.reflection = reflection;
         }
 
         public void Update()
         {
             reflection.Update();
+            _model.Update();
         }
     }
 }

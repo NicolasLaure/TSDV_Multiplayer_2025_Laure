@@ -23,6 +23,7 @@ namespace MidTerm2
 
         [SerializeField] private ColorHandler color;
         [SerializeField] private HashHandler hashHandler;
+        [SerializeField] private InputReader input;
 
         public int clientId = -1;
 
@@ -39,7 +40,8 @@ namespace MidTerm2
             networkClient.onClientDisconnect += HandleDisconnectedUser;
             networkClient.onError += HandleError;
 
-            InputReader.Instance.onQuit += HandleQuit;
+            input.onQuit += HandleQuit;
+            input.Initialize();
         }
 
         private void OnDestroy()

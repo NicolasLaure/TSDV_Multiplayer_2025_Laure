@@ -20,7 +20,7 @@ namespace ReflectionTest
 
         void Start()
         {
-            reflectionHandler = new ReflectionHandler<TestModel>(ref model);
+            reflectionHandler = new ReflectionHandler<TestModel>(ref model, new ReflectiveClient<TestModel>());
             List<Type> types = new List<Type>();
             types.AddRange(new[] { typeof(Castle), typeof(Warrior) });
             _factory = new ReflectiveFactory<TestModel>(reflectionHandler, types, color, hashHandler);

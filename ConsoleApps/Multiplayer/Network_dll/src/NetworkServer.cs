@@ -79,6 +79,7 @@ namespace Network
             {
                 int id = nextClientId;
                 ipToId[ip] = nextClientId;
+                Console.Write("Adding client: " + ip.Address + " ID: " + id);
                 Logger.Log("Adding client: " + ip.Address + " ID: " + id);
                 clients.Add(nextClientId, new Client(ip, nextClientId, username, ServerTime.time));
                 clients[nextClientId].lastPingTime = ServerTime.time;

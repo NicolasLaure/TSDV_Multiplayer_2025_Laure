@@ -58,6 +58,7 @@ namespace Network
             this.username = username;
             this.color = color;
 
+            Debug.Log($"ip: {ip}, port: {port}");
             connection = new UdpConnection(ip, port, this);
             clientStartTime = Time.time;
 
@@ -74,7 +75,7 @@ namespace Network
         public override void Update()
         {
             base.Update();
-            ping = Time.time - lastPingTime;
+            ping = ServerTime.time - lastPingTime;
             onPingUpdated?.Invoke((short)(ping * 1000));
 
             for (int i = 0; i < heldMessages.Count; i++)
@@ -83,7 +84,7 @@ namespace Network
                 {
                     Debug.Log($"Resending held message, Held Messages count: {heldMessages.Count}");
                     SendToServer(heldMessages[i].message);
-                    heldMessages[i].heldSince = Time.time;
+                    heldMessages[i].heldSince = ServerTime.time;
                 }
             }
 

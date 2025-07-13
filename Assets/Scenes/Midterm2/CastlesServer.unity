@@ -119,6 +119,84 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &770282296
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3045277866962941006, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3045277866962941006, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3045277866962941006, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3045277866962941006, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3045277866962941006, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3045277866962941006, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3045277866962941006, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3045277866962941006, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3045277866962941006, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3045277866962941006, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3497242454017489952, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: movesText
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3497242454017489952, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: passTurnButton
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5802004593387478226, guid: 2412e6f12e6d86d4983c40036426433d,
+        type: 3}
+      propertyPath: m_Name
+      value: CastlesView
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2412e6f12e6d86d4983c40036426433d, type: 3}
 --- !u!1 &1143509618
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,10 +227,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model:
-    isPlayerTurn: 0
+    isPlayerOneTurn: 0
+    _castle:
+      position: {x: 0, y: 0}
+    _OtherCastle:
+      position: {x: 0, y: 0}
     _warriors: []
     _OtherWarriors: []
     remainingMoves: 0
+    selectedWarriorIndex: 0
 --- !u!4 &1143509620
 Transform:
   m_ObjectHideFlags: 0
@@ -249,7 +332,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1941017542367559973, guid: c2f245a4935ac064e8186d354f183bb3,
         type: 3}
-      insertIndex: 1
+      insertIndex: -1
       addedObject: {fileID: 2063857427}
   m_SourcePrefab: {fileID: 100100000, guid: c2f245a4935ac064e8186d354f183bb3, type: 3}
 --- !u!1 &2063857426 stripped
@@ -267,14 +350,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 2063857426}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6446175856549245957a42c3f9758eb, type: 3}
+  m_Script: {fileID: 11500000, guid: 568c9b2743294df4fa6e1a8ebf24fd9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabsData: {fileID: 11400000, guid: c38fbe6a2d90f0d40ba94ff93a7bd748, type: 2}
-  colorHandler: {fileID: 11400000, guid: 52184fc5f8af67a418860a811870f43a, type: 2}
+  model:
+    isPlayerOneTurn: 0
+    _castle:
+      position: {x: 0, y: 0}
+    _OtherCastle:
+      position: {x: 0, y: 0}
+    _warriors: []
+    _OtherWarriors: []
+    remainingMoves: 10
+    selectedWarriorIndex: -1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 2063857425}
   - {fileID: 1143509620}
+  - {fileID: 770282296}

@@ -152,8 +152,6 @@ namespace Network
                         break;
                     case MessageType.Error:
                         break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
 
                 if (messageAttribs.HasFlag(Attributes.Important))

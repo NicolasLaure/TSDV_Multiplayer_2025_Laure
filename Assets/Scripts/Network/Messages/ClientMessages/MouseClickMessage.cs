@@ -1,45 +1,54 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Network.Enums;
 
 namespace Network.Messages
 {
     public struct MouseInput
     {
-        Vector2 position;
+        public float x;
+        public float y;
 
         public byte[] Serialize()
         {
             List<byte> data = new List<byte>();
-            data.AddRange(BitConverter.GetBytes(position.X));
-            data.AddRange(BitConverter.GetBytes(position.Y));
+            data.AddRange(BitConverter.GetBytes(x));
+            data.AddRange(BitConverter.GetBytes(y));
             return data.ToArray();
         }
 
         public static MouseInput Deserialize(byte[] data)
         {
             MouseInput input;
-            input.position.X = BitConverter.ToSingle(data);
-            input.position.Y = BitConverter.ToSingle(data, sizeof(float));
+            input.x = BitConverter.ToSingle(data);
+            input.y = BitConverter.ToSingle(data, sizeof(float));
             return input;
         }
     }
 
     public class MouseClickMessage : Message<MouseInput>
     {
-        private MouseInput _input;
+        public MouseInput input;
 
-        public MouseClickMessage(MouseInput input, int clientId)
+        public MouseClickMessage(MouseInput input)
         {
-            _input = input;
-            this.clientId = clientId;
+            messageType = MessageType.MouseInput;
+            this.input = input;
+            clientId = -1;
             messageId++;
+        }
+
+        public MouseClickMessage(byte[] data)
+        {
+            messageType = MessageType.MouseInput;
+            input = Deserialize(data);
         }
 
         public override byte[] Serialize()
         {
             List<byte> data = new List<byte>();
-            data.AddRange(_input.Serialize());
+            data.AddRange(input.Serialize());
             return GetFormattedData(data.ToArray());
         }
 

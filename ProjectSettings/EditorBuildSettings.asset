@@ -17,5 +17,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Midterm2/CastlesServer.unity
     guid: f827a5307746ade49b9b411fa1645e5c
+  - enabled: 0
+    path: Assets/Scenes/Midterm2/CastlesNA_Client.unity
+    guid: 8c9fce8e442d35143b75fc0872b480af
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

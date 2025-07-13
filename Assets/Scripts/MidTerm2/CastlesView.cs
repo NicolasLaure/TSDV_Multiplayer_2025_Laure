@@ -38,7 +38,10 @@ namespace MidTerm2
             if (_model == null)
                 return;
 
-            if (passTurnButton.activeInHierarchy != _model.isPlayerTurn)
+            if (passTurnButton == null || movesText == null)
+                return;
+
+            if (passTurnButton.activeInHierarchy != _model.isPlayerOneTurn)
                 OnTurnChanged();
         }
 
@@ -74,7 +77,10 @@ namespace MidTerm2
 
         private void OnTurnChanged()
         {
-            passTurnButton.SetActive(_model.isPlayerTurn);
+            if (passTurnButton == null || movesText == null)
+                return;
+
+            passTurnButton.SetActive(_model.isPlayerOneTurn);
             movesText.SetText(_model.remainingMoves);
         }
     }

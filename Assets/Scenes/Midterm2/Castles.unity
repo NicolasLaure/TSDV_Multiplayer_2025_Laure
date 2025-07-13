@@ -731,6 +731,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textObject: {fileID: 258862298}
+--- !u!114 &306497930 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4507904852966558499, guid: 7a3a155c773720d459f548660ba40fd9,
+    type: 3}
+  m_PrefabInstance: {fileID: 656114060}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c193638e701e94248831de3bb5eecfc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &388691206
 GameObject:
   m_ObjectHideFlags: 0
@@ -1727,6 +1739,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3598177305874348220, guid: 7a3a155c773720d459f548660ba40fd9,
         type: 3}
+      propertyPath: input
+      value: 
+      objectReference: {fileID: 306497930}
+    - target: {fileID: 3598177305874348220, guid: 7a3a155c773720d459f548660ba40fd9,
+        type: 3}
       propertyPath: winPanel
       value: 
       objectReference: {fileID: 543012718}
@@ -2327,10 +2344,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model:
-    isPlayerTurn: 0
+    isPlayerOneTurn: 0
+    _castle:
+      position: {x: 0, y: 0}
+    _OtherCastle:
+      position: {x: 0, y: 0}
     _warriors: []
     _OtherWarriors: []
     remainingMoves: 0
+    selectedWarriorIndex: -1
 --- !u!4 &1143509620
 Transform:
   m_ObjectHideFlags: 0
@@ -3036,6 +3058,7 @@ MonoBehaviour:
   chatScreen: {fileID: 1951501998}
   mainCamera: {fileID: 7568101541316388220, guid: ae1844ca2b5b7324bbb75a38978fe210,
     type: 3}
+  input: {fileID: 306497930}
   gameOverPanels:
   - {fileID: 543012718}
   - {fileID: 1185770181}

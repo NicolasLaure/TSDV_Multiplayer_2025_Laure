@@ -11,6 +11,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] private InputReader input;
+
     public PlayerProperties playerProperties;
     protected Vector3 movementDir;
 
@@ -20,9 +22,9 @@ public class PlayerController : MonoBehaviour
 
     protected virtual void Start()
     {
-        InputReader.Instance.onMove += HandleDir;
-        InputReader.Instance.onCrouch += ToggleCrouch;
-        InputReader.Instance.onShoot += Shoot;
+        input.onMove += HandleDir;
+        input.onCrouch += ToggleCrouch;
+        input.onShoot += Shoot;
 
         lastFrameTrs = transform.localToWorldMatrix;
 
@@ -35,9 +37,9 @@ public class PlayerController : MonoBehaviour
         if (Camera.main != null)
             Camera.main.transform.parent = null;
 
-        InputReader.Instance.onMove -= HandleDir;
-        InputReader.Instance.onCrouch -= ToggleCrouch;
-        InputReader.Instance.onShoot -= Shoot;
+        input.onMove -= HandleDir;
+        input.onCrouch -= ToggleCrouch;
+        input.onShoot -= Shoot;
 
         _healthPoints.onDeathEvent -= OnDeath;
     }

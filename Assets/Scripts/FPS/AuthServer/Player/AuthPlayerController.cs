@@ -25,14 +25,14 @@ namespace FPS.AuthServer
             EntityToUpdate thisEntity;
             thisEntity.gameObject = gameObject;
             thisEntity.trs = trs;
-            FpsServer.Instance.onEntityUpdated.Invoke((thisEntity, id));
+           // FpsServer.Instance.onEntityUpdated.Invoke((thisEntity, id));
         }
 
         protected override void Shoot()
         {
             Vector3 bulletSpawnPosition = transform.right * playerProperties.shootingPoint.x + transform.up * playerProperties.shootingPoint.y + transform.forward * playerProperties.shootingPoint.z;
             Matrix4x4 bulletSpawnTrs = Matrix4x4.TRS(transform.position + bulletSpawnPosition, Camera.main.transform.rotation, Vector3.one);
-            FpsServer.Instance.Instantiate(playerProperties.bulletPrefab, bulletSpawnTrs, (short)Colors.Black, id);
+           // FpsServer.Instance.Instantiate(playerProperties.bulletPrefab, bulletSpawnTrs, (short)Colors.Black, id);
         }
 
         protected override void ToggleCrouch()

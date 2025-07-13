@@ -1,7 +1,5 @@
 using System;
 using System.Net;
-using CustomMath;
-using FPS.AuthServer;
 using Network;
 using Network.Enums;
 using Network.Factory;
@@ -19,16 +17,32 @@ namespace MidTerm2
 
         public ReflectiveAuthoritativeServer<CastlesModel> _server;
         public ReflectionHandler<CastlesModel> _reflectionHandler;
-        //        private AuthServerFactory _serverFactory;
+        public ReflectiveServerFactory<CastlesModel> factory;
+        public Action<Tuple<Vector2, int>> onMouseClick;
+
+        private CastlesServerProgram _castlesServerProgram;
 
         private void Start()
         {
             _server = new ReflectiveAuthoritativeServer<CastlesModel>();
-
-            string[] args = Environment.GetCommandLineArgs();
+            string[] args;
+#if UNITY_EDITOR
+            args = new[] { " ",_server.defaultPort.ToString() };
+#else
+             args = Environment.GetCommandLineArgs();
+#endif
             _server.Start(int.Parse(args[1]));
             _server.onNewClient += HandleHandshake;
             _server.OnReceiveEvent += OnReceiveDataEvent;
+            _castlesServerProgram = new CastlesServerProgram(color, hashHandler);
+            _castlesServerProgram.Initialize(_server);
+            AuthServerController.Instance.StartUp();
+        }
+
+        private void Update()
+        {
+            _server.Update();
+            _castlesServerProgram.Update();
         }
 
         void OnReceiveDataEvent(byte[] data, IPEndPoint ip)
@@ -39,22 +53,12 @@ namespace MidTerm2
             {
                 case MessageType.PrivateHandshake:
                     PrivateHandshake privateHandshake = new PrivateHandshake(data);
-                    HandlePrivateHandshake(privateHandshake);
+                    HandlePrivateHandshake(privateHandshake, receivedClientId);
                     break;
-                case MessageType.AxisInput:
-                    AxisInput axisInput = new AxisInput(data);
-                    if (axisInput.axisType == AxisType.Move)
-                        InputHandler.Instance.idToMoveActions[receivedClientId]?.Invoke(new Vec3(axisInput.axis));
-                    else
-                        InputHandler.Instance.idToLookActions[receivedClientId]?.Invoke(new Vec3(axisInput.axis));
-
-                    break;
-                case MessageType.ActionInput:
-                    ActionInput actionInput = new ActionInput(data);
-                    if (actionInput.actionType == (short)ActionType.Crouch)
-                        InputHandler.Instance.idToCrouchActions[receivedClientId]?.Invoke();
-                    else
-                        InputHandler.Instance.idToShootActions[receivedClientId]?.Invoke();
+                case MessageType.MouseInput:
+                    MouseInput mouseInput = new MouseClickMessage(data).input;
+                    Vector2 mousePos = new Vector2(mouseInput.x, mouseInput.y);
+                    onMouseClick?.Invoke(new Tuple<Vector2, int>(mousePos, receivedClientId));
                     break;
 
                 default:
@@ -69,26 +73,10 @@ namespace MidTerm2
             _server.SendToClient(hsResponse.Serialize(), clientId);
         }
 
-        private void HandlePrivateHandshake(PrivateHandshake privateHandshake)
+        private void HandlePrivateHandshake(PrivateHandshake privateHandshake, int id)
         {
+            _castlesServerProgram._model.SetServerArmy(privateHandshake.clientId, privateHandshake.clientId == 0, privateHandshake.color);
         }
-
-        // void OnEntityUpdate((EntityToUpdate entityToToUpdate, int clientId) entityAndId)
-        // {
-        //     if (_server != null)
-        //     {
-        //         SendEntityPosition(entityAndId.entityToToUpdate.gameObject, entityAndId.entityToToUpdate.trs, entityAndId.clientId);
-        //     }
-        // }
-        //
-        // private void SendEntityPosition(GameObject entity, Matrix4x4 trs, int clientId)
-        // {
-        //     if (!_serverFactory.TryGetInstanceId(entity, out int instanceId, out int originalClientId) || originalClientId != clientId)
-        //         return;
-        //
-        //     Position entityPosition = new Position(trs, instanceId, clientId);
-        //     _server.Broadcast(entityPosition.Serialize());
-        // }
 
         public void Instantiate(GameObject prefab, Matrix4x4 trs, short instanceColor, int clientId)
         {

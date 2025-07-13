@@ -17,7 +17,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 
     [SerializeField] private GameObject chatScreen;
     [SerializeField] private GameObject mainCamera;
-
+    [SerializeField] private InputReader input;
     [SerializeField] private List<GameObject> gameOverPanels = new List<GameObject>();
 
     protected override void Initialize()
@@ -34,10 +34,10 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         Debug.Log(ClientManager.Instance.networkClient.defaultPort);
         ClientManager.Instance.networkClient.StartClient(ipAddress, ClientManager.Instance.networkClient.defaultPort, username, color);
         ClientManager.Instance.isServerActive = true;
-        
+
         ClientManager.Instance.networkClient.onDisconnection += Disconnect;
 
-        InputReader.Instance.onPingScreen += OnPingScreen;
+        input.onPingScreen += OnPingScreen;
         SwitchToFps();
     }
 
@@ -63,7 +63,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         if (Camera.main == null)
             GameObject.Instantiate(mainCamera);
 
-        InputReader.Instance.onPingScreen -= OnPingScreen;
+        input.onPingScreen -= OnPingScreen;
         if (ClientManager.Instance.networkClient != null)
             ClientManager.Instance.networkClient.onDisconnection -= Disconnect;
     }

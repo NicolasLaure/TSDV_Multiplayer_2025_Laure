@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
@@ -25,17 +26,12 @@ namespace Network
         public static Action onServerStart;
         private ChatGuardian _chatGuardian;
         private EloHandler _eloHandler;
-        private AuthServerFactory factory;
         private readonly Dictionary<int, List<InstanceData>> instanceIdTointegrityChecks = new Dictionary<int, List<InstanceData>>();
 
+        public ReflectiveServerFactory<ModelType> factory;
+        public ReflectionHandler<ModelType> reflection;
         private float maxEmptyTime = 3;
         private float emptySince = 0;
-
-        //public ReflectiveFactory<ModelType> factory;
-        public ReflectiveAuthoritativeServer()
-        {
-            
-        }
 
         public void Start(int port)
         {
@@ -77,7 +73,7 @@ namespace Network
 
                 if (messageType == MessageType.Ping)
                 {
-                    short ms = (short)Math.Floor((ServerTime.time - clients[receivedClientId].lastPingTime * 1000));
+                    short ms = (short)Math.Floor((ServerTime.time - clients[receivedClientId].lastPingTime) * 1000);
                     clients[receivedClientId].lastPingTime = ServerTime.time;
                     SendToClient(new Ping(ms).Serialize(), receivedClientId);
                     return;
@@ -267,34 +263,37 @@ namespace Network
             return usernames.ToArray();
         }
 
-        // public void SendInstantiateRequest(object obj, Matrix4x4 trs)
-        // {
-        //     Type objType = obj.GetType();
-        //     if (objType.IsArray || typeof(ICollection).IsAssignableFrom(objType))
-        //         objType = ReflectionUtilities.GetCollectionType(objType);
-        //
-        //     if (!factory.typeHashes.typeToHash.ContainsKey(objType))
-        //     {
-        //         Debug.Log("Invalid Prefab");
-        //         return;
-        //     }
-        //
-        //     List<int> route = new List<int>();
-        //     if (ReflectionUtilities.TryGetRoute(reflection._model, obj, route))
-        //         Debug.Log($"Object Path: {Route.RouteString(route.ToArray())}");
-        //
-        //     InstanceData instanceData = new InstanceData
-        //     {
-        //         originalClientID = id,
-        //         prefabHash = factory.typeHashes.typeToHash[objType],
-        //         instanceID = -1,
-        //         trs = ByteFormat.Get4X4Bytes(trs),
-        //         color = color,
-        //         routeLength = route.Count,
-        //         route = route.ToArray()
-        //     };
-        //
-        //     Broadcast(new InstantiateRequest(instanceData).Serialize());
-        // }
+        public void BroadcastInstantiateRequest(object obj, Matrix4x4 trs, short color, int id, int index = -1)
+        {
+            Type objType = obj.GetType();
+            if (objType.IsArray || typeof(ICollection).IsAssignableFrom(objType))
+                objType = objType.GetCollectionType();
+
+            if (!factory.typeHashes.typeToHash.ContainsKey(objType))
+            {
+                Debug.Log("Invalid Prefab");
+                return;
+            }
+
+            List<int> route = new List<int>();
+            if (!ReflectionUtilities.TryGetRoute(reflection._model, obj, route))
+                return;
+
+            if (index != -1)
+                route.Add(index);
+
+            InstanceData instanceData = new InstanceData
+            {
+                originalClientID = id,
+                prefabHash = factory.typeHashes.typeToHash[objType],
+                instanceID = -1,
+                trs = ByteFormat.Get4X4Bytes(trs),
+                color = color,
+                routeLength = route.Count,
+                route = route.ToArray()
+            };
+
+            Broadcast(new InstantiateRequest(instanceData).Serialize());
+        }
     }
 }

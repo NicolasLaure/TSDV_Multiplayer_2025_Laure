@@ -11,7 +11,6 @@ namespace MidTerm2
     public class CastlesProgram
     {
         private CastlesView _view;
-        private InputReader _inputReader;
         private ColorHandler _colorHandler;
         private HashHandler prefabHashHandler;
         private CastlesModel _model;
@@ -22,7 +21,6 @@ namespace MidTerm2
         public CastlesProgram(ColorHandler color, HashHandler hash)
         {
             _view = CastlesView.Instance;
-            _inputReader = InputReader.Instance;
             _colorHandler = color;
             prefabHashHandler = hash;
         }
@@ -30,14 +28,15 @@ namespace MidTerm2
         public void Initialize(ReflectiveClient<CastlesModel> client = null)
         {
             prefabHashHandler.Initialize();
-            _model = new CastlesModel(_inputReader, client);
+            _model = new CastlesModel();
             reflection = new ReflectionHandler<CastlesModel>(ref _model, client);
             List<Type> types = new List<Type>();
             types.Add(typeof(Castle));
             types.Add(typeof(Warrior));
 
             _client = client;
-            _client.onHandshakeOk += _model.Initialize;
+            _client.onHandshakeOk += InitializeModel;
+
             client.factory = new ReflectiveFactory<CastlesModel>(reflection, types, _colorHandler, prefabHashHandler);
             client.reflection = reflection;
 
@@ -52,6 +51,12 @@ namespace MidTerm2
         {
             reflection.Update();
             _model.Update();
+        }
+
+        private void InitializeModel()
+        {
+            _model.Initialize();
+            _model.SetArmy(_client.Id == 0);
         }
     }
 }

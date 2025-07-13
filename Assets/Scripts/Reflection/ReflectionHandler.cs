@@ -19,17 +19,19 @@ namespace Reflection
         private Node root;
         public object _model;
         private ReflectiveClient<ModelType> _networkClient;
+        private ReflectiveAuthoritativeServer<ModelType> _server;
         public RPCHooker<ModelType> rpcHooker;
         public Node Root => root;
         private DirtyRegistry<ModelType> _dirtyRegistry = new DirtyRegistry<ModelType>();
 
         private int _clientId;
 
-        public ReflectionHandler(ref ModelType model)
+        public ReflectionHandler(ref ModelType model, ReflectiveAuthoritativeServer<ModelType> server)
         {
             _model = model;
-            rpcHooker = new RPCHooker<ModelType>(ref model);
-            _clientId = 0;
+            rpcHooker = new RPCHooker<ModelType>(ref model, server);
+            _server = server;
+            _clientId = -1;
             Initialize();
         }
 

@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class MouseLook : MonoBehaviour
 {
+    [SerializeField] private InputReader input;
+
     public PlayerProperties playerProperties;
 
     private Vector2 _rotationDir = Vector2.zero;
@@ -18,7 +20,7 @@ public class MouseLook : MonoBehaviour
         xAngle = Camera.main.transform.localRotation.eulerAngles.x;
         yAngle = transform.rotation.eulerAngles.y;
 
-        InputReader.Instance.onLook += SetRotation;
+        input.onLook += SetRotation;
         ClientManager.Instance.networkClient.onDisconnection += UnlockMouse;
     }
 

@@ -18,7 +18,7 @@ namespace MidTerm2
 
         public void SelectTile(GameObject tileObject)
         {
-            if (factory == null || model == null || !model.isPlayerTurn)
+            if (factory == null || model == null || !model.isPlayerOneTurn)
                 return;
 
             TileView tileView = tileObject.GetComponent<TileView>();

@@ -1,12 +1,15 @@
 using System;
 using CustomMath;
 using FPS;
+using Input;
 using UnityEngine;
 
 namespace Cubes
 {
     public class CubeController : MonoBehaviour
     {
+        [SerializeField] private InputReader input;
+
         private float speed;
         private Vector3 dir;
 
@@ -18,8 +21,8 @@ namespace Cubes
 
         private void Start()
         {
-            Input.InputReader.Instance.onMove += HandleDir;
-            Input.InputReader.Instance.onMove += HandleDir;
+            input.onMove += HandleDir;
+            input.onMove += HandleDir;
         }
 
         void Update()

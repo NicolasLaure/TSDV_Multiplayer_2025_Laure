@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using FPS.AuthServer;
 using Input;
 using MidTerm2.Model;
 using Network;
 using Reflection.RPC;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Utils;
 using Random = System.Random;
 
@@ -15,7 +17,7 @@ namespace MidTerm2
     {
         public Tile[][] board = new Tile[30][];
         private int mapSize = 30;
-        public bool isPlayerTurn = false;
+        public bool isPlayerOneTurn = false;
 
         public Castle _castle = new Castle();
         public Castle _OtherCastle = new Castle();
@@ -30,19 +32,16 @@ namespace MidTerm2
 
         public Tile selectedTile = null;
         public int selectedWarriorIndex = -1;
-        private bool isServer = false;
 
-        public CastlesModel(InputReader input, ReflectiveClient<CastlesModel> client, bool isServer = false)
+        public CastlesModel()
         {
-            this.isServer = isServer;
             _random = new Random();
         }
 
         public void Initialize()
         {
             SetMap();
-            SetArmy(ClientManager.Instance.networkClient.Id == 0);
-            isPlayerTurn = ClientManager.Instance.networkClient.Id == 0;
+            isPlayerOneTurn = true;
         }
 
         public void Update()
@@ -66,7 +65,7 @@ namespace MidTerm2
         [RPC]
         public void ChangeTurn()
         {
-            isPlayerTurn = !isPlayerTurn;
+            isPlayerOneTurn = !isPlayerOneTurn;
             remainingMoves = maxMoves;
         }
 
@@ -95,7 +94,7 @@ namespace MidTerm2
             return warriorPos;
         }
 
-        private void SetArmy(bool isPlayerOne)
+        public void SetArmy(bool isPlayerOne)
         {
             ReflectiveClient<CastlesModel> client = ClientManager.Instance.networkClient;
             Tile castleTile;
@@ -118,6 +117,32 @@ namespace MidTerm2
                     client.SendInstantiateRequest(_warriors, MatrixHandler.Vector2To4X4(GetWarriorPos(true)), i);
                 else
                     client.SendInstantiateRequest(_OtherWarriors, MatrixHandler.Vector2To4X4(GetWarriorPos(false)), i);
+            }
+        }
+
+        public void SetServerArmy(int id, bool isPlayerOne, short color)
+        {
+            ReflectiveAuthoritativeServer<CastlesModel> server = CastlesAuthServer.Instance._server;
+            Tile castleTile;
+            if (isPlayerOne)
+            {
+                castleTile = GetTile(GetCastlePos(true));
+                server.BroadcastInstantiateRequest(_castle, MatrixHandler.Vector2To4X4(castleTile.position), color, id);
+            }
+            else
+            {
+                castleTile = GetTile(GetCastlePos(false));
+                server.BroadcastInstantiateRequest(_OtherCastle, MatrixHandler.Vector2To4X4(castleTile.position), color, id);
+            }
+
+            castleTile.isTaken = true;
+
+            for (int i = 0; i < initialWarriorQty; i++)
+            {
+                if (isPlayerOne)
+                    server.BroadcastInstantiateRequest(_warriors, MatrixHandler.Vector2To4X4(GetWarriorPos(true)), color, id, i);
+                else
+                    server.BroadcastInstantiateRequest(_OtherWarriors, MatrixHandler.Vector2To4X4(GetWarriorPos(false)), color, id, i);
             }
         }
 
