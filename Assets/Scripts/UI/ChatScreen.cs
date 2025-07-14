@@ -29,7 +29,7 @@ namespace UI
             if (inputMessage.text != "")
             {
                 Chat message = new Chat(inputMessage.text);
-                message.clientId = CastlesClient.Instance.clientId;
+                message.clientId = ClientManager.Instance.networkClient.Id;
                 ClientManager.Instance.networkClient.SendToServer(message.Serialize());
 
                 inputMessage.ActivateInputField();

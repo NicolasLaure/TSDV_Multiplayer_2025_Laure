@@ -35,7 +35,7 @@ namespace Network
 
         public void Start(int port)
         {
-            //_chatGuardian = new ChatGuardian();
+            _chatGuardian = new ChatGuardian();
             _eloHandler = new EloHandler(_savedClientHandler);
             StartServer(port);
             onServerStart?.Invoke();
