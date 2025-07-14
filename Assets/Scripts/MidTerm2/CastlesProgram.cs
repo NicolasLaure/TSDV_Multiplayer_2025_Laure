@@ -25,7 +25,7 @@ namespace MidTerm2
             prefabHashHandler = hash;
         }
 
-        public void Initialize(ReflectiveClient<CastlesModel> client = null)
+        public void Initialize(ReflectiveClient<CastlesModel> client = null, bool isAuth = false)
         {
             prefabHashHandler.Initialize();
             _model = new CastlesModel();
@@ -42,9 +42,12 @@ namespace MidTerm2
 
             _view.InitializeView(_model);
 
-            CastlesController.Instance.model = _model;
-            CastlesController.Instance.factory = client.factory;
-            CastlesController.Instance.reflection = reflection;
+            if (!isAuth)
+            {
+                CastlesController.Instance.model = _model;
+                CastlesController.Instance.factory = client.factory;
+                CastlesController.Instance.reflection = reflection;
+            }
         }
 
         public void Update()

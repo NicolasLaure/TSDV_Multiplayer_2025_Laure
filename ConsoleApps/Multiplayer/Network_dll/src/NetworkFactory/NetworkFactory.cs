@@ -8,7 +8,7 @@ namespace Network
 
         private static int instanceId = 0;
 
-        protected void SaveInstance(ref InstanceData instanceData)
+        public void SaveInstance(ref InstanceData instanceData)
         {
             instanceData.instanceID = instanceId;
             instanceIdToInstanceData[instanceId] = instanceData;

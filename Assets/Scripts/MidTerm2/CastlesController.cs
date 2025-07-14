@@ -28,11 +28,11 @@ namespace MidTerm2
 
                 if (originalClientId == CastlesClient.Instance.clientId && tileObjView != null)
                 {
-                    model.SelectTileObject(tileView.position);
+                    model.SelectTileObject(tileView.position, CastlesClient.Instance.clientId);
                 }
             }
             else
-                model.SelectTile(tileView.position);
+                model.SelectTile(tileView.position, CastlesClient.Instance.clientId);
         }
     }
 }

@@ -24,8 +24,6 @@ namespace Network.Factory
 
         private ReflectionHandler<ModelType> _reflection;
 
-        private readonly Dictionary<int, InstanceData> heldInstanceIdToData = new Dictionary<int, InstanceData>();
-
         public ReflectiveFactory(ReflectionHandler<ModelType> reflection, List<Type> instantiableTypes, ColorHandler colorHandler, HashHandler prefabHash)
         {
             _reflection = reflection;
@@ -42,7 +40,12 @@ namespace Network.Factory
                 return new InstanceData();
             }
 
-            heldInstanceIdToData.Add(instanceData.instanceID, instanceData);
+            if (instanceIdToObject.ContainsKey(instanceData.instanceID))
+            {
+                Debug.Log("Instance was Already instanced");
+                return new InstanceData();
+            }
+
             object instance = Activator.CreateInstance(typeHashes.hashToType[instanceData.prefabHash]);
             GameObject prefab = prefabHashes.hashToPrefab[instanceData.prefabHash];
             Matrix4x4 trs = ByteFormat.Get4X4FromBytes(instanceData.trs, 0);
@@ -197,17 +200,6 @@ namespace Network.Factory
             }
 
             return gameObjects;
-        }
-
-        public InstantiateAll GetObjectsToInstantiate()
-        {
-            List<InstanceData> instanceDatas = new List<InstanceData>();
-            foreach (var instanceData in instanceIdToInstanceData.Values)
-            {
-                instanceDatas.Add(instanceData);
-            }
-
-            return new InstantiateAll(instanceDatas);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Network
 
         public ReflectiveServerFactory<ModelType> factory;
         public ReflectionHandler<ModelType> reflection;
-        private float maxEmptyTime = 3;
+        private float maxEmptyTime = 11;
         private float emptySince = 0;
 
         public void Start(int port)
@@ -48,6 +48,7 @@ namespace Network
             if (clients.Count == 0 && ServerTime.time - emptySince >= maxEmptyTime)
             {
                 EndServer();
+                Application.Quit();
             }
 
             base.Update();
@@ -117,14 +118,15 @@ namespace Network
 
                         break;
                     case MessageType.PrivateHandshake:
+                        OnReceiveEvent?.Invoke(data, ip);
                         PrivateHandshake receivedMatchMakerHandshake = new PrivateHandshake(data);
                         Logger.Log($"Decrypted Private Handshake Color {receivedMatchMakerHandshake.color}");
                         InstantiateAll objectsToInstantiate = factory.GetObjectsToInstantiate();
+                        Debug.Log($"objectsToInstantiate count: {objectsToInstantiate.count}");
                         PrivateServerHsResponse response = new PrivateServerHsResponse(objectsToInstantiate);
                         SendToClient(Encrypter.Encrypt(idToIVKeyGenerator[receivedClientId].Next(), response.Serialize()), receivedClientId);
                         SendToClient(new UsernamesMessage(GetAllUsernames()).Serialize(), receivedClientId);
                         Broadcast(new UsernameMessage(GetUserName(receivedClientId)).Serialize());
-                        OnReceiveEvent?.Invoke(data, ip);
                         break;
                     case MessageType.Acknowledge:
                         break;
@@ -169,6 +171,7 @@ namespace Network
 
                     case MessageType.AxisInput:
                     case MessageType.ActionInput:
+                    case MessageType.MouseInput:
                         OnReceiveEvent?.Invoke(data, ip);
                         break;
 
@@ -180,8 +183,6 @@ namespace Network
                         Logger.Log($"Player {win.winnerUsername} won the game");
                         _eloHandler.EloCalculation(win.winnerUsername, win.loserUsername);
                         break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
 
                 if (messageAttribs.HasFlag(Attributes.Important))
@@ -293,6 +294,8 @@ namespace Network
                 route = route.ToArray()
             };
 
+            factory.SaveInstance(ref instanceData);
+            factory.Instantiate(instanceData, false);
             Broadcast(new InstantiateRequest(instanceData).Serialize());
         }
     }

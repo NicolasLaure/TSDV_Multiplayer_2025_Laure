@@ -316,6 +316,20 @@ namespace Reflection
             return ((Sync)info.GetCustomAttribute(typeof(Sync), false)).attribs;
         }
 
+        public static bool IsValidRoute(this int[] route, Node root)
+        {
+            Node target = root;
+            for (int i = 0; i < route.Length; i++)
+            {
+                if (route[i] >= target.Children.Length)
+                    return false;
+
+                target = target[route[i]];
+            }
+
+            return true;
+        }
+
         public static bool IsCollection(this object obj)
         {
             return obj.GetType() != typeof(string) && (obj.GetType().IsArray || obj is ICollection);

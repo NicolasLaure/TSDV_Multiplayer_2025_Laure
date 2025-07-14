@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net;
 using Input;
 using Network;
@@ -61,7 +60,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         }
 
         if (Camera.main == null)
-            GameObject.Instantiate(mainCamera);
+            Instantiate(mainCamera);
 
         input.onPingScreen -= OnPingScreen;
         if (ClientManager.Instance.networkClient != null)

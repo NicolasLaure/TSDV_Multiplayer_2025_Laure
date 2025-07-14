@@ -32,7 +32,7 @@ namespace Network.Factory
             prefabHashes = prefabHash;
         }
 
-        public InstanceData Instantiate(InstanceData instanceData)
+        public InstanceData Instantiate(InstanceData instanceData, bool shouldSave = true)
         {
             if (!typeHashes.hashToType.ContainsKey(instanceData.prefabHash) || !prefabHashes.hashToPrefab.ContainsKey(instanceData.prefabHash))
             {
@@ -40,7 +40,8 @@ namespace Network.Factory
                 return new InstanceData();
             }
 
-            SaveInstance(ref instanceData);
+            if (shouldSave)
+                SaveInstance(ref instanceData);
 
             object instance = Activator.CreateInstance(typeHashes.hashToType[instanceData.prefabHash]);
             GameObject prefab = prefabHashes.hashToPrefab[instanceData.prefabHash];
@@ -73,7 +74,7 @@ namespace Network.Factory
 
             return instanceData;
         }
-        
+
         public void DeInstantiate(int instanceId)
         {
             GameObject gameObjectToDestroy = instanceIdToObject[instanceId].view;

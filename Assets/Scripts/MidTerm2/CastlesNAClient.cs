@@ -57,7 +57,7 @@ namespace MidTerm2
             if (networkClient.port != networkClient.defaultPort)
             {
                 _castlesProgram = new CastlesProgram(color, hashHandler);
-                _castlesProgram.Initialize(networkClient);
+                _castlesProgram.Initialize(networkClient, true);
             }
         }
 

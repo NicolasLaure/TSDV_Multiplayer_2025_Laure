@@ -81,6 +81,9 @@ namespace Reflection
             Node target = root;
             for (int i = 0; i < route.Length; i++)
             {
+                if (target.Children.Length <= route[i])
+                    return;
+
                 target = target[route[i]];
             }
 
@@ -114,7 +117,7 @@ namespace Reflection
 
         private void SendDirtyValues()
         {
-            if (_networkClient == null)
+            if (_networkClient == null && _server == null)
                 return;
 
             foreach (int[] route in _dirtyRegistry.DirtyRoutes)
@@ -124,15 +127,21 @@ namespace Reflection
                 if (message.data.type != PrimitiveType.NonPrimitive)
                 {
                     Debug.Log($"Sent PrimitiveData: {message.data.obj}");
-                    _networkClient.SendToServer(message.Serialize());
+                    if (_networkClient != null)
+                        _networkClient.SendToServer(message.Serialize());
+                    if (_server != null)
+                        _server.Broadcast(message.Serialize());
                 }
             }
         }
 
         public void ReceiveValues<T>(PrimitiveData data)
         {
-            Debug.Log($"Received primitive: {data.obj}: Route: {Route.RouteString(data.route)}");
-            SetData<T>(data.route, data.obj);
+            if (data.route.IsValidRoute(root))
+            {
+                Debug.Log($"Received primitive: {data.obj}: Route: {Route.RouteString(data.route)}");
+                SetData<T>(data.route, data.obj);
+            }
         }
 
         public object SetDataAt<T>(int[] route, object value, object obj, int startIndex = 0)

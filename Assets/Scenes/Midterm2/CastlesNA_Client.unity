@@ -493,7 +493,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 
+  m_Text: 127.0.0.1
 --- !u!222 &74439062
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1669,7 +1669,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 
+  m_Text: 127.0.0.1
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -1756,7 +1756,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 691613495}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
@@ -1791,7 +1791,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 691613495}
   m_CullTransparentMesh: 0
---- !u!1001 &757843305
+--- !u!1001 &732367086
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -1863,11 +1863,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: CastlesView
-      objectReference: {fileID: 0}
-    - target: {fileID: 5802004593387478226, guid: 2412e6f12e6d86d4983c40036426433d,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4813,7 +4808,7 @@ SceneRoots:
   - {fileID: 1789737937}
   - {fileID: 2047374156}
   - {fileID: 1334120705}
-  - {fileID: 757843305}
   - {fileID: 1143509620}
   - {fileID: 1968775969}
   - {fileID: 825406319}
+  - {fileID: 732367086}

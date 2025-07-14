@@ -77,9 +77,10 @@ namespace Input
         {
             Debug.Log($"Click at: {context.ReadValue<Vector2>()}");
             MouseInput input;
-            Vector2 pos = context.ReadValue<Vector2>();
-            input.x = pos.x;
-            input.y = pos.y;
+            Vector2 cursorPos = context.ReadValue<Vector2>();
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(cursorPos.x, cursorPos.y, -10));
+            input.x = worldPos.x;
+            input.y = worldPos.y;
             if (CastlesNaClient.Instance != null)
                 CastlesNaClient.Instance.networkClient.SendToServer(new MouseClickMessage(input).Serialize());
         }

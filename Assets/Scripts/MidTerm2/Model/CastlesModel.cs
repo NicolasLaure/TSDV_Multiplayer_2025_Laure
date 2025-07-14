@@ -25,13 +25,15 @@ namespace MidTerm2
         public List<Warrior> _warriors = new List<Warrior>();
         public List<Warrior> _OtherWarriors = new List<Warrior>();
 
-        private int initialWarriorQty = 1;
+        private int initialWarriorQty = 15;
         public int remainingMoves = 10;
         private const int maxMoves = 10;
         private Random _random;
 
         public Tile selectedTile = null;
         public int selectedWarriorIndex = -1;
+
+        public Action onTurnChange;
 
         public CastlesModel()
         {
@@ -62,11 +64,18 @@ namespace MidTerm2
             }
         }
 
+
+        public void ChangeTurnLocal()
+        {
+            onTurnChange?.Invoke();
+        }
+
         [RPC]
         public void ChangeTurn()
         {
             isPlayerOneTurn = !isPlayerOneTurn;
             remainingMoves = maxMoves;
+            ChangeTurnLocal();
         }
 
         private void UpdateWarriors(List<Warrior> warriors)
@@ -163,18 +172,14 @@ namespace MidTerm2
             return board[(int)pos.x][(int)pos.y];
         }
 
-        public void SelectTile(Vector2 pos)
+        public void SelectTile(Vector2 pos, int clientId)
         {
             selectedTile = board[(int)pos.x][(int)pos.y];
             Debug.Log($"Selected Tile Position {selectedTile.position}");
             if (selectedWarriorIndex != -1)
             {
-                if (ClientManager.Instance.networkClient.Id == 0)
-                {
-                    Debug.Log(_warriors[selectedWarriorIndex].position);
+                if (clientId == 0)
                     _warriors[selectedWarriorIndex].Move(selectedTile, ref remainingMoves);
-                    Debug.Log(_warriors[selectedWarriorIndex].position);
-                }
                 else
                     _OtherWarriors[selectedWarriorIndex].Move(selectedTile, ref remainingMoves);
 
@@ -182,13 +187,13 @@ namespace MidTerm2
             }
         }
 
-        public void SelectTileObject(Vector2 pos)
+        public void SelectTileObject(Vector2 pos, int clientId)
         {
             selectedTile = board[(int)pos.x][(int)pos.y];
             if (selectedTile.currentObject as Warrior != null)
             {
                 List<Warrior> warriors = _warriors;
-                if (ClientManager.Instance.networkClient.Id != 0)
+                if (clientId != 0)
                     warriors = _OtherWarriors;
                 for (int i = 0; i < warriors.Count; i++)
                 {

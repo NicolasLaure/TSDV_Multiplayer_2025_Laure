@@ -131,7 +131,7 @@ namespace Reflection
 
         public bool CheckDirty(int clientId)
         {
-            if (clientId != ownerId)
+            if (clientId != -1 && clientId != ownerId)
                 return false;
 
             bool isDirty = currentHash != lastHash;

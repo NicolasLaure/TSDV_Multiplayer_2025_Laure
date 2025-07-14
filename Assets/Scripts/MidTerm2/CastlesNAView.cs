@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MidTerm2
 {
-    public class CastlesView : MonoBehaviourSingleton<CastlesView>
+    public class CastlesNAView : MonoBehaviourSingleton<CastlesNAView>
     {
         private CastlesModel _model;
 
@@ -20,12 +20,10 @@ namespace MidTerm2
         [SerializeField] private RemainingMoves movesText;
 
         public TileView[][] boardView;
-        private int _clientId = -1;
 
         public void InitializeView(CastlesModel model)
         {
             _model = model;
-            _model.onTurnChange += OnTurnChanged;
             InitializeBoard();
         }
 
@@ -33,12 +31,21 @@ namespace MidTerm2
         {
             Instantiate(tilePrefab);
             SetTiles(_model.board);
-            if (CastlesNaClient.Instance != null)
-                _clientId = CastlesNaClient.Instance.clientId;
-            else if (CastlesClient.Instance != null)
-                _clientId = CastlesClient.Instance.clientId;
+        }
 
-            OnTurnChanged();
+        private void Update()
+        {
+            if (_model == null)
+                return;
+
+            if (passTurnButton == null || movesText == null)
+                return;
+
+            if (CastlesNaClient.Instance.clientId == 0)
+            {
+                if (passTurnButton.activeInHierarchy != _model.isPlayerOneTurn || passTurnButton.activeInHierarchy != !_model.isPlayerOneTurn)
+                    OnTurnChanged();
+            }
         }
 
         public void SetTileObjectPosition(ObjectModel tileObject)
@@ -71,13 +78,12 @@ namespace MidTerm2
             return new Vector3(xPos, yPos, depthOffset);
         }
 
-        public void OnTurnChanged()
+        private void OnTurnChanged()
         {
-            bool isPlayerOne = _clientId == 0;
             if (passTurnButton == null || movesText == null)
                 return;
 
-            passTurnButton.SetActive((isPlayerOne && _model.isPlayerOneTurn) || (!isPlayerOne && !_model.isPlayerOneTurn));
+            passTurnButton.SetActive(_model.isPlayerOneTurn);
             movesText.SetText(_model.remainingMoves);
         }
     }

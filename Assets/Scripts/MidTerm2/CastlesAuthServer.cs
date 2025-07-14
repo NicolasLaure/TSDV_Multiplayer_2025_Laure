@@ -27,7 +27,7 @@ namespace MidTerm2
             _server = new ReflectiveAuthoritativeServer<CastlesModel>();
             string[] args;
 #if UNITY_EDITOR
-            args = new[] { " ",_server.defaultPort.ToString() };
+            args = new[] { " ", (_server.defaultPort + 1).ToString() };
 #else
              args = Environment.GetCommandLineArgs();
 #endif
@@ -75,27 +75,8 @@ namespace MidTerm2
 
         private void HandlePrivateHandshake(PrivateHandshake privateHandshake, int id)
         {
-            _castlesServerProgram._model.SetServerArmy(privateHandshake.clientId, privateHandshake.clientId == 0, privateHandshake.color);
-        }
-
-        public void Instantiate(GameObject prefab, Matrix4x4 trs, short instanceColor, int clientId)
-        {
-            if (!hashHandler.prefabToHash.ContainsKey(prefab))
-            {
-                Debug.Log("Invalid Prefab");
-                return;
-            }
-
-            InstanceData instanceData = new InstanceData
-            {
-                originalClientID = clientId,
-                prefabHash = hashHandler.prefabToHash[prefab],
-                instanceID = -1,
-                trs = ByteFormat.Get4X4Bytes(trs),
-                color = instanceColor
-            };
-
-            //_serverFactory.Instantiate(instanceData);
+            Debug.Log($"PlayerId: {id}");
+            _castlesServerProgram._model.SetServerArmy(id, id == 0, privateHandshake.color);
         }
     }
 }

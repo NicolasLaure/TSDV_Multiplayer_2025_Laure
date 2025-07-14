@@ -21,6 +21,8 @@ namespace Reflection.RPC
         private Harmony _harmony;
         private Node _methodsTree;
         private ReflectiveClient<ModelType> _network;
+        private ReflectiveAuthoritativeServer<ModelType> _server;
+
         private static readonly BindingFlags BindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
         #region Constructors
@@ -31,6 +33,7 @@ namespace Reflection.RPC
                 Instance = this;
 
             _model = model;
+            _server = server;
             _harmony = new Harmony("RPC Hooks");
             _methodsTree = new Node();
         }
@@ -57,7 +60,10 @@ namespace Reflection.RPC
             Debug.Log($"Methods Count: {methods.Count}");
 
             foreach (MethodInfo method in methods)
+            {
+                Debug.Log($"method: {method.Name}");
                 Hook(method);
+            }
         }
 
         public void AddHook(int[] route, object obj)
@@ -97,8 +103,17 @@ namespace Reflection.RPC
             Node node = GetNode(Instance._methodsTree, route);
             RPCMessage message = new RPCMessage(data, node.attributes);
 
-            message.clientId = Instance._network.Id;
-            Instance._network?.SendToServer(message.Serialize());
+            if (Instance._network != null)
+            {
+                message.clientId = Instance._network.Id;
+                Instance._network?.SendToServer(message.Serialize());
+            }
+
+            if (Instance._server != null)
+            {
+                message.clientId = -1;
+                Instance._server?.Broadcast(message.Serialize());
+            }
         }
 
         #endregion
