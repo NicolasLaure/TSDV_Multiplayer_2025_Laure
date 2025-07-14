@@ -44,6 +44,11 @@ namespace MidTerm2
             input.Initialize();
         }
 
+        private void OnApplicationQuit()
+        {
+            HandleQuit();
+        }
+
         private void OnDestroy()
         {
             HandleQuit();
@@ -164,7 +169,6 @@ namespace MidTerm2
 
         private void HandleQuit()
         {
-            //_clientFactory.DeInstantiateAll();
             networkClient.EndClient();
         }
 

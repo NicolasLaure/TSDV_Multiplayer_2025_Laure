@@ -22,11 +22,13 @@ namespace MidTerm2
         public TileView[][] boardView;
         private int _clientId = -1;
 
-        public void InitializeView(CastlesModel model)
+        public void InitializeView(CastlesModel model, int clientId)
         {
+            Debug.Log($"ClientID:{clientId}");
+            _clientId = clientId;
             _model = model;
-            _model.onTurnChange += OnTurnChanged;
             InitializeBoard();
+            _model.onTurnChange += OnTurnChanged;
         }
 
         public void InitializeBoard()
@@ -71,12 +73,13 @@ namespace MidTerm2
             return new Vector3(xPos, yPos, depthOffset);
         }
 
-        public void OnTurnChanged()
+        private void OnTurnChanged()
         {
             bool isPlayerOne = _clientId == 0;
             if (passTurnButton == null || movesText == null)
                 return;
 
+            Debug.Log($"Client ID:{_clientId}, isPlayerOneTurn: {_model.isPlayerOneTurn}, shouldShowButton: {(isPlayerOne && _model.isPlayerOneTurn) || (!isPlayerOne && !_model.isPlayerOneTurn)}");
             passTurnButton.SetActive((isPlayerOne && _model.isPlayerOneTurn) || (!isPlayerOne && !_model.isPlayerOneTurn));
             movesText.SetText(_model.remainingMoves);
         }

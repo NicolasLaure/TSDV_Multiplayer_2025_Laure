@@ -40,7 +40,7 @@ namespace MidTerm2
             client.factory = new ReflectiveFactory<CastlesModel>(reflection, types, _colorHandler, prefabHashHandler);
             client.reflection = reflection;
 
-            _view.InitializeView(_model);
+            _view.InitializeView(_model, client.Id);
 
             if (!isAuth)
             {

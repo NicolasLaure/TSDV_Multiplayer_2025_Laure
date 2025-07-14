@@ -123,10 +123,8 @@ namespace Reflection
             foreach (int[] route in _dirtyRegistry.DirtyRoutes)
             {
                 PrimitiveMessage message = GetMessage(route);
-                Debug.Log($"MessageType:{message.data.type}: , {GetDataAt(route).GetType()}");
                 if (message.data.type != PrimitiveType.NonPrimitive)
                 {
-                    Debug.Log($"Sent PrimitiveData: {message.data.obj}");
                     if (_networkClient != null)
                         _networkClient.SendToServer(message.Serialize());
                     if (_server != null)
@@ -138,10 +136,7 @@ namespace Reflection
         public void ReceiveValues<T>(PrimitiveData data)
         {
             if (data.route.IsValidRoute(root))
-            {
-                Debug.Log($"Received primitive: {data.obj}: Route: {Route.RouteString(data.route)}");
                 SetData<T>(data.route, data.obj);
-            }
         }
 
         public object SetDataAt<T>(int[] route, object value, object obj, int startIndex = 0)

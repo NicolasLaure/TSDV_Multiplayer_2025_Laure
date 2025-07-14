@@ -26,7 +26,6 @@ namespace Reflection
 
                 if (child.CheckDirty(clientId))
                 {
-                    Debug.Log($"Dirty: {Route.RouteString(child.GetRoute())}");
                     dirtyNodesPaths.Add(child.GetRoute());
                 }
 

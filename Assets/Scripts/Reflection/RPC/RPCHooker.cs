@@ -105,6 +105,7 @@ namespace Reflection.RPC
 
             if (Instance._network != null)
             {
+                Debug.Log($"Rpc messageID: {Instance._network.Id}");
                 message.clientId = Instance._network.Id;
                 Instance._network?.SendToServer(message.Serialize());
             }

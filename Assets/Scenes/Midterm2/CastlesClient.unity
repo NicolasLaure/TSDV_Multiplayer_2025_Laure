@@ -493,7 +493,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 
+  m_Text: 127.0.0.1
 --- !u!222 &74439062
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1669,7 +1669,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 
+  m_Text: 127.0.0.1
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -1730,6 +1730,26 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3598177305874348220, guid: 7a3a155c773720d459f548660ba40fd9,
+        type: 3}
+      propertyPath: input
+      value: 
+      objectReference: {fileID: 656114065}
+    - target: {fileID: 3598177305874348220, guid: 7a3a155c773720d459f548660ba40fd9,
+        type: 3}
+      propertyPath: winPanel
+      value: 
+      objectReference: {fileID: 543012718}
+    - target: {fileID: 3598177305874348220, guid: 7a3a155c773720d459f548660ba40fd9,
+        type: 3}
+      propertyPath: losePanel
+      value: 
+      objectReference: {fileID: 1185770181}
+    - target: {fileID: 3598177305874348220, guid: 7a3a155c773720d459f548660ba40fd9,
+        type: 3}
+      propertyPath: errorPanel
+      value: 
+      objectReference: {fileID: 1580295752}
     - target: {fileID: 7333139467472402989, guid: 7a3a155c773720d459f548660ba40fd9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1787,10 +1807,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1941017542367559973, guid: 7a3a155c773720d459f548660ba40fd9,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 656114062}
-    - targetCorrespondingSourceObject: {fileID: 1941017542367559973, guid: 7a3a155c773720d459f548660ba40fd9,
-        type: 3}
-      insertIndex: -1
       addedObject: {fileID: 656114065}
   m_SourcePrefab: {fileID: 100100000, guid: 7a3a155c773720d459f548660ba40fd9, type: 3}
 --- !u!1 &656114061 stripped
@@ -1799,7 +1815,7 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 656114060}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &656114062
+--- !u!114 &656114065
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1808,20 +1824,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 656114061}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 607210e5ab7c77b47a44c8c0546120c8, type: 3}
+  m_Script: {fileID: 11500000, guid: c193638e701e94248831de3bb5eecfc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  errorPanel: {fileID: 1580295752}
-  winPanel: {fileID: 543012718}
-  losePanel: {fileID: 1185770181}
-  color: {fileID: 11400000, guid: 52184fc5f8af67a418860a811870f43a, type: 2}
-  hashHandler: {fileID: 11400000, guid: c38fbe6a2d90f0d40ba94ff93a7bd748, type: 2}
-  clientId: -1
---- !u!114 &656114065
+--- !u!114 &656114066 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 4507904852966558499, guid: 7a3a155c773720d459f548660ba40fd9,
+    type: 3}
+  m_PrefabInstance: {fileID: 656114060}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 656114061}
   m_Enabled: 1
@@ -1873,7 +1883,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 691613495}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
   m_Name: 
@@ -2361,10 +2371,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model:
-    isPlayerTurn: 0
+    isPlayerOneTurn: 0
+    _castle:
+      position: {x: 0, y: 0}
+    _OtherCastle:
+      position: {x: 0, y: 0}
     _warriors: []
     _OtherWarriors: []
     remainingMoves: 0
+    selectedWarriorIndex: -1
 --- !u!4 &1143509620
 Transform:
   m_ObjectHideFlags: 0
@@ -3070,6 +3085,7 @@ MonoBehaviour:
   chatScreen: {fileID: 1951501998}
   mainCamera: {fileID: 7568101541316388220, guid: ae1844ca2b5b7324bbb75a38978fe210,
     type: 3}
+  input: {fileID: 656114066}
   gameOverPanels:
   - {fileID: 543012718}
   - {fileID: 1185770181}

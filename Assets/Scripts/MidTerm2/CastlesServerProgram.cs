@@ -40,7 +40,7 @@ namespace MidTerm2
             _server.factory = new ReflectiveServerFactory<CastlesModel>(reflection, types, _colorHandler, prefabHashHandler);
             _server.reflection = reflection;
 
-            _view.InitializeView(_model);
+            _view.InitializeView(_model, -1);
 
             AuthServerController.Instance.model = _model;
             AuthServerController.Instance.factory = server.factory;

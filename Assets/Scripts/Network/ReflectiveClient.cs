@@ -115,13 +115,18 @@ namespace Network
 
         public override void OnReceiveData(byte[] data, IPEndPoint ip)
         {
-            if (BitConverter.ToBoolean(data, 0))
-            {
-                data = Encrypter.Decrypt(ivKeyGenerator.Next(), data);
-            }
-
             MessageType messageType = (MessageType)BitConverter.ToInt16(data, sizeof(bool));
             Attributes messageAttribs = (Attributes)BitConverter.ToInt16(data, sizeof(bool) + sizeof(short));
+
+            if (BitConverter.ToBoolean(data, 0))
+            {
+                if (!CheckHeader(ivKeyGenerator.Next(), out messageType, out messageAttribs, data, out byte[] decryptedData))
+                    return;
+
+                data = decryptedData;
+            }
+            else if (!CheckHeader(out messageType, out messageAttribs, data))
+                return;
 
             if (messageAttribs.HasFlag(Attributes.Checksum))
             {
@@ -163,6 +168,8 @@ namespace Network
                 }
             }
 
+            if (messageAttribs.HasFlag(Attributes.Important))
+                SendToServer(new Acknowledge(messageType, messageId).Serialize());
 
             switch (messageType)
             {
@@ -195,11 +202,11 @@ namespace Network
                 // Moving Cubes message
                 case MessageType.HandShakeResponse:
                     HandleHandshakeResponse(new ServerHsResponse(data));
-                    onClientStart?.Invoke();
                     PrivateHandshake privateHandshake = new PrivateHandshake(_elo, color);
                     privateHandshake.clientId = id;
                     SendToServer(Encrypter.Encrypt(ivKeyGenerator.Next(), privateHandshake.Serialize()));
                     OnReceiveEvent?.Invoke(data, ip);
+                    onClientStart?.Invoke();
                     onHandshakeOk?.Invoke();
                     break;
                 case MessageType.PrivateHsResponse:
@@ -246,9 +253,6 @@ namespace Network
                     OnReceiveEvent?.Invoke(data, ip);
                     break;
             }
-
-            if (messageAttribs.HasFlag(Attributes.Important))
-                SendToServer(new Acknowledge(messageType, messageId).Serialize());
 
             if (messageAttribs.HasFlag(Attributes.Critical) && messageId > clientIdToMessageId[receivedClientId][messageType])
                 SaveCriticalMessage(receivedClientId, messageId, data);

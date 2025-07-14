@@ -17,7 +17,7 @@ namespace MidTerm2
     {
         public Tile[][] board = new Tile[30][];
         private int mapSize = 30;
-        public bool isPlayerOneTurn = false;
+        public bool isPlayerOneTurn = true;
 
         public Castle _castle = new Castle();
         public Castle _OtherCastle = new Castle();
